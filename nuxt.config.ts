@@ -1,17 +1,22 @@
 // https://v3.nuxtjs.org/api/configuration/nuxt.config
 export default defineNuxtConfig({
-  // enable devtools
+  css: ["~/assets/css/main.scss"],
   devtools: { enabled: true },
-  modules: ["@nuxtjs/tailwindcss", "nuxt-icon", "@pinia/nuxt"],
-  // custom tailwindcss path
-  tailwindcss: {
-    cssPath: "~/assets/main.css",
+  modules: [ "nuxt-icon", "@pinia/nuxt"],
+
+  build: {
+    transpile: ["vuetify"],
   },
-  // server config variable
+  components: [
+    {
+      path: "~/components",
+      pathPrefix: false,
+    },
+  ],
+
   runtimeConfig: {
     MONGO_URI: process.env.MONGO_URI,
   },
-  // register nitro plugin
   nitro: {
     plugins: ["@/server/db/index.ts"],
   },

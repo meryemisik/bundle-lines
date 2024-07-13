@@ -5,7 +5,6 @@ A Nuxt 3 app that displays how to use [Server Routes & Middleware](https://v3.nu
 ## Stuff used
 
 - [Nuxt 3](https://v3.nuxtjs.org)
-- [TailwindCSS](https://tailwindcss.com/)
 - [Headless UI](https://headlessui.com/)
 - [Pinia](https://pinia.vuejs.org/)
 - [VeeValidate V4](https://vee-validate.logaretm.com/v4/)
