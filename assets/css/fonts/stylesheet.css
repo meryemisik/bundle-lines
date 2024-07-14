@@ -1,0 +1,144 @@
+@font-face {
+    font-family: 'MetaSerifPro';
+    src: url('MetaSerifPro-BlackItalic.eot');
+    src: local('MetaSerifPro-BlackItalic'),
+        url('MetaSerifPro-BlackItalic.eot?#iefix') format('embedded-opentype'),
+        url('MetaSerifPro-BlackItalic.woff2') format('woff2'),
+        url('MetaSerifPro-BlackItalic.woff') format('woff'),
+        url('MetaSerifPro-BlackItalic.ttf') format('truetype');
+    font-weight: 900;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'MetaSerifPro';
+    src: url('MetaSerifPro-Medium.eot');
+    src: local('MetaSerifPro-Medium'),
+        url('MetaSerifPro-Medium.eot?#iefix') format('embedded-opentype'),
+        url('MetaSerifPro-Medium.woff2') format('woff2'),
+        url('MetaSerifPro-Medium.woff') format('woff'),
+        url('MetaSerifPro-Medium.ttf') format('truetype');
+    font-weight: 500;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'MetaSerifPro';
+    src: url('MetaSerifPro-LightItalic.eot');
+    src: local('MetaSerifPro-LightItalic'),
+        url('MetaSerifPro-LightItalic.eot?#iefix') format('embedded-opentype'),
+        url('MetaSerifPro-LightItalic.woff2') format('woff2'),
+        url('MetaSerifPro-LightItalic.woff') format('woff'),
+        url('MetaSerifPro-LightItalic.ttf') format('truetype');
+    font-weight: 300;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'MetaSerifPro-Book';
+    src: url('MetaSerifPro-Book.eot');
+    src: local('MetaSerifPro-Book'),
+        url('MetaSerifPro-Book.eot?#iefix') format('embedded-opentype'),
+        url('MetaSerifPro-Book.woff2') format('woff2'),
+        url('MetaSerifPro-Book.woff') format('woff'),
+        url('MetaSerifPro-Book.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'MetaSerifPro';
+    src: url('MetaSerifPro-Black.eot');
+    src: local('MetaSerifPro-Black'),
+        url('MetaSerifPro-Black.eot?#iefix') format('embedded-opentype'),
+        url('MetaSerifPro-Black.woff2') format('woff2'),
+        url('MetaSerifPro-Black.woff') format('woff'),
+        url('MetaSerifPro-Black.ttf') format('truetype');
+    font-weight: 900;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'MetaSerifPro';
+    src: url('MetaSerifPro-Light.eot');
+    src: local('MetaSerifPro-Light'),
+        url('MetaSerifPro-Light.eot?#iefix') format('embedded-opentype'),
+        url('MetaSerifPro-Light.woff2') format('woff2'),
+        url('MetaSerifPro-Light.woff') format('woff'),
+        url('MetaSerifPro-Light.ttf') format('truetype');
+    font-weight: 300;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'MetaSerifPro';
+    src: url('MetaSerifPro-ExtraboldItalic.eot');
+    src: local('MetaSerifPro-ExtraboldItalic'),
+        url('MetaSerifPro-ExtraboldItalic.eot?#iefix') format('embedded-opentype'),
+        url('MetaSerifPro-ExtraboldItalic.woff2') format('woff2'),
+        url('MetaSerifPro-ExtraboldItalic.woff') format('woff'),
+        url('MetaSerifPro-ExtraboldItalic.ttf') format('truetype');
+    font-weight: 800;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'MetaSerifPro';
+    src: url('MetaSerifPro-BoldItalic.eot');
+    src: local('MetaSerifPro-BoldItalic'),
+        url('MetaSerifPro-BoldItalic.eot?#iefix') format('embedded-opentype'),
+        url('MetaSerifPro-BoldItalic.woff2') format('woff2'),
+        url('MetaSerifPro-BoldItalic.woff') format('woff'),
+        url('MetaSerifPro-BoldItalic.ttf') format('truetype');
+    font-weight: bold;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'MetaSerifPro';
+    src: url('MetaSerifPro-Extrabold.eot');
+    src: local('MetaSerifPro-Extrabold'),
+        url('MetaSerifPro-Extrabold.eot?#iefix') format('embedded-opentype'),
+        url('MetaSerifPro-Extrabold.woff2') format('woff2'),
+        url('MetaSerifPro-Extrabold.woff') format('woff'),
+        url('MetaSerifPro-Extrabold.ttf') format('truetype');
+    font-weight: 800;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'MetaSerifPro-BookItalic';
+    src: url('MetaSerifPro-BookItalic.eot');
+    src: local('MetaSerifPro-BookItalic'),
+        url('MetaSerifPro-BookItalic.eot?#iefix') format('embedded-opentype'),
+        url('MetaSerifPro-BookItalic.woff2') format('woff2'),
+        url('MetaSerifPro-BookItalic.woff') format('woff'),
+        url('MetaSerifPro-BookItalic.ttf') format('truetype');
+    font-weight: normal;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'MetaSerifPro';
+    src: url('MetaSerifPro-MediumItalic.eot');
+    src: local('MetaSerifPro-MediumItalic'),
+        url('MetaSerifPro-MediumItalic.eot?#iefix') format('embedded-opentype'),
+        url('MetaSerifPro-MediumItalic.woff2') format('woff2'),
+        url('MetaSerifPro-MediumItalic.woff') format('woff'),
+        url('MetaSerifPro-MediumItalic.ttf') format('truetype');
+    font-weight: 500;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'MetaSerifPro';
+    src: url('MetaSerifPro-Bold.eot');
+    src: local('MetaSerifPro-Bold'),
+        url('MetaSerifPro-Bold.eot?#iefix') format('embedded-opentype'),
+        url('MetaSerifPro-Bold.woff2') format('woff2'),
+        url('MetaSerifPro-Bold.woff') format('woff'),
+        url('MetaSerifPro-Bold.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+}
+

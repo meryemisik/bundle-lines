@@ -1,9 +1,14 @@
 @import "vuetify/styles/main";
+@import "fonts/stylesheet.css";
 @import "@mdi/font/css/materialdesignicons.min";
-@import url('https://fonts.googleapis.com/css2?family=PT+Serif:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 
 body {
     margin: 100px 0 40px;
+
+    @media screen and (max-width: 573px) {
+        margin: 80px 0 20px;
+    }
 
     &::before {
         content: '';
@@ -15,24 +20,25 @@ body {
         background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(255, 255, 255, 1) 100%),
             repeating-linear-gradient(to right,
                 transparent,
-                transparent 20px,
-                #90D6F4 20px,
-                #90D6F4 21px),
+                transparent 18px,
+                #90D6F4 18px,
+                #90D6F4 19px),
             repeating-linear-gradient(to bottom,
                 transparent,
-                transparent 20px,
-                #90D6F4 20px,
-                #90D6F4 21px),
+                transparent 18px,
+                #90D6F4 18px,
+                #90D6F4 19px),
             linear-gradient(45deg, #fcfcfc, #fcfcfc);
     }
 }
 
 * {
-    font-family: "PT Serif", serif !important;
+    font-family: 'MetaSerifPro' !important;
+    user-select: none !important;
 }
 
 .page-container {
-    max-width: 573px !important;
+    max-width: 600px !important;
     margin: 0 auto;
 }
 
@@ -46,10 +52,31 @@ body {
             border-bottom: 1px solid #EEEEEE;
             padding-bottom: 3em !important;
 
+            @media screen and (max-width: 573px) {
+                padding-bottom: 2em !important;
+            }
+
         }
     }
 
     .post-by {
         color: #E62C33;
     }
+}
+
+.header-title {
+    font-size: 31px;
+    line-height: 38px;
+
+    @media screen and (max-width: 573px) {
+        font-size: 24px;
+    }
+}
+
+.text-sponsorship {
+    font-size: 10px;
+}
+
+.font-barlow {
+    font-family: 'Barlow', sans-serif !important;
 }
