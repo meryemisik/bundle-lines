@@ -1,7 +1,7 @@
 // https://v3.nuxtjs.org/api/configuration/nuxt.config
 export default defineNuxtConfig({
   css: ["~/assets/css/main.scss"],
-  modules: [ "nuxt-icon", "@pinia/nuxt"],
+  modules: [ "nuxt-icon", "@nuxt/content"],
 
   build: {
     transpile: ["vuetify"],
@@ -14,7 +14,7 @@ export default defineNuxtConfig({
   ],
 
   runtimeConfig: {
-    MONGO_URI: process.env.MONGO_URI,
+    mongoUrl: process.env.NUXT_MONGO_URI,
   },
   nitro: {
     plugins: ["@/server/db/index.ts"],

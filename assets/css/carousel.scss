@@ -1,0 +1,43 @@
+.carousel-icon {
+    width: 24px;
+    height: 24px;
+}
+
+.v-carousel__controls {
+    bottom: -20px;
+
+    &__item {
+        &.v-btn.v-btn--icon {
+            background-color: #eeeeee;
+            height: 6px;
+            width: 6px;
+            border-radius: 100%;
+
+            &.v-btn--active {
+                background-color: #1f1f1f;
+            }
+
+            &:hover {
+                background-color: #282828;
+            }
+        }
+    }
+}
+
+.v-btn__content .v-icon {
+    display: none;
+}
+
+
+.slider-control {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    justify-content: space-between;
+    width: 150%;
+
+    @media screen and (max-width: 870px) {
+        width: 100%;
+    }
+}

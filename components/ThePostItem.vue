@@ -4,9 +4,9 @@
       <v-row>
         <v-col>
           <template v-if="postType == 0">
-            <v-img src="/News-1.png" />
+            <v-img :src="postImages[0].url"  :id="`image-${dataIndex}`"/>
           </template>
-          <template v-else-if="postType == 1">
+          <template v-else-if="postType == 2">
             <div class="position-relative">
               <v-carousel
                 height="auto"
@@ -15,9 +15,9 @@
                 :show-arrows="false"
               >
                 <v-carousel-item
-                  v-for="(image, index) in images"
+                  v-for="(image, index) in postImages"
                   :key="index"
-                  :src="image"
+                  :src="image.url"
                   :value="index"
                 ></v-carousel-item>
               </v-carousel>
@@ -37,19 +37,20 @@
               </div>
             </div>
           </template>
-          <template v-else-if="postType == 2">
+          <template v-else-if="postType == 1">
             <v-col>
-              <v-responsive aspect-ratio="16/9">
+              <v-responsive>
                 <video
                   ref="video"
                   :controls="isPlaying"
-                  :id="`video-${videoId}`"
+                  :id="`video-${dataIndex}`"
                   style="width: 100%; height: 100%"
                   @play="isPlaying = true"
                   @pause="isPlaying = false"
                   controlsList="nodownload"
+                  class="post-video"
                 >
-                  <source src="/video.mp4" type="video/mp4" />
+                  <source :src="postImages[0].url" type="video/mp4" />
                   Tarayıcınız bu videoyu desteklemiyor.
                 </video>
 
@@ -66,9 +67,8 @@
       </v-row>
       <v-row>
         <v-col class="px-0 px-sm-3 px-md-6">
-          <p class="text-subtitle-2 text-md-subtitle-1 font-weight-medium text-center">
-            ABD yeni savunma programını açıkladı: Savaşlarda yapay zeka karar
-            alacak
+          <p class="text-subtitle-2 text-md-subtitle-1 font-weight-medium text-center" id="description">
+           {{postDescription}}
             <a href="#" class="post-by text-decoration-none">@Kubilay Odabaş</a>
           </p>
         </v-col>
@@ -89,46 +89,229 @@
             <span>Beğen</span>
           </div>
           <div
-            class="cursor-pointer mx-1 mx-md-2 mx-lg-4 d-flex align-center"
-            @click="dialog = true"
+            class="cursor-pointer position-relative mx-1 mx-md-2 mx-lg-4 d-flex align-center" @click="shareTooltip = !shareTooltip"
           >
             <v-img :width="24" src="/icons/share.svg" class="mr-2" />
             <span>Paylaş</span>
+            <div
+              v-if="shareTooltip"
+              class="position-absolute share-tooltip py-3"
+            >
+              <div class="d-flex justify-space-between">
+                <a
+                @click="createImage"
+                  v-for="icon in socialIcons"
+                  :key="icon.name"
+                 
+                  rel="noopener noreferrer"
+                >
+                  <v-img
+                    :width="24"
+                    :src="`/icons/${icon.name}.svg`"
+                    :alt="icon.name"
+                  />
+                </a>
+                <!-- <a
+                  v-for="icon in socialIcons"
+                  :key="icon.name"
+                  :href="icon.url"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <v-img
+                    :width="24"
+                    :src="/icons/${icon.name}.svg"
+                    :alt="icon.name"
+                  />
+                </a> -->
+              </div>
+            </div>
+
           </div>
         </v-col>
       </v-row>
+
+      <canvas id="canvas" width="1080" height="1350" ref="canvas" class="w-100"></canvas>
+    <br>
+    <img id="result" alt="Merged Image" :src="resultSrc" v-if="resultSrc"  class="w-100"/>
+
     </v-container>
   </div>
 </template>
 
 <script setup>
-const images = ref([
-  "/News-1.png",
-  "/News-2.png",
-  "/News-1.png",
-  "/News-2.png",
-]);
+const socialIcons = [
+  {
+    name: "facebook",
+    url:
+      "https://www.facebook.com/sharer.php?u=" +
+      encodeURIComponent('window?.location.href'),
+  },
+  {
+    name: "x",
+    url:
+      "https://x.com/intent/tweet?url=" +
+      encodeURIComponent('window?.location.href') +
+      "&text=" +
+      encodeURIComponent("Bu karikatürü gördünüz mü?"),
+  },
+  {
+    name: "instagram",
+    url:
+      "https://www.linkedin.com/shareArticle?mini=true&url=" +
+      encodeURIComponent('window?.location.href') +
+      "&title=" +
+      encodeURIComponent('document.title') +
+      "&summary=" +
+      encodeURIComponent("Check this out!") +
+      "&source=" +
+      encodeURIComponent('window?.location.hostname'),
+  },
+  {
+    name: "linkedin",
+    url:
+      "https://www.linkedin.com/shareArticle?mini=true&url=" +
+      encodeURIComponent('window?.location.href') +
+      "&title=" +
+      encodeURIComponent('document.title') +
+      "&summary=" +
+      encodeURIComponent("Check this out!") +
+      "&source=" +
+      encodeURIComponent('window?.location.hostname'),
+  },
+  {
+    name: "whatsapp",
+    url:
+      "https://api.whatsapp.com/send?text=" +
+      encodeURIComponent("Bu karikatürü gördün mü? " + 'window?.location.href'),
+  },
+  {
+    name: "link",
+    url:
+      "https://www.linkedin.com/shareArticle?mini=true&url=" +
+      encodeURIComponent('window?.location.href') +
+      "&title=" +
+      encodeURIComponent('document.title') +
+      "&summary=" +
+      encodeURIComponent("Check this out!") +
+      "&source=" +
+      encodeURIComponent('window?.location.hostname'),
+  },
+];
+const shareTooltip = ref(false);
+
+const scrollY = ref(0);
+const handleScroll = () => {
+  shareTooltip.value = false;
+};
+onMounted(() => {
+  window.addEventListener("scroll", handleScroll);
+});
+
+onUnmounted(() => {
+  window.removeEventListener("scroll", handleScroll);
+});
+
+
+const canvas = ref(null);
+const resultSrc = ref('');
+const createImage=()=> {
+    const sourceImage = document.querySelector(`#image-${props.videoId} img`);
+    const sourceText = document.getElementById('description');
+
+    console.log("sourceImage : ", sourceImage)
+
+    const context = canvas.value.getContext('2d');
+  const imageElement = sourceImage;
+  const text = sourceText.innerText;
+
+
+  const img = new Image();
+  img.onload = function() {
+    // Clear the canvas
+    context.clearRect(0, 0, 1080, 1350);
+
+
+    const padding = 10;
+    const availableWidth = canvas.value.width - padding * 2;
+    const imgHeight = (img.height / img.width) * availableWidth;
+    const imgX = padding;
+    const imgY = (canvas.value.height - imgHeight) / 2;
+   
+
+    // Draw the image on the canvas
+    context.drawImage(img, imgX, imgY, availableWidth, imgHeight);
+
+    
+
+    // Calculate the position for the text
+    const textX = canvas.value.width / 2;
+    const textY = imgHeight + padding * 20;
+
+
+    document.fonts.load('30px "MetaSerifPro"').then(() => {
+
+        // Set text properties
+    context.font = '30px MetaSerifPro';
+    context.fillStyle = 'red';
+    context.textAlign = 'center';
+  
+    // Draw the text on the canvas
+    const lineHeight = 40;
+    wrapText(context, text, textX, textY, availableWidth, lineHeight);
+
+    // Set the result image src to the canvas data URL
+    resultSrc.value = canvas.value.toDataURL('image/png');
+    });
+  };
+
+  img.src = imageElement.src;
+}
+
+
+
+const wrapText = (context, text, x, y, maxWidth, lineHeight) => {
+  const words = text.split(' ');
+  let line = '';
+  for (let n = 0; n < words.length; n++) {
+    const testLine = line + words[n] + ' ';
+    const metrics = context.measureText(testLine);
+    const testWidth = metrics.width;
+    if (testWidth > maxWidth && n > 0) {
+      context.fillText(line, x, y);
+      line = words[n] + ' ';
+      y += lineHeight;
+    } else {
+      line = testLine;
+    }
+  }
+  context.fillText(line, x, y);
+};
+
+
+const props = defineProps(["data", "dataIndex"]);
 
 const currentSlide = ref(0);
 const prev = () => {
   if (currentSlide.value != 0) {
     currentSlide.value--;
   } else {
-    currentSlide.value = images.value.length - 1;
+    currentSlide.value = postImages.value.length - 1;
   }
 };
 const next = () => {
-  if (images.value.length - 1 != currentSlide.value) {
+  if (postImages.value.length - 1 != currentSlide.value) {
     currentSlide.value++;
   } else {
     currentSlide.value = 0;
   }
 };
 
-const show = ref(false);
 
-const props = defineProps(["videoId", "type"]);
-const postType = ref(props.type);
+const postType = ref(props?.data?.type);
+const postDescription = ref(props?.data?.description)
+const postImages = ref(props?.data?.content);
+
 const isLiked = ref(false);
 const likeToggle = (id) => {
   isLiked.value = !isLiked.value;
@@ -137,68 +320,19 @@ const likeToggle = (id) => {
 const isPlaying = ref(false);
 
 const playVideo = () => {
-  const videoElement = document.getElementById(`video-${props.videoId}`);
+  const videoElement = document.getElementById(`video-${props.dataIndex}`);
   if (videoElement) {
     videoElement.play();
   }
 };
 </script>
 
-<style lang="scss">
-.carousel-icon {
-  width: 24px;
-  height: 24px;
+<style>
+.v-window__container{
+  max-height: 500px !important;
 }
-.v-carousel__controls {
-  bottom: -20px;
-
-  &__item {
-    &.v-btn.v-btn--icon {
-      background-color: #eeeeee;
-      height: 6px;
-      width: 6px;
-      border-radius: 100%;
-      &.v-btn--active {
-        background-color: #1f1f1f;
-      }
-      &:hover {
-        background-color: #282828;
-      }
-    }
-  }
-}
-
-.v-btn__content .v-icon {
-  display: none;
-}
-
-.play-icon {
-  width: 100%;
-  height: 100%;
-  z-index: 999999;
-  position: absolute;
-  top: 0;
-  cursor: pointer;
-
-  img {
-    width: 40px;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-  }
-}
-
-.slider-control {
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  display: flex;
-  justify-content: space-between;
-  width: 150%;
-
-  @media screen and (max-width: 870px) {
-    width: 100%;
-  }
+.v-img__img--contain {
+    max-height: 500px !important;
 }
 </style>
+

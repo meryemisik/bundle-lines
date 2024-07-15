@@ -66,10 +66,6 @@
 </template>
 
 <script setup lang="ts">
-const caricatureStore = useCaricatureStore();
-
-useAsyncData(async () => await caricatureStore.getAll(), {});
-
 const formCaricatures = ref({
   sponsor: "",
   title: "",
@@ -100,31 +96,42 @@ const ImageUploadFunction = (event: any) => {
 
   const reader = new FileReader();
   reader.onload = () => {
-    uploadImage.value.content.push({
-      url: reader.result as string,
-    });
+    const imageContent = {
+      description: uploadImage.value.description,
+      content: [{ url: reader.result as string }],
+      type: 0,
+    };
+    formCaricatures.value.news.push(imageContent);
   };
 
   reader.readAsDataURL(file);
-  formCaricatures.news.push(uploadImage.value);
 };
 
 const SliderUploadFunction = (event: any) => {
   const files = event.target.files;
   if (!files) return;
-  uploadSlider.value.content = [];
+  
+  const sliderContent = {
+    description: uploadSlider.value.description,
+    content: [],
+    type: 2,
+  };
+
   for (let i = 0; i < files.length; i++) {
     const file = files[i];
     const reader = new FileReader();
 
     reader.onload = () => {
-      uploadSlider.value.content.push({
+      sliderContent.content.push({
         url: reader.result as string,
       });
+
+      if (sliderContent.content.length === files.length) {
+        formCaricatures.value.news.push(sliderContent);
+      }
     };
 
     reader.readAsDataURL(file);
-    formCaricatures.news.push(uploadSlider.value);
   }
 };
 
@@ -134,13 +141,15 @@ const VideoUploadFunction = (event: any) => {
 
   const reader = new FileReader();
   reader.onload = () => {
-    uploadVideo.value.content.push({
-      url: reader.result as string,
-    });
+    const videoContent = {
+      description: uploadVideo.value.description,
+      content: [{ url: reader.result as string }],
+      type: 1,
+    };
+    formCaricatures.value.news.push(videoContent);
   };
 
   reader.readAsDataURL(file);
-  formCaricatures.news.push(uploadVideo.value);
 };
 const getAll = async () => {
   try {
@@ -150,6 +159,7 @@ const getAll = async () => {
     alert(e);
   }
 };
+
 const createCaricatures = async (values: any, ctx: any) => {
   console.log(formCaricatures.value);
   try {

@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 const connectDB = async () => {
   const config = useRuntimeConfig();
   try {
-    await mongoose.connect(config.MONGO_URI, {
+    await mongoose.connect(config.mongoUrl, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
