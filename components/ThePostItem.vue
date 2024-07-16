@@ -4,38 +4,7 @@
       <v-row>
         <v-col>
           <template v-if="postType == 0">
-            <v-img :src="postImages[0].url"  :id="`image-${dataIndex}`"/>
-          </template>
-          <template v-else-if="postType == 2">
-            <div class="position-relative">
-              <v-carousel
-                height="auto"
-                v-model="currentSlide"
-                hide-delimiter-background
-                :show-arrows="false"
-              >
-                <v-carousel-item
-                  v-for="(image, index) in postImages"
-                  :key="index"
-                  :src="image.url"
-                  :value="index"
-                ></v-carousel-item>
-              </v-carousel>
-              <div class="position-absolute slider-control">
-                <v-btn @click="prev" variant="plain" rounded="xl">
-                  <v-img
-                    src="/icons/arrow-left.svg"
-                    class="carousel-icon"
-                  ></v-img
-                ></v-btn>
-                <v-btn @click="next" variant="plain" rounded="xl">
-                  <v-img
-                    src="/icons/arrow-right.svg"
-                    class="carousel-icon"
-                  ></v-img
-                ></v-btn>
-              </div>
-            </div>
+            <v-img :src="postImages[0].url" :id="`image-${dataIndex}`" />
           </template>
           <template v-else-if="postType == 1">
             <v-col>
@@ -44,7 +13,6 @@
                   ref="video"
                   :controls="isPlaying"
                   :id="`video-${dataIndex}`"
-                  style="width: 100%; height: 100%"
                   @play="isPlaying = true"
                   @pause="isPlaying = false"
                   controlsList="nodownload"
@@ -63,13 +31,49 @@
               </v-responsive>
             </v-col>
           </template>
+          <template v-else-if="postType == 2">
+            <!-- currentSlide: {{ currentSlide }} -->
+            <div class="position-relative">
+              <v-carousel
+                height="auto"
+                v-model="currentSlide"
+                hide-delimiter-background
+                :show-arrows="false"
+                :id="`slider-${dataIndex}`"
+              >
+                <v-carousel-item
+                  v-for="(image, index) in postImages"
+                  :key="index"
+                  :src="image.url"
+                  :value="index"
+                  :id="`slider-item-${index}`"
+                ></v-carousel-item>
+              </v-carousel>
+              <div class="position-absolute slider-control">
+                <v-btn @click="prevImg" variant="plain" rounded="xl">
+                  <v-img
+                    src="/icons/arrow-left.svg"
+                    class="carousel-icon"
+                  ></v-img
+                ></v-btn>
+                <v-btn @click="nextImg" variant="plain" rounded="xl">
+                  <v-img
+                    src="/icons/arrow-right.svg"
+                    class="carousel-icon"
+                  ></v-img
+                ></v-btn>
+              </div>
+            </div>
+          </template>
         </v-col>
       </v-row>
       <v-row>
         <v-col class="px-0 px-sm-3 px-md-6">
-          <p class="text-subtitle-2 text-md-subtitle-1 font-weight-medium text-center" id="description">
-           {{postDescription}}
-            <a href="#" class="post-by text-decoration-none">@Kubilay Odabaş</a>
+          <p
+            class="text-subtitle-2 text-md-subtitle-1 font-weight-medium text-center post-description"
+            :id="`description-${dataIndex}`"
+          >
+            {{ postDescription }}
           </p>
         </v-col>
       </v-row>
@@ -84,25 +88,25 @@
               :src="
                 isLiked ? '/icons/favorite.svg' : '/icons/favorite-outline.svg'
               "
-              class="mr-2"
+              :class="`mr-2 like-button ${isLiked && 'liked'} `"
             />
             <span>Beğen</span>
           </div>
           <div
-            class="cursor-pointer position-relative mx-1 mx-md-2 mx-lg-4 d-flex align-center" @click="shareTooltip = !shareTooltip"
+            class="cursor-pointer position-relative mx-1 mx-md-2 mx-lg-4 d-flex align-center"
+            @click="shareTooltip = !shareTooltip"
           >
             <v-img :width="24" src="/icons/share.svg" class="mr-2" />
             <span>Paylaş</span>
             <div
-              v-if="shareTooltip"
+              v-show="shareTooltip"
               class="position-absolute share-tooltip py-3"
             >
               <div class="d-flex justify-space-between">
                 <a
-                @click="createImage"
+                  @click="createImage"
                   v-for="icon in socialIcons"
                   :key="icon.name"
-                 
                   rel="noopener noreferrer"
                 >
                   <v-img
@@ -111,47 +115,63 @@
                     :alt="icon.name"
                   />
                 </a>
-                <!-- <a
-                  v-for="icon in socialIcons"
-                  :key="icon.name"
-                  :href="icon.url"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <v-img
-                    :width="24"
-                    :src="/icons/${icon.name}.svg"
-                    :alt="icon.name"
-                  />
-                </a> -->
               </div>
             </div>
-
           </div>
         </v-col>
       </v-row>
 
-      <canvas id="canvas" width="1080" height="1350" ref="canvas" class="w-100"></canvas>
-    <br>
-    <img id="result" alt="Merged Image" :src="resultSrc" v-if="resultSrc"  class="w-100"/>
-
+      <div v-show="resultSrc" style="background-color: rgb(219, 219, 219)">
+        canvas:
+        <canvas
+          id="canvas"
+          width="1080"
+          height="1350"
+          ref="canvas"
+          class="w-100"
+        ></canvas>
+        <br />
+        img
+        <img
+          id="result"
+          alt="Merged Image"
+          :src="resultSrc"
+          v-if="resultSrc"
+          class="w-100"
+        />
+      </div>
     </v-container>
   </div>
 </template>
 
 <script setup>
+import { sendGA4Events } from "~/services/ga4";
+
+const { sendItemImpression, sendItemClick } = sendGA4Events({
+  campaign: "bundle-lines-bunaltan-sicaklar-20240713",
+  measurementId: "G-7PNZ5E4JDZ", // Your GA4 Measurement ID
+  apiSecretKey: "RU0cCzDxRbCbpV6xOZ7xQA", // Your GA4 API Secret Key
+});
+
+const props = defineProps(["data", "dataIndex"]);
+
+const postType = ref(props?.data?.type);
+const postDescription = ref(props?.data?.description);
+const postImages = ref(props?.data?.content);
+
+
 const socialIcons = [
   {
     name: "facebook",
     url:
       "https://www.facebook.com/sharer.php?u=" +
-      encodeURIComponent('window?.location.href'),
+      encodeURIComponent("window?.location.href"),
   },
   {
     name: "x",
     url:
       "https://x.com/intent/tweet?url=" +
-      encodeURIComponent('window?.location.href') +
+      encodeURIComponent("window?.location.href") +
       "&text=" +
       encodeURIComponent("Bu karikatürü gördünüz mü?"),
   },
@@ -159,147 +179,191 @@ const socialIcons = [
     name: "instagram",
     url:
       "https://www.linkedin.com/shareArticle?mini=true&url=" +
-      encodeURIComponent('window?.location.href') +
+      encodeURIComponent("window?.location.href") +
       "&title=" +
-      encodeURIComponent('document.title') +
+      encodeURIComponent("document.title") +
       "&summary=" +
       encodeURIComponent("Check this out!") +
       "&source=" +
-      encodeURIComponent('window?.location.hostname'),
+      encodeURIComponent("window?.location.hostname"),
   },
   {
     name: "linkedin",
     url:
       "https://www.linkedin.com/shareArticle?mini=true&url=" +
-      encodeURIComponent('window?.location.href') +
+      encodeURIComponent("window?.location.href") +
       "&title=" +
-      encodeURIComponent('document.title') +
+      encodeURIComponent("document.title") +
       "&summary=" +
       encodeURIComponent("Check this out!") +
       "&source=" +
-      encodeURIComponent('window?.location.hostname'),
+      encodeURIComponent("window?.location.hostname"),
   },
   {
     name: "whatsapp",
     url:
       "https://api.whatsapp.com/send?text=" +
-      encodeURIComponent("Bu karikatürü gördün mü? " + 'window?.location.href'),
+      encodeURIComponent("Bu karikatürü gördün mü? " + "window?.location.href"),
   },
   {
     name: "link",
     url:
       "https://www.linkedin.com/shareArticle?mini=true&url=" +
-      encodeURIComponent('window?.location.href') +
+      encodeURIComponent("window?.location.href") +
       "&title=" +
-      encodeURIComponent('document.title') +
+      encodeURIComponent("document.title") +
       "&summary=" +
       encodeURIComponent("Check this out!") +
       "&source=" +
-      encodeURIComponent('window?.location.hostname'),
+      encodeURIComponent("window?.location.hostname"),
   },
 ];
 const shareTooltip = ref(false);
 
-const scrollY = ref(0);
 const handleScroll = () => {
   shareTooltip.value = false;
 };
 onMounted(() => {
   window.addEventListener("scroll", handleScroll);
+  sendItemImpression("homepage");
 });
 
 onUnmounted(() => {
   window.removeEventListener("scroll", handleScroll);
 });
 
-
 const canvas = ref(null);
-const resultSrc = ref('');
-const createImage=()=> {
-    const sourceImage = document.querySelector(`#image-${props.videoId} img`);
-    const sourceText = document.getElementById('description');
+const resultSrc = ref("");
+const createImage = () => {
+  const sourceImage = ref("")
+  console.log("postType : ", postType)
+  if(postType.value == 0){
+     sourceImage.value = document.querySelector(`#image-${props.dataIndex} img`);
+  }
+  else if(postType.value == 1){
+     sourceImage.value = document.querySelector(`#video-${props.dataIndex}`);
+     console.log("videoooo : ", sourceImage.value);
+  }
+  else if(postType.value == 2){
+     sourceImage.value = document.querySelector(`#slider-${props.dataIndex} #slider-item-${currentSlide.value} img`);
+  }
 
-    console.log("sourceImage : ", sourceImage)
+  const sourceText = document.querySelector(`#description-${props.dataIndex}`);
 
-    const context = canvas.value.getContext('2d');
-  const imageElement = sourceImage;
-  const text = sourceText.innerText;
+  const context = canvas.value.getContext("2d");
+  const imageElement = sourceImage.value;
+  const text = sourceText.innerHTML;
 
-
-  const img = new Image();
-  img.onload = function() {
-    // Clear the canvas
+  const firstImage = new Image();
+  firstImage.src = "/canvas-frame.png";
+  firstImage.onload = () => {
     context.clearRect(0, 0, 1080, 1350);
+    context.fillStyle = "white";
+    context.fillRect(0, 0, canvas.value.width, canvas.value.height);
 
+    context.drawImage(firstImage, 0, 0, canvas.value.width, canvas.value.width);
 
-    const padding = 10;
-    const availableWidth = canvas.value.width - padding * 2;
-    const imgHeight = (img.height / img.width) * availableWidth;
-    const imgX = padding;
-    const imgY = (canvas.value.height - imgHeight) / 2;
-   
+    const img = new Image();
+    img.onload = function () {
+      // Clear the canvas
 
-    // Draw the image on the canvas
-    context.drawImage(img, imgX, imgY, availableWidth, imgHeight);
+      const canvasContentWidth = (canvas.value.width / 38) * 30;
+      var imgWidth = 0;
+      var imgHeight = 0;
+      var imgX = (canvas.value.width / 38) * 4;
+      var imgY = (canvas.value.width / 38) * 2.5;
 
-    
+      if (img.height > img.width) {
+        imgWidth = (img.width / img.height) * canvasContentWidth;
+        imgHeight = canvasContentWidth;
+        imgX = imgX + (canvasContentWidth - imgWidth) / 2;
+      } else {
+        imgWidth = canvasContentWidth;
+        imgHeight = (img.height / img.width) * canvasContentWidth;
+        imgY = imgY + (canvasContentWidth - imgHeight) / 2;
+      }
 
-    // Calculate the position for the text
-    const textX = canvas.value.width / 2;
-    const textY = imgHeight + padding * 20;
+      // Draw the image on the canvas
+      context.drawImage(img, imgX, imgY, imgWidth, imgHeight);
 
+      // Calculate the position for the text
+      const textX = canvas.value.width / 2;
+      const textY = canvas.value.width;
 
-    document.fonts.load('30px "MetaSerifPro"').then(() => {
-
+      document.fonts.load('30px "MetaSerifPro"').then(() => {
         // Set text properties
-    context.font = '30px MetaSerifPro';
-    context.fillStyle = 'red';
-    context.textAlign = 'center';
-  
-    // Draw the text on the canvas
-    const lineHeight = 40;
-    wrapText(context, text, textX, textY, availableWidth, lineHeight);
+        context.font = "30px MetaSerifPro";
+        context.fillStyle = "#E62C33";
+        context.textAlign = "center";
 
-    // Set the result image src to the canvas data URL
-    resultSrc.value = canvas.value.toDataURL('image/png');
-    });
+        // Draw the text on the canvas
+        const lineHeight = 40;
+        wrapText(context, text, textX, textY, canvasContentWidth, lineHeight);
+
+        // Set the result image src to the canvas data URL
+        resultSrc.value = canvas.value.toDataURL("image/png");
+      });
+    };
+
+    img.src = imageElement.src;
   };
-
-  img.src = imageElement.src;
-}
-
-
+};
 
 const wrapText = (context, text, x, y, maxWidth, lineHeight) => {
-  const words = text.split(' ');
-  let line = '';
-  for (let n = 0; n < words.length; n++) {
-    const testLine = line + words[n] + ' ';
-    const metrics = context.measureText(testLine);
-    const testWidth = metrics.width;
-    if (testWidth > maxWidth && n > 0) {
-      context.fillText(line, x, y);
-      line = words[n] + ' ';
-      y += lineHeight;
-    } else {
-      line = testLine;
+  const words = text.split(/(<a[^>]*>|<\/a>)/).filter(Boolean);
+  let line = "";
+  let isLink = false;
+
+  words.forEach((word) => {
+    if (word.startsWith("<a")) {
+      isLink = true;
+      return;
     }
+    if (word === "</a>") {
+      isLink = false;
+      return;
+    }
+
+    const wordParts = word.split(" ");
+    wordParts.forEach((part, index) => {
+      const testLine = line + part + " ";
+      const metrics = context.measureText(testLine);
+      const testWidth = metrics.width;
+      if (testWidth > maxWidth && index > 0) {
+        context.fillStyle = isLink ? "#E62C33" : "black";
+        context.fillText(line, x, y);
+        line = part + " ";
+        y += lineHeight;
+      } else {
+        line = testLine;
+      }
+    });
+
+    if (line.trim()) {
+      context.fillStyle = isLink ? "#E62C33" : "black";
+      context.fillText(line, x, y);
+      line = "";
+      y += lineHeight;
+    }
+  });
+
+  if (line) {
+    context.fillStyle = isLink ? "#E62C33" : "black";
+    context.fillText(line, x, y);
   }
-  context.fillText(line, x, y);
 };
 
 
-const props = defineProps(["data", "dataIndex"]);
 
 const currentSlide = ref(0);
-const prev = () => {
+const prevImg = () => {
   if (currentSlide.value != 0) {
     currentSlide.value--;
   } else {
     currentSlide.value = postImages.value.length - 1;
   }
 };
-const next = () => {
+const nextImg = () => {
   if (postImages.value.length - 1 != currentSlide.value) {
     currentSlide.value++;
   } else {
@@ -308,13 +372,12 @@ const next = () => {
 };
 
 
-const postType = ref(props?.data?.type);
-const postDescription = ref(props?.data?.description)
-const postImages = ref(props?.data?.content);
-
 const isLiked = ref(false);
 const likeToggle = (id) => {
   isLiked.value = !isLiked.value;
+  if (isLiked.value) {
+    sendItemClick("visit_ad");
+  }
 };
 
 const isPlaying = ref(false);
@@ -326,13 +389,3 @@ const playVideo = () => {
   }
 };
 </script>
-
-<style>
-.v-window__container{
-  max-height: 500px !important;
-}
-.v-img__img--contain {
-    max-height: 500px !important;
-}
-</style>
-

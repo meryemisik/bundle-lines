@@ -4,15 +4,27 @@ const schema: mongoose.Schema = new mongoose.Schema(
 	{
 		title: {
 			type: String,
-			requied: true,
+			requied: false,
 		},
 		sponsor: {
 			type: String,
-			requied: true,
+			requied: false,
+		},
+		sponsorImage:{
+			type: String,
+			requied: false,
 		},
 		news: {
 			type: Array,
-			requied: true,
+			requied: false,
+		},
+		analyticsId:{
+			type: String,
+			requied: false,
+		},
+		campaignName:{
+			type: String,
+			requied: false,
 		},
 	},
 	{ timestamps: true }

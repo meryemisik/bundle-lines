@@ -22,10 +22,9 @@
       <v-col class="mt-n4" v-if="!isLoading">
         <div class="d-inline-flex">
           <v-img :width="64" :src="sponsorshipLogo" class="mr-2" />
-          <v-img :width="10" src="/icons/bracket.svg" class="mr-2" />
-          <span class="text-sponsorship font-weight-medium font-barlow"
-            >SPONSORLUĞUNDA</span
-          >
+          <span class="text-sponsorship font-weight-medium font-barlow">{{
+            sponsorship
+          }}</span>
         </div>
       </v-col>
     </v-row>
@@ -33,15 +32,16 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch } from "vue";
 
 const props = defineProps({
-  data: Object
+  data: Object,
 });
 
 const isLoading = ref(true);
 const title = ref(null);
-const sponsorshipLogo = ref("/logo/akbank-logo.svg");
+const sponsorship = ref(null);
+const sponsorshipLogo = ref(null);
 
 watch(
   () => props.data,
@@ -49,6 +49,8 @@ watch(
     if (newData && newData.title) {
       isLoading.value = false;
       title.value = newData.title;
+      sponsorship.value = newData.sponsor;
+      sponsorshipLogo.value = newData.sponsorImage;
     }
   },
   { immediate: true }

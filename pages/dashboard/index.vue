@@ -1,6 +1,19 @@
 <template>
   <div style="margin: auto; width: 50%">
     <form class="mt-5">
+      <label>Analytics Id  :</label><br />
+      <input
+        v-model="formCaricatures.analyticsId"
+        type="text"
+        placeholder="Enter image description"
+      /><br />
+      <label>Analytics Campaign Id  :</label><br />
+      <input
+        v-model="formCaricatures.campaignName"
+        type="text"
+        placeholder="Enter image description"
+      /><br />
+
       <label>Title :</label><br />
       <input
         v-model="formCaricatures.title"
@@ -45,8 +58,8 @@
         <input type="file" @change="VideoUploadFunction($event)" />
       </div>
       <button
-        @click="createCaricatures"
-        style="border: 1px solid grey; padding: 10px; background: red"
+        @click="createCaricatures(formCaricatures)"
+        style="border: 1px solid grey; padding: 10px; background: red" type="button"
       >
         Create
       </button>
@@ -55,12 +68,12 @@
     <div class="relative mt-5 border border-gray-100 rounded-lg">
       formCaricatures:
       <pre>{{ formCaricatures }}</pre>
-      uploadImage
+      <!-- uploadImage
       <pre>{{ uploadImage }}</pre>
       uploadSlider:
       <pre>{{ uploadSlider }}</pre>
       uploadVideo :
-      <pre>{{ uploadVideo }}</pre>
+      <pre>{{ uploadVideo }}</pre> -->
     </div>
   </div>
 </template>
@@ -70,6 +83,9 @@ const formCaricatures = ref({
   sponsor: "",
   title: "",
   news: [],
+  analyticsId:"",
+  campaignName:"",
+  sponsorImage:""
 });
 
 const uploadImage = ref({
@@ -102,6 +118,18 @@ const ImageUploadFunction = (event: any) => {
       type: 0,
     };
     formCaricatures.value.news.push(imageContent);
+  };
+
+  reader.readAsDataURL(file);
+};
+const SponsorImageUploadFunction = (event: any) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+
+  reader.onload = () => {
+    formCaricatures.value.sponsorImage = reader.result as string;
   };
 
   reader.readAsDataURL(file);
@@ -160,7 +188,7 @@ const getAll = async () => {
   }
 };
 
-const createCaricatures = async (values: any, ctx: any) => {
+const createCaricatures = async (event:any) => {
   console.log(formCaricatures.value);
   try {
     const response = await $fetch("/api/caricatures/create", {

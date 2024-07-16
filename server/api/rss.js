@@ -1,23 +1,37 @@
-import { serverQueryContent } from '#content/server'
 import RSS from 'rss'
 
+const getAll = async () => {
+  try {
+    let data = await $fetch("/api/caricatures");
+    return data;
+  } catch (e) {
+    console.error(e);
+    throw new Error("Error fetching caricatures data");
+  }
+};
+
 export default defineEventHandler(async (event) => {
+
+  const host = event.node.req.headers.host
+  const protocol = event.node.req.headers['x-forwarded-proto'] || 'http'
+  const wedDomain = `${protocol}://${host}/`
+
   const feed = new RSS({
-    title: 'My Nuxt 3 RSS Feed',
-    description: 'This is my Nuxt 3 RSS feed',
-    feed_url: 'http://meryem.com/rss.xml',
-    site_url: 'http://meryem.com',
+    title: 'Bundle Lines',
+    description: 'Bundle Lines RSS Feed',
+    feed_url: `${wedDomain}api/rss`,
+    site_url: wedDomain,
     language: 'en',
   })
 
-  const articles = await serverQueryContent(event).find()
-  
-  articles.forEach(article => {
+  const caricatures = await getAll();
+
+  caricatures?.forEach(caricatur => {
     feed.item({
-      title: article.title,
-      description: article.description,
-      url: `http://meryem.com/${article.path}`,
-      date: article.createdAt,
+      title: caricatur.title,
+      description: caricatur.sponsor,
+      url: `${wedDomain}newsletter/${caricatur._id}`,
+      date: caricatur.createdAt,
     })
   })
 
