@@ -4,7 +4,7 @@
       <the-header :data="posts" />
       <v-sheet>
         <template v-for="(item, index) in posts?.news" :key="index">
-          <the-post-item :data="item" :dataIndex="index" />
+          <the-post-item :data="item" :posts="posts" :dataIndex="index" />
         </template>
         <template v-if="isLoading" v-for="i in 3" :key="i">
           <v-skeleton-loader

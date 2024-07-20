@@ -27,9 +27,16 @@ export default defineEventHandler(async (event) => {
   const caricatures = await getAll();
 
   caricatures?.forEach(caricatur => {
+    let getFirstImage = caricatur.news.find(
+      (obj) => obj.type == 0 || obj.type == 2
+    );
+    getFirstImage = getFirstImage?.content[0].url
     feed.item({
       title: caricatur.title,
-      description: caricatur.sponsor,
+      description:  `
+      <p>${caricatur.sponsor}</p>
+      <img src="${getFirstImage}" alt="${caricatur.title}" />
+    `,
       url: `${wedDomain}newsletter/${caricatur._id}`,
       date: caricatur.createdAt,
     })

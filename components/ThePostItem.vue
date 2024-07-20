@@ -9,19 +9,18 @@
           <template v-else-if="postType == 1">
             <v-col>
               <v-responsive>
-                <video
-                  ref="video"
-                  :controls="isPlaying"
-                  :id="`video-${dataIndex}`"
-                  @play="isPlaying = true"
-                  @pause="isPlaying = false"
-                  controlsList="nodownload"
-                  class="post-video"
-                >
-                  <source :src="postImages[0].url" type="video/mp4" />
-                  Tarayıcınız bu videoyu desteklemiyor.
-                </video>
-
+                <div :id="`video-${dataIndex}`">
+                  <video
+                    ref="video"
+                    :controls="isPlaying"
+                    @play="isPlaying = true"
+                    controlsList="nodownload"
+                    class="post-video"
+                  >
+                    <source :src="postImages[0].url" type="video/mp4" />
+                    Tarayıcınız bu videoyu desteklemiyor.
+                  </video>
+                </div>
                 <v-img
                   src="/icons/play.svg"
                   class="play-icon"
@@ -32,7 +31,6 @@
             </v-col>
           </template>
           <template v-else-if="postType == 2">
-            <!-- currentSlide: {{ currentSlide }} -->
             <div class="position-relative">
               <v-carousel
                 height="auto"
@@ -72,9 +70,8 @@
           <p
             class="text-subtitle-2 text-md-subtitle-1 font-weight-medium text-center post-description"
             :id="`description-${dataIndex}`"
-          >
-            {{ postDescription }}
-          </p>
+            v-html="postDescription"
+          ></p>
         </v-col>
       </v-row>
       <v-row>
@@ -146,76 +143,68 @@
 
 <script setup>
 import { sendGA4Events } from "~/services/ga4";
-
-const { sendItemImpression, sendItemClick } = sendGA4Events({
-  campaign: "bundle-lines-bunaltan-sicaklar-20240713",
-  measurementId: "G-7PNZ5E4JDZ", // Your GA4 Measurement ID
-  apiSecretKey: "RU0cCzDxRbCbpV6xOZ7xQA", // Your GA4 API Secret Key
-});
-
-const props = defineProps(["data", "dataIndex"]);
+import html2canvas from "html2canvas";
+const props = defineProps(["data", "dataIndex", "posts"]);
 
 const postType = ref(props?.data?.type);
 const postDescription = ref(props?.data?.description);
 const postImages = ref(props?.data?.content);
 
+const stripHTMLTags = (input) => {
+  return input.replace(/<\/?[^>]+(>|$)/g, "");
+};
+
+watchEffect(() => {
+  if (props?.posts) {
+    let getFirstImage = props?.posts.news.find(
+      (obj) => obj.type == 0 || obj.type == 2
+    );
+    getFirstImage = getFirstImage.content[0].url;
+    let getFirstDescription = props?.posts.news[0].description;
+    getFirstDescription = stripHTMLTags(getFirstDescription);
+    useSeoMeta({
+      title: props.posts.title,
+      ogTitle: props.posts.title,
+      description: getFirstDescription,
+      ogDescription: getFirstDescription,
+      ogImage: getFirstImage,
+      twitterCard: "summary_large_image",
+      ogType: "article", // veya uygun tür
+      ogSiteName: "Bundle Lines",
+      ogUrl: window.location.href,
+      ogLocale: "tr_TR",
+      twitterTitle: props.posts.title,
+      twitterDescription: getFirstDescription,
+      twitterImage: getFirstImage,
+    });
+  }
+});
+
+const measurementId = ref(props?.posts?.analyticsId);
+const campaign = ref(props?.posts?.campaignName);
+
+const { sendItemImpression, sendItemClick } = sendGA4Events({
+  campaign: campaign.value,
+  measurementId: measurementId.value, // Your GA4 Measurement ID
+  apiSecretKey: "RU0cCzDxRbCbpV6xOZ7xQA", // Your GA4 API Secret Key
+});
 
 const socialIcons = [
   {
     name: "facebook",
-    url:
-      "https://www.facebook.com/sharer.php?u=" +
-      encodeURIComponent("window?.location.href"),
   },
   {
     name: "x",
-    url:
-      "https://x.com/intent/tweet?url=" +
-      encodeURIComponent("window?.location.href") +
-      "&text=" +
-      encodeURIComponent("Bu karikatürü gördünüz mü?"),
   },
-  {
-    name: "instagram",
-    url:
-      "https://www.linkedin.com/shareArticle?mini=true&url=" +
-      encodeURIComponent("window?.location.href") +
-      "&title=" +
-      encodeURIComponent("document.title") +
-      "&summary=" +
-      encodeURIComponent("Check this out!") +
-      "&source=" +
-      encodeURIComponent("window?.location.hostname"),
-  },
+
   {
     name: "linkedin",
-    url:
-      "https://www.linkedin.com/shareArticle?mini=true&url=" +
-      encodeURIComponent("window?.location.href") +
-      "&title=" +
-      encodeURIComponent("document.title") +
-      "&summary=" +
-      encodeURIComponent("Check this out!") +
-      "&source=" +
-      encodeURIComponent("window?.location.hostname"),
   },
   {
     name: "whatsapp",
-    url:
-      "https://api.whatsapp.com/send?text=" +
-      encodeURIComponent("Bu karikatürü gördün mü? " + "window?.location.href"),
   },
   {
     name: "link",
-    url:
-      "https://www.linkedin.com/shareArticle?mini=true&url=" +
-      encodeURIComponent("window?.location.href") +
-      "&title=" +
-      encodeURIComponent("document.title") +
-      "&summary=" +
-      encodeURIComponent("Check this out!") +
-      "&source=" +
-      encodeURIComponent("window?.location.hostname"),
   },
 ];
 const shareTooltip = ref(false);
@@ -234,23 +223,27 @@ onUnmounted(() => {
 
 const canvas = ref(null);
 const resultSrc = ref("");
-const createImage = () => {
-  const sourceImage = ref("")
-  console.log("postType : ", postType)
-  if(postType.value == 0){
-     sourceImage.value = document.querySelector(`#image-${props.dataIndex} img`);
-  }
-  else if(postType.value == 1){
-     sourceImage.value = document.querySelector(`#video-${props.dataIndex}`);
-     console.log("videoooo : ", sourceImage.value);
-  }
-  else if(postType.value == 2){
-     sourceImage.value = document.querySelector(`#slider-${props.dataIndex} #slider-item-${currentSlide.value} img`);
+const createImage = async () => {
+  const sourceImage = ref("");
+
+  if (postType.value == 0) {
+    sourceImage.value = document.querySelector(`#image-${props.dataIndex} img`);
+  } else if (postType.value == 1) {
+    var captureDivElement = document.querySelector(`#video-${props.dataIndex}`);
+    var createCanvas = await html2canvas(captureDivElement);
+    var createImgFromCanvas = createCanvas.toDataURL("image/png");
+    sourceImage.value = document.createElement("img");
+    sourceImage.value.src = createImgFromCanvas;
+  } else if (postType.value == 2) {
+    sourceImage.value = document.querySelector(
+      `#slider-${props.dataIndex} #slider-item-${currentSlide.value} img`
+    );
   }
 
-  const sourceText = document.querySelector(`#description-${props.dataIndex}`);
-
-  const context = canvas.value.getContext("2d");
+  const sourceText = document.querySelector(
+    `#description-${props.dataIndex} p`
+  );
+  const context = canvas.value.getContext("2d", { willReadFrequently: true });
   const imageElement = sourceImage.value;
   const text = sourceText.innerHTML;
 
@@ -265,8 +258,6 @@ const createImage = () => {
 
     const img = new Image();
     img.onload = function () {
-      // Clear the canvas
-
       const canvasContentWidth = (canvas.value.width / 38) * 30;
       var imgWidth = 0;
       var imgHeight = 0;
@@ -283,29 +274,25 @@ const createImage = () => {
         imgY = imgY + (canvasContentWidth - imgHeight) / 2;
       }
 
-      // Draw the image on the canvas
       context.drawImage(img, imgX, imgY, imgWidth, imgHeight);
 
-      // Calculate the position for the text
       const textX = canvas.value.width / 2;
       const textY = canvas.value.width;
 
       document.fonts.load('30px "MetaSerifPro"').then(() => {
-        // Set text properties
         context.font = "30px MetaSerifPro";
         context.fillStyle = "#E62C33";
         context.textAlign = "center";
 
-        // Draw the text on the canvas
         const lineHeight = 40;
         wrapText(context, text, textX, textY, canvasContentWidth, lineHeight);
 
-        // Set the result image src to the canvas data URL
         resultSrc.value = canvas.value.toDataURL("image/png");
       });
     };
 
     img.src = imageElement.src;
+
   };
 };
 
@@ -353,8 +340,6 @@ const wrapText = (context, text, x, y, maxWidth, lineHeight) => {
   }
 };
 
-
-
 const currentSlide = ref(0);
 const prevImg = () => {
   if (currentSlide.value != 0) {
@@ -371,7 +356,6 @@ const nextImg = () => {
   }
 };
 
-
 const isLiked = ref(false);
 const likeToggle = (id) => {
   isLiked.value = !isLiked.value;
@@ -383,8 +367,10 @@ const likeToggle = (id) => {
 const isPlaying = ref(false);
 
 const playVideo = () => {
-  const videoElement = document.getElementById(`video-${props.dataIndex}`);
-  if (videoElement) {
+  const videoElement = document.querySelector(
+    `#video-${props.dataIndex} video`
+  );
+  if (videoElement && isPlaying) {
     videoElement.play();
   }
 };

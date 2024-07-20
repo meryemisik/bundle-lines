@@ -2,6 +2,7 @@
 @import "fonts/stylesheet.css";
 @import "carousel.scss";
 @import "post.scss";
+@import "upload.scss";
 @import "@mdi/font/css/materialdesignicons.min";
 @import url('https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 
@@ -47,4 +48,16 @@ body {
 
 .font-barlow {
     font-family: 'Barlow', sans-serif !important;
+}
+
+.snackbar-success {
+    .v-overlay__content {
+        background: rgb(76, 175, 80) !important;
+    }
+}
+
+.snackbar-error {
+    .v-overlay__content {
+        background: red !important;
+    }
 }

@@ -1,0 +1,53 @@
+.main-container {
+    display: flex;
+    flex-grow: 1;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  
+  .dropzone-container {
+    width: 100%;
+    height: 196px;
+    overflow-y: auto;
+  }
+  
+  .hidden-input {
+    opacity: 0;
+    overflow: hidden;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+  }
+  
+  .file-label {
+    font-size: 20px;
+    display: block;
+    cursor: pointer;
+  }
+  
+  .preview-container {
+    display: flex;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+  }
+  
+  .preview-card {
+    padding: 5px;
+    max-width: 128px;
+    position: relative;
+    display: inline-grid;
+    justify-items: center;
+  }
+  
+  .preview-card > button {
+    position: absolute;
+    right: 10px;
+  }
+  
+  .preview-image {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin-top: 10px;
+  }

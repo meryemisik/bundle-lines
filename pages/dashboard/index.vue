@@ -1,183 +1,237 @@
 <template>
-  <div style="margin: auto; width: 50%">
-    <form class="mt-5">
-      <label>Analytics Id  :</label><br />
-      <input
-        v-model="formCaricatures.analyticsId"
-        type="text"
-        placeholder="Enter image description"
-      /><br />
-      <label>Analytics Campaign Id  :</label><br />
-      <input
-        v-model="formCaricatures.campaignName"
-        type="text"
-        placeholder="Enter image description"
-      /><br />
+  <v-container class="page-container">
+    <v-row>
+      <v-col>
+        <v-card class="pa-4" elevation="16">
+          <v-card class="mx-auto mb-4" elevation="1">
+            <v-card-item>
+              <v-card-subtitle>Analytics Id</v-card-subtitle>
+            </v-card-item>
+            <v-card-text class="form-input-text">
+              <v-text-field
+                variant="solo-filled"
+                density="compact"
+                label="Ex: G-XXXXXXXXXX"
+                v-model="formCaricatures.analyticsId"
+                :rules="analyticsIdRules"
+              ></v-text-field>
+            </v-card-text>
+          </v-card>
+          <v-card class="mx-auto my-4" elevation="1">
+            <v-card-item>
+              <v-card-subtitle>Analytics Campaign Id</v-card-subtitle>
+            </v-card-item>
+            <v-card-text class="form-input-text">
+              <v-text-field
+                variant="solo-filled"
+                density="compact"
+                label="Ex: studio-fairy-temmuz-2020"
+                v-model="formCaricatures.campaignName"
+                :rules="campaignNameRules"
+              ></v-text-field>
+            </v-card-text>
+          </v-card>
+          <v-card class="mx-auto my-4" elevation="1">
+            <v-card-item>
+              <v-card-subtitle>Title</v-card-subtitle>
+            </v-card-item>
+            <v-card-text class="form-input-text">
+              <tiptap-editor :editor="editor" v-model="formCaricatures.title" />
+            </v-card-text>
+          </v-card>
+          <v-card class="mx-auto my-4" elevation="1">
+            <v-card-item>
+              <v-card-subtitle>Sponsor</v-card-subtitle>
+            </v-card-item>
+            <v-card-text class="form-input-text">
+              <tiptap-editor
+                :editor="editor"
+                v-model="formCaricatures.sponsor"
+              />
+              <the-sponsor-upload
+                @sponsor-file="
+                  fileUploadFunction($event, index, 'sponsorImage')
+                "
+              />
+            </v-card-text>
+          </v-card>
 
-      <label>Title :</label><br />
-      <input
-        v-model="formCaricatures.title"
-        type="text"
-        placeholder="Enter image description"
-      /><br />
+          <div v-for="(comp, index) in components" :key="index">
+            <v-card class="mx-auto my-4 pa-2 new-component" elevation="1">
+              <div class="trash-icon">
+                <v-icon
+                  icon="mdi-trash-can-outline"
+                  @click="removeComponents(index)"
+                  v-if="components?.length > 1"
+                  color="error"
+                />
+              </div>
 
-      <label>Sponsor :</label><br />
-      <input
-        v-model="formCaricatures.sponsor"
-        type="text"
-        placeholder="Enter image description"
-      /><br />
-
-      <div>
-        <label>Image Description:</label><br />
-        <input
-          v-model="uploadImage.description"
-          type="text"
-          placeholder="Enter image description"
-        /><br />
-        <input type="file" @change="ImageUploadFunction($event)" />
-      </div>
-
-      <div>
-        <label>Slider Description:</label><br />
-        <input
-          v-model="uploadSlider.description"
-          type="text"
-          placeholder="Enter slider description"
-        /><br />
-        <input type="file" @change="SliderUploadFunction($event)" multiple />
-      </div>
-
-      <div>
-        <label>Video Description:</label><br />
-        <input
-          v-model="uploadVideo.description"
-          type="text"
-          placeholder="Enter video description"
-        /><br />
-        <input type="file" @change="VideoUploadFunction($event)" />
-      </div>
-      <button
-        @click="createCaricatures(formCaricatures)"
-        style="border: 1px solid grey; padding: 10px; background: red" type="button"
-      >
-        Create
-      </button>
-    </form>
-
-    <div class="relative mt-5 border border-gray-100 rounded-lg">
-      formCaricatures:
-      <pre>{{ formCaricatures }}</pre>
-      <!-- uploadImage
-      <pre>{{ uploadImage }}</pre>
-      uploadSlider:
-      <pre>{{ uploadSlider }}</pre>
-      uploadVideo :
-      <pre>{{ uploadVideo }}</pre> -->
-    </div>
-  </div>
+              <div v-if="comp.type === '0'" class="file-component">
+                <v-card-item>
+                  <v-card-subtitle>File Upload</v-card-subtitle>
+                </v-card-item>
+                <v-card-text class="form-input-text">
+                  <tiptap-editor :editor="editor" v-model="comp.description" />
+                  <the-file-upload
+                    @single-file="fileUploadFunction($event, index, 'file')"
+                  />
+                </v-card-text>
+              </div>
+              <div v-else-if="comp.type === '1'" class="video-component">
+                <v-card-item>
+                  <v-card-subtitle>Video Upload</v-card-subtitle>
+                </v-card-item>
+                <v-card-text class="form-input-text">
+                  <tiptap-editor :editor="editor" v-model="comp.description" />
+                  <the-video-upload
+                    @video-file="fileUploadFunction($event, index, 'video')"
+                  />
+                </v-card-text>
+              </div>
+              <div v-else-if="comp.type === '2'" class="multi-file-component">
+                <v-card-item>
+                  <v-card-subtitle>Slider Upload</v-card-subtitle>
+                </v-card-item>
+                <v-card-text class="form-input-text">
+                  <tiptap-editor :editor="editor" v-model="comp.description" />
+                  <the-multiple-upload
+                    @multiple-file="multifileUploadFunction($event, index)"
+                  />
+                </v-card-text>
+              </div>
+            </v-card>
+          </div>
+          <v-row>
+            <v-col>
+              <div class="new-components-content">
+                <div class="item cursor-pointer" @click="addComponents(0)">
+                  <div class="file-upload">
+                    <v-icon icon="mdi-file-image-outline"></v-icon>
+                    <v-label class="title font-barlow cursor-pointer"
+                      >File Upload</v-label
+                    >
+                    <v-label class="description font-barlow cursor-pointer"
+                      >Upload single image</v-label
+                    >
+                  </div>
+                </div>
+                <div class="item" @click="addComponents(2)">
+                  <div class="file-upload">
+                    <v-icon icon="mdi-folder-multiple-image"></v-icon>
+                    <v-label class="title font-barlow cursor-pointer"
+                      >Slider Upload</v-label
+                    >
+                    <v-label class="description font-barlow cursor-pointer"
+                      >Upload multiple image</v-label
+                    >
+                  </div>
+                </div>
+                <div class="item" @click="addComponents(1)">
+                  <div class="file-upload">
+                    <v-icon icon="mdi-file-video-outline"></v-icon>
+                    <v-label class="title font-barlow cursor-pointer"
+                      >Video Upload</v-label
+                    >
+                    <v-label class="description font-barlow cursor-pointer"
+                      >Upload video</v-label
+                    >
+                  </div>
+                </div>
+              </div>
+            </v-col>
+          </v-row>
+          <v-btn
+            @click="createCaricatures(formCaricatures)"
+            color="success"
+            class="mt-5"
+            ><span class="font-barlow">Create</span></v-btn
+          >
+        </v-card>
+      </v-col>
+    </v-row>
+    <v-snackbar
+      v-model="isSnackbarVisible"
+      :class="snackbarClass"
+      timeout="30000"
+      location="top right"
+    >
+      {{ snackbarMsg }}
+    </v-snackbar>
+  </v-container>
 </template>
 
-<script setup lang="ts">
+<script setup>
+const isSnackbarVisible = ref(false);
+const snackbarMsg = ref("");
+const snackbarType = ref("");
+const files = ref([]);
+const multipleFileResult = ref([]);
+const analyticsIdRules = [(value) => !!value || "This field is required"];
+const campaignNameRules = [(value) => !!value || "This field is required"];
+
 const formCaricatures = ref({
   sponsor: "",
   title: "",
   news: [],
-  analyticsId:"",
-  campaignName:"",
-  sponsorImage:""
+  analyticsId: "",
+  campaignName: "",
+  sponsorImage: "",
 });
 
-const uploadImage = ref({
-  description: "",
-  content: [],
-  type: 0,
-});
+const selectedComponent = ref("2");
+const components = ref([
+  {
+    type: "0",
+    content: null,
+    description: "",
+  },
+]);
 
-const uploadVideo = ref({
-  description: "",
-  content: [],
-  type: 1,
-});
-
-const uploadSlider = ref({
-  description: "",
-  content: [],
-  type: 2,
-});
-
-const ImageUploadFunction = (event: any) => {
-  const file = event.target.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = () => {
-    const imageContent = {
-      description: uploadImage.value.description,
-      content: [{ url: reader.result as string }],
-      type: 0,
-    };
-    formCaricatures.value.news.push(imageContent);
+const snackbarClass = computed(() => {
+  return {
+    "snackbar-success": snackbarType.value === "success",
+    "snackbar-error": snackbarType.value === "error",
   };
+});
 
-  reader.readAsDataURL(file);
-};
-const SponsorImageUploadFunction = (event: any) => {
-  const file = event.target.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-
-  reader.onload = () => {
-    formCaricatures.value.sponsorImage = reader.result as string;
-  };
-
-  reader.readAsDataURL(file);
-};
-
-const SliderUploadFunction = (event: any) => {
-  const files = event.target.files;
-  if (!files) return;
-  
-  const sliderContent = {
-    description: uploadSlider.value.description,
-    content: [],
-    type: 2,
-  };
-
-  for (let i = 0; i < files.length; i++) {
-    const file = files[i];
-    const reader = new FileReader();
-
-    reader.onload = () => {
-      sliderContent.content.push({
-        url: reader.result as string,
-      });
-
-      if (sliderContent.content.length === files.length) {
-        formCaricatures.value.news.push(sliderContent);
-      }
-    };
-
-    reader.readAsDataURL(file);
+const addComponents = (type) => {
+  if (type === 0) {
+    components.value.push({
+      type: "0",
+      content: null,
+      description: "",
+    });
+  } else if (type === 1) {
+    components.value.push({
+      type: "1",
+      content: null,
+      description: "",
+    });
+  } else if (type === 2) {
+    components.value.push({
+      type: "2",
+      content: [],
+      description: "",
+    });
   }
 };
 
-const VideoUploadFunction = (event: any) => {
-  const file = event.target.files[0];
-  if (!file) return;
+const removeComponents = (index) => {
+  return components.value.splice(index, 1);
+};
 
-  const reader = new FileReader();
-  reader.onload = () => {
-    const videoContent = {
-      description: uploadVideo.value.description,
-      content: [{ url: reader.result as string }],
-      type: 1,
-    };
-    formCaricatures.value.news.push(videoContent);
-  };
-
-  reader.readAsDataURL(file);
+const fileUploadFunction = async (event, index, fileKey) => {
+  if (event) {
+    if (fileKey == "sponsorImage") {
+      formCaricatures.value.sponsorImage = event;
+    } else {
+      components.value[index].content = event;
+    }
+  }
+};
+const multifileUploadFunction = async (event, index) => {
+    components.value[index].content = event
 };
 const getAll = async () => {
   try {
@@ -187,19 +241,123 @@ const getAll = async () => {
     alert(e);
   }
 };
-
-const createCaricatures = async (event:any) => {
-  console.log(formCaricatures.value);
+const createCaricatures = async (event) => {
+  const formData = {
+    sponsor: formCaricatures.value.sponsor,
+    title: formCaricatures.value.title,
+    news: components.value,
+    analyticsId: formCaricatures.value.analyticsId,
+    campaignName: formCaricatures.value.campaignName,
+    sponsorImage: formCaricatures.value.sponsorImage,
+  };
   try {
     const response = await $fetch("/api/caricatures/create", {
       method: "POST",
-      body: formCaricatures.value,
+      body: formData,
     });
-
+    isSnackbarVisible.value = true;
+    snackbarType.value = "success";
+    snackbarMsg.value = "Caricature added successfully!";
     await getAll();
-    alert("Karikatür eklendi");
   } catch (e) {
-    alert(e);
+    isSnackbarVisible.value = true;
+    snackbarType.value = "error";
+    snackbarMsg.value = "An error occurred while adding the caricature!";
   }
 };
 </script>
+
+<style lang="scss">
+.new-components-content {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+
+  i {
+    font-size: 40px;
+  }
+  .item {
+    padding: 8px;
+    border-radius: 16px;
+    color: #fff;
+    flex: 1;
+    cursor: pointer;
+    transition: all 0.2s 0s linear;
+
+    .file-upload {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px;
+      border-radius: 8px;
+      gap: 8px;
+      .title {
+        opacity: 1 !important;
+        font-weight: bold !important;
+        font-size: 14px;
+      }
+      .description {
+        white-space: normal !important;
+        font-size: 12px;
+      }
+    }
+    &:nth-child(1) {
+      background-color: rgb(241, 241, 242);
+      color: black;
+
+      &:hover {
+        background-color: rgb(223, 223, 223);
+      }
+
+      .file-upload {
+        background-color: rgb(250, 250, 251);
+      }
+    }
+    &:nth-child(2) {
+      background-color: rgb(23, 25, 35);
+
+      &:hover {
+        background-color: rgb(42, 42, 43);
+      }
+
+      .file-upload {
+        background: rgb(40, 41, 51);
+        color: #f2f2f2;
+      }
+    }
+    &:nth-child(3) {
+      background-color: rgb(36, 172, 255);
+
+      &:hover {
+        background-color: rgb(93, 193, 255);
+      }
+
+      .file-upload {
+        background: rgb(107, 198, 255);
+        color: #f2f2f2;
+      }
+    }
+  }
+}
+.trash-icon {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.new-component {
+  animation: animasyon 0.75s 0s linear;
+}
+
+@keyframes animasyon {
+  from {
+    background: rgb(209, 255, 209);
+  }
+  to {
+    background: white;
+  }
+}
+.form-input-text {
+  padding: 0 1rem !important;
+}
+</style>
