@@ -7,17 +7,16 @@
         @drop="drop"
       >
         <input
+          :id="'fileInput' + index"
           type="file"
           name="file"
-          id="fileInput"
           class="hidden-input"
           @change="onChange"
           ref="fileInput"
           accept="image/*"
         />
-  
         <label
-          for="fileInput"
+          :for="'fileInput' + index"
           class="file-label h-100 d-flex align-center justify-center"
           v-if="!internalFiles.length"
         >
@@ -41,7 +40,7 @@
           v-if="internalFiles.length"
         >
           <div
-            v-for="(file, index) in internalFiles"
+            v-for="(file, idx) in internalFiles"
             :key="file.name"
             class="preview-card"
             :title="file.name"
@@ -51,7 +50,7 @@
               {{ file.name }}<br />
             </p>
   
-            <button type="button" @click="remove(index)" title="Remove file">
+            <button type="button" @click="remove(idx)" title="Remove file">
               <b>×</b>
             </button>
           </div>
@@ -61,13 +60,21 @@
   </template>
   
   <script>
-  import { ref, watch, nextTick } from "vue";
+  import { ref, watch } from "vue";
   
   export default {
     props: {
       models: {
         type: Array,
         default: () => [],
+      },
+      index: {
+        type: Number,
+        required: true,
+      },
+      fileKey: {
+        type: String,
+        required: true,
       },
     },
     setup(props, { emit }) {
@@ -85,10 +92,10 @@
           const reader = new FileReader();
           reader.onload = (e) => {
             internalFiles.value.push({ url: e.target.result });
+            emit("single-file", internalFiles.value, props.index, props.fileKey);
           };
           reader.readAsDataURL(file);
         });
-        emit("single-file", internalFiles.value);
       };
   
       const dragover = (e) => {
@@ -109,8 +116,8 @@
         isDragging.value = false;
       };
   
-      const remove = (index) => {
-        internalFiles.value.splice(index, 1);
+      const remove = (idx) => {
+        internalFiles.value.splice(idx, 1);
       };
   
       return {

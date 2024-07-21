@@ -53,7 +53,7 @@
                 label="Enter Sponsor"
                 v-model="formCaricatures.sponsor"
               ></v-text-field>
-              <the-sponsor-upload @sponsor-file="fileUploadFunction($event, index, 'sponsorImage')"/>
+              <the-file-upload @single-file="fileUploadFunction($event, index, 'sponsorImage')" :index="index" fileKey="sponsorImage" />
             </v-card-text>
           </v-card>
 
@@ -74,7 +74,7 @@
                 </v-card-item>
                 <v-card-text class="form-input-text">
                   <tiptap-editor :editor="editor" v-model="comp.description" />
-                  <the-file-upload @single-file="fileUploadFunction($event, index, 'file')" />
+                  <the-file-upload @single-file="fileUploadFunction($event, index, 'file')" :index="index" fileKey="file" />
                 </v-card-text>
               </div>
               <div v-else-if="comp.type === '1'" class="video-component">
@@ -84,7 +84,7 @@
                 </v-card-item>
                 <v-card-text class="form-input-text">
                   <tiptap-editor :editor="editor" v-model="comp.description" />
-                  <the-video-upload @video-file="fileUploadFunction($event, index, 'video')" />
+                  <the-file-upload @single-file="fileUploadFunction($event, index, 'video')" :index="index" fileKey="video" />
                 </v-card-text>
               </div>
               <div v-else-if="comp.type === '2'" class="multi-file-component">
@@ -93,7 +93,7 @@
                 </v-card-item>
                 <v-card-text class="form-input-text">
                   <tiptap-editor :editor="editor" v-model="comp.description" />
-                  <the-multiple-upload @multiple-file="multifileUploadFunction($event, index)"/>
+                  <the-multiple-upload @multiple-file="multifileUploadFunction($event, index)" :index="index" fileKey="multiple" />
                 </v-card-text>
               </div>
             </v-card>
@@ -209,6 +209,7 @@ const removeComponents = (index) => {
 };
 
 const fileUploadFunction = async (event, index, fileKey) => {
+  console.log('components', components.value)
   if (event) {
     if (fileKey == "sponsorImage") {
       formCaricatures.value.sponsorImage = event;
@@ -237,20 +238,21 @@ const createCaricatures = async (event) => {
     campaignName: formCaricatures.value.campaignName,
     sponsorImage: formCaricatures.value.sponsorImage,
   };
-  try {
-    const response = await $fetch("/api/caricatures/create", {
-      method: "POST",
-      body: formData,
-    });
-    isSnackbarVisible.value = true;
-    snackbarColor.value = "success";
-    snackbarMsg.value = "Caricature added successfully!";
-    await getAll();
-  } catch (e) {
-    isSnackbarVisible.value = true;
-    snackbarColor.value = "error";
-    snackbarMsg.value = "An error occurred while adding the caricature!";
-  }
+  console.log('form', formData)
+  // try {
+  //   const response = await $fetch("/api/caricatures/create", {
+  //     method: "POST",
+  //     body: formData,
+  //   });
+  //   isSnackbarVisible.value = true;
+  //   snackbarColor.value = "success";
+  //   snackbarMsg.value = "Caricature added successfully!";
+  //   await getAll();
+  // } catch (e) {
+  //   isSnackbarVisible.value = true;
+  //   snackbarColor.value = "error";
+  //   snackbarMsg.value = "An error occurred while adding the caricature!";
+  // }
 };
 </script>
 

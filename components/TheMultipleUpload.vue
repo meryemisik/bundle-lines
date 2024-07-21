@@ -2,27 +2,26 @@
   <div class="main-container">
     <div
       class="dropzone-container"
-      @dragover="dragover"
+      @dragover.prevent="dragover"
       @dragleave="dragleave"
       @drop="drop"
     >
       <input
+        :id="'multipleFile' + index"
         type="file"
-        name="file1"
-        id="multipleFile"
+        name="file"
         class="hidden-input"
-        @change="onChange1"
+        @change="onChange"
         ref="files"
         accept="image/*"
         multiple
       />
-
       <label
-        for="multipleFile"
+        :for="'multipleFile' + index"
         class="file-label h-100 d-flex align-center justify-center"
-        v-if="!internalFiles1.length"
+        v-if="!internalFiles.length"
       >
-        <div v-if="isDragging1">Release to drop files here.</div>
+        <div v-if="isDragging">Release to drop files here.</div>
         <div v-else class="d-flex flex-column align-center">
           <div class="text-grey">Drag and drop here to add more</div>
           <span class="my-4 d-block text-grey">or</span>
@@ -37,9 +36,12 @@
           </div>
         </div>
       </label>
-      <div class="preview-container justify-center mt-4" v-if="internalFiles1.length">
+      <div
+        class="preview-container justify-center mt-4"
+        v-if="internalFiles.length"
+      >
         <div
-          v-for="(file, index) in internalFiles1"
+          v-for="(file, idx) in internalFiles"
           :key="file.name"
           class="preview-card"
           :title="file.name"
@@ -49,18 +51,14 @@
             {{ file.name }}<br />
           </p>
 
-          <button
-            type="button"
-            @click="remove(index)"
-            title="Remove file"
-          >
+          <button type="button" @click="remove(idx)" title="Remove file">
             <b>×</b>
           </button>
         </div>
         <div class="d-flex justify-center w-100 pt-3">
           <label
             class="d-flex rounded-pill bg-grey-lighten-4 text-grey-darken-3 text-center px-8 py-2 text-body-2"
-            for="multipleFile"
+            :for="'multipleFile' + index"
           >
             <v-icon icon="mdi-folder-open" class="mr-4" />
             <span>Add file</span>
@@ -72,67 +70,75 @@
 </template>
 
 <script>
-import { ref, watch } from 'vue';
+import { ref, watch } from "vue";
 
 export default {
   props: {
-    updateModel: {
+    models: {
       type: Array,
-      default: () => []
-    }
+      default: () => [],
+    },
+    index: {
+      type: Number,
+      required: true,
+    },
+    fileKey: {
+      type: String,
+      required: true,
+    },
   },
   setup(props, { emit }) {
     const files = ref(null);
-    const isDragging1 = ref(false);
-    const internalFiles1 = ref([...props.updateModel]);
+    const isDragging = ref(false);
+    const internalFiles = ref([...props.models]);
 
-    watch(internalFiles1, (newFiles) => {
+    watch(internalFiles, (newFiles) => {
       emit('update:updateModel', newFiles);
     });
 
-    const onChange1 = (event) => {
+    const onChange = (event) => {
       const selectedFiles = Array.from(event.target.files);
       selectedFiles.forEach((file) => {
         const reader = new FileReader();
         reader.onload = (e) => {
-          internalFiles1.value.push({url: e.target.result });
+          internalFiles.value.push({ url: e.target.result });
+          emit("multiple-file", internalFiles.value, props.index, props.fileKey);
         };
         reader.readAsDataURL(file);
       });
-      emit("multiple-file", internalFiles1.value);
     };
 
     const dragover = (e) => {
       e.preventDefault();
-      isDragging1.value = true;
+      isDragging.value = true;
     };
 
     const drop = (e) => {
       e.preventDefault();
       if (files.value) {
         files.value.files = e.dataTransfer.files;
-        onChange1({ target: files.value });
-        isDragging1.value = false;
+        onChange({ target: files.value });
+        isDragging.value = false;
       }
     };
 
     const dragleave = () => {
-      isDragging1.value = false;
+      isDragging.value = false;
     };
 
-    const remove = (index) => {
-      internalFiles1.value.splice(index, 1);
+    const remove = (idx) => {
+      internalFiles.value.splice(idx, 1);
     };
 
     return {
       files,
-      isDragging1,
-      internalFiles1,
-      onChange1,
+      isDragging,
+      internalFiles,
+      onChange,
       dragover,
       dragleave,
+      remove,
       drop,
-      remove
     };
   }
 };
