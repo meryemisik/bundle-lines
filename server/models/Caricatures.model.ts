@@ -11,7 +11,7 @@ const schema: mongoose.Schema = new mongoose.Schema(
 			requied: false,
 		},
 		sponsorImage:{
-			type: String,
+			type: Array,
 			requied: false,
 		},
 		news: {

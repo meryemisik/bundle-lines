@@ -21,7 +21,7 @@
       </v-col>
       <v-col class="mt-n4" v-if="!isLoading">
         <div class="d-inline-flex">
-          <v-img :width="64" :src="sponsorshipLogo" class="mr-2" v-if="sponsorshipLogo" />
+          <v-img :width="64" :src="sponsorshipLogo[0].url" class="mr-2" v-if="sponsorshipLogo" />
           <span class="text-sponsorship font-weight-medium font-barlow">{{
             sponsorship
           }}</span>

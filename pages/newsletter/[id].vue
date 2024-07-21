@@ -6,8 +6,10 @@
         <template v-for="(item, index) in posts?.news" :key="index">
           <the-post-item :data="item" :posts="posts" :dataIndex="index" />
         </template>
-        <template v-if="isLoading" v-for="i in 3" :key="i">
+        <template v-if="isLoading">
           <v-skeleton-loader
+            v-for="i in 3"
+            :key="i"
             type="image,paragraph,actions"
             class="my-3 mx-auto"
             max-width="530"

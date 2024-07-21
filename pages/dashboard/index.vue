@@ -13,7 +13,6 @@
                 density="compact"
                 label="Ex: G-XXXXXXXXXX"
                 v-model="formCaricatures.analyticsId"
-                :rules="analyticsIdRules"
               ></v-text-field>
             </v-card-text>
           </v-card>
@@ -27,7 +26,6 @@
                 density="compact"
                 label="Ex: studio-fairy-temmuz-2020"
                 v-model="formCaricatures.campaignName"
-                :rules="campaignNameRules"
               ></v-text-field>
             </v-card-text>
           </v-card>
@@ -36,7 +34,12 @@
               <v-card-subtitle>Title</v-card-subtitle>
             </v-card-item>
             <v-card-text class="form-input-text">
-              <tiptap-editor :editor="editor" v-model="formCaricatures.title" />
+              <v-text-field
+                variant="solo-filled"
+                density="compact"
+                label="Enter Title"
+                v-model="formCaricatures.title"
+              ></v-text-field>
             </v-card-text>
           </v-card>
           <v-card class="mx-auto my-4" elevation="1">
@@ -44,15 +47,13 @@
               <v-card-subtitle>Sponsor</v-card-subtitle>
             </v-card-item>
             <v-card-text class="form-input-text">
-              <tiptap-editor
-                :editor="editor"
+              <v-text-field
+                variant="solo-filled"
+                density="compact"
+                label="Enter Sponsor"
                 v-model="formCaricatures.sponsor"
-              />
-              <the-sponsor-upload
-                @sponsor-file="
-                  fileUploadFunction($event, index, 'sponsorImage')
-                "
-              />
+              ></v-text-field>
+              <the-sponsor-upload @sponsor-file="fileUploadFunction($event, index, 'sponsorImage')"/>
             </v-card-text>
           </v-card>
 
@@ -73,20 +74,17 @@
                 </v-card-item>
                 <v-card-text class="form-input-text">
                   <tiptap-editor :editor="editor" v-model="comp.description" />
-                  <the-file-upload
-                    @single-file="fileUploadFunction($event, index, 'file')"
-                  />
+                  <the-file-upload @single-file="fileUploadFunction($event, index, 'file')" />
                 </v-card-text>
               </div>
               <div v-else-if="comp.type === '1'" class="video-component">
+
                 <v-card-item>
                   <v-card-subtitle>Video Upload</v-card-subtitle>
                 </v-card-item>
                 <v-card-text class="form-input-text">
                   <tiptap-editor :editor="editor" v-model="comp.description" />
-                  <the-video-upload
-                    @video-file="fileUploadFunction($event, index, 'video')"
-                  />
+                  <the-video-upload @video-file="fileUploadFunction($event, index, 'video')" />
                 </v-card-text>
               </div>
               <div v-else-if="comp.type === '2'" class="multi-file-component">
@@ -95,9 +93,7 @@
                 </v-card-item>
                 <v-card-text class="form-input-text">
                   <tiptap-editor :editor="editor" v-model="comp.description" />
-                  <the-multiple-upload
-                    @multiple-file="multifileUploadFunction($event, index)"
-                  />
+                  <the-multiple-upload @multiple-file="multifileUploadFunction($event, index)"/>
                 </v-card-text>
               </div>
             </v-card>
@@ -152,9 +148,9 @@
     </v-row>
     <v-snackbar
       v-model="isSnackbarVisible"
-      :class="snackbarClass"
       timeout="30000"
       location="top right"
+      :color="snackbarColor"
     >
       {{ snackbarMsg }}
     </v-snackbar>
@@ -164,12 +160,9 @@
 <script setup>
 const isSnackbarVisible = ref(false);
 const snackbarMsg = ref("");
-const snackbarType = ref("");
+const snackbarColor = ref("");
 const files = ref([]);
 const multipleFileResult = ref([]);
-const analyticsIdRules = [(value) => !!value || "This field is required"];
-const campaignNameRules = [(value) => !!value || "This field is required"];
-
 const formCaricatures = ref({
   sponsor: "",
   title: "",
@@ -188,12 +181,6 @@ const components = ref([
   },
 ]);
 
-const snackbarClass = computed(() => {
-  return {
-    "snackbar-success": snackbarType.value === "success",
-    "snackbar-error": snackbarType.value === "error",
-  };
-});
 
 const addComponents = (type) => {
   if (type === 0) {
@@ -256,12 +243,12 @@ const createCaricatures = async (event) => {
       body: formData,
     });
     isSnackbarVisible.value = true;
-    snackbarType.value = "success";
+    snackbarColor.value = "success";
     snackbarMsg.value = "Caricature added successfully!";
     await getAll();
   } catch (e) {
     isSnackbarVisible.value = true;
-    snackbarType.value = "error";
+    snackbarColor.value = "error";
     snackbarMsg.value = "An error occurred while adding the caricature!";
   }
 };

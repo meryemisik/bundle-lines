@@ -49,15 +49,3 @@ body {
 .font-barlow {
     font-family: 'Barlow', sans-serif !important;
 }
-
-.snackbar-success {
-    .v-overlay__content {
-        background: rgb(76, 175, 80) !important;
-    }
-}
-
-.snackbar-error {
-    .v-overlay__content {
-        background: red !important;
-    }
-}
