@@ -209,7 +209,6 @@ const removeComponents = (index) => {
 };
 
 const fileUploadFunction = async (event, index, fileKey) => {
-  console.log('components', components.value)
   if (event) {
     if (fileKey == "sponsorImage") {
       formCaricatures.value.sponsorImage = event;
@@ -238,21 +237,20 @@ const createCaricatures = async (event) => {
     campaignName: formCaricatures.value.campaignName,
     sponsorImage: formCaricatures.value.sponsorImage,
   };
-  console.log('form', formData)
-  // try {
-  //   const response = await $fetch("/api/caricatures/create", {
-  //     method: "POST",
-  //     body: formData,
-  //   });
-  //   isSnackbarVisible.value = true;
-  //   snackbarColor.value = "success";
-  //   snackbarMsg.value = "Caricature added successfully!";
-  //   await getAll();
-  // } catch (e) {
-  //   isSnackbarVisible.value = true;
-  //   snackbarColor.value = "error";
-  //   snackbarMsg.value = "An error occurred while adding the caricature!";
-  // }
+  try {
+    const response = await $fetch("/api/caricatures/create", {
+      method: "POST",
+      body: formData,
+    });
+    isSnackbarVisible.value = true;
+    snackbarColor.value = "success";
+    snackbarMsg.value = "Caricature added successfully!";
+    await getAll();
+  } catch (e) {
+    isSnackbarVisible.value = true;
+    snackbarColor.value = "error";
+    snackbarMsg.value = "An error occurred while adding the caricature!";
+  }
 };
 </script>
 
