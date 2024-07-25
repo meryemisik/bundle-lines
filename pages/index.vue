@@ -1,18 +1,11 @@
 <template>
-    <v-app>
-      <v-main>
-       <!-- <ul>
-        <li v-for="(item,index) in caricatureStore.caricatures">
-            {{ item }}
-        </li>
-       </ul> -->
-      </v-main>
-    </v-app>
-  </template>
-  
-  
-  
-  <script setup>
-  
- 
-  </script>
+  <div></div>
+</template>
+
+<script setup>
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+
+router.push('/dashboard')
+</script>

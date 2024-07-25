@@ -50,22 +50,29 @@
       ></v-icon>
       <v-icon icon="mdi-link-variant" @click="setLink(editor)"></v-icon>
     </div>
-    <TiptapEditorContent :editor="editor" class="deneme"/>
+    <TiptapEditorContent :editor="editor" class="tip-tap-editor" />
   </div>
 </template>
 <script setup>
-import { onMounted, onBeforeUnmount, watchEffect, defineProps, defineEmits, ref } from 'vue';
-import { useEditor, EditorContent } from '@tiptap/vue-3';
-import StarterKit from '@tiptap/starter-kit';
-import Link from '@tiptap/extension-link';
-import Placeholder from '@tiptap/extension-placeholder';
+import {
+  onMounted,
+  onBeforeUnmount,
+  watchEffect,
+  defineProps,
+  defineEmits,
+  ref,
+} from "vue";
+import { useEditor, EditorContent } from "@tiptap/vue-3";
+import StarterKit from "@tiptap/starter-kit";
+import Link from "@tiptap/extension-link";
+import Placeholder from "@tiptap/extension-placeholder";
 
 const props = defineProps({
   modelValue: String,
-  'onUpdate:modelValue': Function,
+  "onUpdate:modelValue": Function,
 });
 
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits(["update:modelValue"]);
 
 const editor = useEditor({
   extensions: [
@@ -74,19 +81,19 @@ const editor = useEditor({
       openOnClick: false,
     }),
     Placeholder.configure({
-      placeholder: 'Start typing here...',
+      placeholder: "Start typing here...",
     }),
   ],
   content: props.modelValue,
   onUpdate({ editor }) {
-    emit('update:modelValue', editor.getHTML());
+    emit("update:modelValue", editor.getHTML());
   },
 });
 
 const setLink = (editor) => {
-  const url = prompt('Enter the URL');
+  const url = prompt("Enter the URL");
   if (url) {
-    editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
+    editor.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
   }
 };
 
@@ -119,12 +126,15 @@ watchEffect(() => {
     padding: 5px;
   }
 
-  .deneme{
+  .tip-tap-editor {
     & > div:first-child {
-   p{
-    padding: 10px;
-   }
-  }
+      p {
+        padding: 10px;
+      }
+    }
+    > * {
+      min-height: 100px;
+    }
   }
 }
 .tiptap p.is-editor-empty:first-child::before {
@@ -142,4 +152,3 @@ watchEffect(() => {
   pointer-events: none;
 }
 </style>
-

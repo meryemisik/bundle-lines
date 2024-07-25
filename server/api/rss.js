@@ -25,22 +25,26 @@ export default defineEventHandler(async (event) => {
   })
 
   const caricatures = await getAll();
-
   caricatures?.forEach(caricatur => {
-    let getFirstImage = caricatur.news.find(
-      (obj) => obj.type == 0 || obj.type == 2
-    );
-    getFirstImage = getFirstImage?.content[0].url
-    feed.item({
-      title: caricatur.title,
-      description:  `
-      <p>${caricatur.sponsor}</p>
-      <img src="${getFirstImage}" alt="${caricatur.title}" />
-    `,
-      url: `${wedDomain}newsletter/${caricatur._id}`,
-      date: caricatur.createdAt,
-    })
-  })
+    if (caricatur.news && caricatur.news.length > 0) {
+      const getFirstImage = caricatur.news.find(
+        (obj) => obj.type == 0 || obj.type == 2
+      );
+
+      const imageUrl = getFirstImage?.content?.[0]?.url;
+
+      feed.item({
+        title: caricatur.title,
+        description: `
+        <p>${caricatur.sponsor || ''}</p>
+        <img src="${imageUrl || ''}" alt="${caricatur.title || 'No title'}" />
+      `,
+        url: `${wedDomain}newsletter/${caricatur._id}`,
+        date: caricatur.createdAt || new Date().toISOString(),
+      });
+    }
+  });
+
 
   event.node.res.setHeader('Content-Type', 'application/xml')
   event.node.res.end(feed.xml({ indent: true }))

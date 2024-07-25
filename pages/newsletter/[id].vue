@@ -35,7 +35,7 @@ onMounted(async () => {
     });
     return data;
   } catch (e) {
-    alert(e);
+    console.error(e);
   }
 });
 </script>

@@ -1,151 +1,202 @@
 <template>
   <v-container class="page-container">
-    <v-row>
-      <v-col>
-        <v-card class="pa-4" elevation="16">
-          <v-card class="mx-auto mb-4" elevation="1">
-            <v-card-item>
-              <v-card-subtitle>Analytics Id</v-card-subtitle>
-            </v-card-item>
-            <v-card-text class="form-input-text">
-              <v-text-field
-                variant="solo-filled"
-                density="compact"
-                label="Ex: G-XXXXXXXXXX"
-                v-model="formCaricatures.analyticsId"
-              ></v-text-field>
-            </v-card-text>
-          </v-card>
-          <v-card class="mx-auto my-4" elevation="1">
-            <v-card-item>
-              <v-card-subtitle>Analytics Campaign Id</v-card-subtitle>
-            </v-card-item>
-            <v-card-text class="form-input-text">
-              <v-text-field
-                variant="solo-filled"
-                density="compact"
-                label="Ex: studio-fairy-temmuz-2020"
-                v-model="formCaricatures.campaignName"
-              ></v-text-field>
-            </v-card-text>
-          </v-card>
-          <v-card class="mx-auto my-4" elevation="1">
-            <v-card-item>
-              <v-card-subtitle>Title</v-card-subtitle>
-            </v-card-item>
-            <v-card-text class="form-input-text">
-              <v-text-field
-                variant="solo-filled"
-                density="compact"
-                label="Enter Title"
-                v-model="formCaricatures.title"
-              ></v-text-field>
-            </v-card-text>
-          </v-card>
-          <v-card class="mx-auto my-4" elevation="1">
-            <v-card-item>
-              <v-card-subtitle>Sponsor</v-card-subtitle>
-            </v-card-item>
-            <v-card-text class="form-input-text">
-              <v-text-field
-                variant="solo-filled"
-                density="compact"
-                label="Enter Sponsor"
-                v-model="formCaricatures.sponsor"
-              ></v-text-field>
-              <the-file-upload @single-file="fileUploadFunction($event, index, 'sponsorImage')" :index="index" fileKey="sponsorImage" />
-            </v-card-text>
-          </v-card>
-
-          <div v-for="(comp, index) in components" :key="index">
-            <v-card class="mx-auto my-4 pa-2 new-component" elevation="1">
-              <div class="trash-icon">
-                <v-icon
-                  icon="mdi-trash-can-outline"
-                  @click="removeComponents(index)"
-                  v-if="components?.length > 1"
-                  color="error"
-                />
-              </div>
-
-              <div v-if="comp.type === '0'" class="file-component">
-                <v-card-item>
-                  <v-card-subtitle>File Upload</v-card-subtitle>
-                </v-card-item>
-                <v-card-text class="form-input-text">
-                  <tiptap-editor :editor="editor" v-model="comp.description" />
-                  <the-file-upload @single-file="fileUploadFunction($event, index, 'file')" :index="index" fileKey="file" />
-                </v-card-text>
-              </div>
-              <div v-else-if="comp.type === '1'" class="video-component">
-
-                <v-card-item>
-                  <v-card-subtitle>Video Upload</v-card-subtitle>
-                </v-card-item>
-                <v-card-text class="form-input-text">
-                  <tiptap-editor :editor="editor" v-model="comp.description" />
-                  <the-file-upload @single-file="fileUploadFunction($event, index, 'video')" :index="index" fileKey="video" />
-                </v-card-text>
-              </div>
-              <div v-else-if="comp.type === '2'" class="multi-file-component">
-                <v-card-item>
-                  <v-card-subtitle>Slider Upload</v-card-subtitle>
-                </v-card-item>
-                <v-card-text class="form-input-text">
-                  <tiptap-editor :editor="editor" v-model="comp.description" />
-                  <the-multiple-upload @multiple-file="multifileUploadFunction($event, index)" :index="index" fileKey="multiple" />
-                </v-card-text>
-              </div>
+    <v-form ref="form">
+      <v-row>
+        <v-col>
+          <div class="ml-auto mb-4 d-flex align-center justify-end">
+            <v-card
+              append-icon="mdi-open-in-new"
+              class="mx-1"
+              max-width="220"
+              prepend-icon="mdi-account"
+              :subtitle="data?.user?.email"
+              title=""
+              @click="goListPage"
+            >
             </v-card>
+            <v-icon
+              icon="mdi-logout"
+              color="light"
+              @click="logout"
+              class="mx-1 bg-error rounded pa-5"
+              elevation="1"
+            />
           </div>
-          <v-row>
-            <v-col>
-              <div class="new-components-content">
-                <div class="item cursor-pointer" @click="addComponents(0)">
-                  <div class="file-upload">
-                    <v-icon icon="mdi-file-image-outline"></v-icon>
-                    <v-label class="title font-barlow cursor-pointer"
-                      >File Upload</v-label
-                    >
-                    <v-label class="description font-barlow cursor-pointer"
-                      >Upload single image</v-label
-                    >
+
+          <v-card class="pa-4" elevation="10">
+            <v-card class="mx-auto mb-4" elevation="1">
+              <v-card-item>
+                <v-card-subtitle>Analytics Id</v-card-subtitle>
+              </v-card-item>
+              <v-card-text class="form-input-text">
+                <v-text-field
+                  variant="solo-filled"
+                  density="compact"
+                  label="Ex: G-XXXXXXXXXX"
+                  v-model="formCaricatures.analyticsId"
+                  :rules="analyticsIdRules"
+                ></v-text-field>
+              </v-card-text>
+            </v-card>
+            <v-card class="mx-auto my-4" elevation="1">
+              <v-card-item>
+                <v-card-subtitle>Analytics Campaign Id</v-card-subtitle>
+              </v-card-item>
+              <v-card-text class="form-input-text">
+                <v-text-field
+                  variant="solo-filled"
+                  density="compact"
+                  label="Ex: studio-fairy-temmuz-2020"
+                  v-model="formCaricatures.campaignName"
+                  :rules="campaignNameRules"
+                ></v-text-field>
+              </v-card-text>
+            </v-card>
+            <v-card class="mx-auto my-4" elevation="1">
+              <v-card-item>
+                <v-card-subtitle>Title</v-card-subtitle>
+              </v-card-item>
+              <v-card-text class="form-input-text">
+                <v-text-field
+                  variant="solo-filled"
+                  density="compact"
+                  label="Enter Title"
+                  v-model="formCaricatures.title"
+                  :rules="titleRules"
+                ></v-text-field>
+              </v-card-text>
+            </v-card>
+            <v-card class="mx-auto my-4" elevation="1">
+              <v-card-item>
+                <v-card-subtitle>Sponsor</v-card-subtitle>
+              </v-card-item>
+              <v-card-text class="form-input-text">
+                <v-text-field
+                  variant="solo-filled"
+                  density="compact"
+                  label="Enter Sponsor"
+                  v-model="formCaricatures.sponsor"
+                ></v-text-field>
+                <the-file-upload
+                  @single-file="
+                    fileUploadFunction($event, index, 'sponsorImage')
+                  "
+                  :index="index"
+                  fileKey="sponsorImage"
+                />
+              </v-card-text>
+            </v-card>
+
+            <div v-for="(comp, index) in components" :key="index">
+              <v-card class="mx-auto my-4 pa-2 new-component" elevation="1">
+                <div class="trash-icon">
+                  <v-icon
+                    icon="mdi-trash-can-outline"
+                    @click="removeComponents(index)"
+                    v-if="components?.length > 1"
+                    color="error"
+                  />
+                </div>
+
+                <div v-if="comp.type === '0'" class="file-component">
+                  <v-card-item>
+                    <v-card-subtitle>File Upload</v-card-subtitle>
+                  </v-card-item>
+                  <v-card-text class="form-input-text">
+                    <tiptap-editor
+                      :editor="editor"
+                      v-model="comp.description"
+                    />
+                    <the-file-upload
+                      @single-file="fileUploadFunction($event, index, 'file')"
+                      :index="index"
+                      fileKey="file"
+                    />
+                  </v-card-text>
+                </div>
+                <div v-else-if="comp.type === '1'" class="video-component">
+                  <v-card-item>
+                    <v-card-subtitle>Video Upload</v-card-subtitle>
+                  </v-card-item>
+                  <v-card-text class="form-input-text">
+                    <tiptap-editor
+                      :editor="editor"
+                      v-model="comp.description"
+                    />
+                    <the-file-upload
+                      @single-file="fileUploadFunction($event, index, 'video')"
+                      :index="index"
+                      fileKey="video"
+                    />
+                  </v-card-text>
+                </div>
+                <div v-else-if="comp.type === '2'" class="multi-file-component">
+                  <v-card-item>
+                    <v-card-subtitle>Slider Upload</v-card-subtitle>
+                  </v-card-item>
+                  <v-card-text class="form-input-text">
+                    <tiptap-editor
+                      :editor="editor"
+                      v-model="comp.description"
+                    />
+                    <the-multiple-upload
+                      @multiple-file="multifileUploadFunction($event, index)"
+                      :index="index"
+                      fileKey="multiple"
+                    />
+                  </v-card-text>
+                </div>
+              </v-card>
+            </div>
+            <v-row>
+              <v-col>
+                <div class="new-components-content">
+                  <div class="item cursor-pointer" @click="addComponents(0)">
+                    <div class="file-upload">
+                      <v-icon icon="mdi-file-image-outline"></v-icon>
+                      <v-label class="title font-barlow cursor-pointer"
+                        >File Upload</v-label
+                      >
+                      <v-label class="description font-barlow cursor-pointer"
+                        >Upload single image</v-label
+                      >
+                    </div>
+                  </div>
+                  <div class="item" @click="addComponents(2)">
+                    <div class="file-upload">
+                      <v-icon icon="mdi-folder-multiple-image"></v-icon>
+                      <v-label class="title font-barlow cursor-pointer"
+                        >Slider Upload</v-label
+                      >
+                      <v-label class="description font-barlow cursor-pointer"
+                        >Upload multiple image</v-label
+                      >
+                    </div>
+                  </div>
+                  <div class="item" @click="addComponents(1)">
+                    <div class="file-upload">
+                      <v-icon icon="mdi-file-video-outline"></v-icon>
+                      <v-label class="title font-barlow cursor-pointer"
+                        >Video Upload</v-label
+                      >
+                      <v-label class="description font-barlow cursor-pointer"
+                        >Upload video</v-label
+                      >
+                    </div>
                   </div>
                 </div>
-                <div class="item" @click="addComponents(2)">
-                  <div class="file-upload">
-                    <v-icon icon="mdi-folder-multiple-image"></v-icon>
-                    <v-label class="title font-barlow cursor-pointer"
-                      >Slider Upload</v-label
-                    >
-                    <v-label class="description font-barlow cursor-pointer"
-                      >Upload multiple image</v-label
-                    >
-                  </div>
-                </div>
-                <div class="item" @click="addComponents(1)">
-                  <div class="file-upload">
-                    <v-icon icon="mdi-file-video-outline"></v-icon>
-                    <v-label class="title font-barlow cursor-pointer"
-                      >Video Upload</v-label
-                    >
-                    <v-label class="description font-barlow cursor-pointer"
-                      >Upload video</v-label
-                    >
-                  </div>
-                </div>
-              </div>
-            </v-col>
-          </v-row>
-          <v-btn
-            @click="createCaricatures(formCaricatures)"
-            color="success"
-            class="mt-5"
-            ><span class="font-barlow">Create</span></v-btn
-          >
-        </v-card>
-      </v-col>
-    </v-row>
+              </v-col>
+            </v-row>
+            <v-btn
+              @click="createCaricatures(formCaricatures)"
+              color="success"
+              class="mt-5"
+              ><span class="font-barlow">Create</span></v-btn
+            >
+          </v-card>
+        </v-col>
+      </v-row>
+    </v-form>
     <v-snackbar
       v-model="isSnackbarVisible"
       timeout="30000"
@@ -158,6 +209,24 @@
 </template>
 
 <script setup>
+const { status, data, getSession, signIn, signOut } = useAuth();
+if (!data?.value?.user) {
+  signIn();
+}
+
+const logout = () => {
+  signOut();
+};
+const router = useRouter();
+const goListPage = () => {
+  router.push("/dashboard/list");
+};
+
+const form = ref(null);
+const analyticsIdRules = [(v) => !!v || "Analytics Id Required"];
+const campaignNameRules = [(v) => !!v || "Analytics Campaign Id Required"];
+const titleRules = [(v) => !!v || "Title Required"];
+
 const isSnackbarVisible = ref(false);
 const snackbarMsg = ref("");
 const snackbarColor = ref("");
@@ -167,7 +236,7 @@ const formCaricatures = ref({
   sponsor: "",
   title: "",
   news: [],
-  analyticsId: "",
+  analyticsId: "G-7PNZ5E4JDZ",
   campaignName: "",
   sponsorImage: "",
 });
@@ -180,7 +249,6 @@ const components = ref([
     description: "",
   },
 ]);
-
 
 const addComponents = (type) => {
   if (type === 0) {
@@ -218,38 +286,79 @@ const fileUploadFunction = async (event, index, fileKey) => {
   }
 };
 const multifileUploadFunction = async (event, index) => {
-    components.value[index].content = event
+  components.value[index].content = event;
 };
 const getAll = async () => {
   try {
     let data = await $fetch("/api/caricatures");
     return data;
   } catch (e) {
-    alert(e);
+    console.error(e);
   }
 };
 const createCaricatures = async (event) => {
-  const formData = {
-    sponsor: formCaricatures.value.sponsor,
-    title: formCaricatures.value.title,
-    news: components.value,
-    analyticsId: formCaricatures.value.analyticsId,
-    campaignName: formCaricatures.value.campaignName,
-    sponsorImage: formCaricatures.value.sponsorImage,
-  };
-  try {
-    const response = await $fetch("/api/caricatures/create", {
-      method: "POST",
-      body: formData,
-    });
-    isSnackbarVisible.value = true;
-    snackbarColor.value = "success";
-    snackbarMsg.value = "Caricature added successfully!";
-    await getAll();
-  } catch (e) {
+  const { valid } = await form.value.validate();
+
+  const sliderComponentLengthControl = components.value.filter(
+    (item) => item.type === "2"
+  );
+  const checkResult = sliderComponentLengthControl.filter(
+    (item) => !item.content || item.content.length < 2
+  );
+
+  if (checkResult.length > 0) {
     isSnackbarVisible.value = true;
     snackbarColor.value = "error";
-    snackbarMsg.value = "An error occurred while adding the caricature!";
+    snackbarMsg.value =
+      "A minimum of 2 images must be selected in the slider file upload fields.!";
+    return false;
+  }
+
+  const newsAreAllFieldsFilled = components.value.every(
+    (item) =>
+      item.content != null &&
+      item.description != null &&
+      item.description.trim() !== ""
+  );
+
+  if (valid) {
+    if (!newsAreAllFieldsFilled) {
+      isSnackbarVisible.value = true;
+      snackbarColor.value = "error";
+      snackbarMsg.value =
+        "Do not leave the file upload and description fields blank!";
+      return false;
+    }
+
+    const formData = {
+      sponsor: formCaricatures.value.sponsor,
+      title: formCaricatures.value.title,
+      news: components.value,
+      analyticsId: formCaricatures.value.analyticsId,
+      campaignName: formCaricatures.value.campaignName,
+      sponsorImage: formCaricatures.value.sponsorImage,
+      creator: data?.value?.user.email,
+    };
+
+    try {
+      const response = await $fetch("/api/caricatures/create", {
+        method: "POST",
+        body: formData,
+      });
+      isSnackbarVisible.value = true;
+      snackbarColor.value = "success";
+      snackbarMsg.value =
+        "Caricature added successfully. You can go to your own list and see the record!";
+      await getAll();
+    } catch (e) {
+      isSnackbarVisible.value = true;
+      snackbarColor.value = "error";
+      snackbarMsg.value = "An error occurred while adding the caricature!";
+    }
+  } else {
+    isSnackbarVisible.value = true;
+    snackbarColor.value = "error";
+    snackbarMsg.value = "Do not leave required fields blank!";
   }
 };
 </script>

@@ -26,6 +26,10 @@ const schema: mongoose.Schema = new mongoose.Schema(
 			type: String,
 			requied: false,
 		},
+		creator:{
+			type: String,
+			requied: false,
+		},
 	},
 	{ timestamps: true }
 );

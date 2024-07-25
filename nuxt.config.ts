@@ -1,7 +1,12 @@
 // https://v3.nuxtjs.org/api/configuration/nuxt.config
 export default defineNuxtConfig({
   css: ["~/assets/css/main.scss"],
-  modules: ["nuxt-icon", "@nuxt/content", "nuxt-tiptap-editor"],
+  modules: [
+    "nuxt-icon",
+    "@nuxt/content",
+    "nuxt-tiptap-editor",
+    "@sidebase/nuxt-auth",
+  ],
 
   build: {
     transpile: ["vuetify"],
@@ -20,6 +25,13 @@ export default defineNuxtConfig({
     plugins: ["@/server/db/index.ts"],
   },
   tiptap: {
-    prefix: "Tiptap", 
+    prefix: "Tiptap",
+  },
+  auth: {
+    provider: {
+      type: "authjs",
+      trustHost: false,
+      addDefaultCallbackUrl: true,
+    },
   },
 });

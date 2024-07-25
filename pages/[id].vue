@@ -32,34 +32,48 @@ const goToPost = () => {
   router.push(`/newsletter/${fullPostId.value}`);
 };
 
-// useSeoMeta({
-//   title: "Bundle Lines",
-//   ogTitle: "Bundle Lines",
-//   description: "Bundle Lines",
-//   ogDescription: "Bundle Lines",
-//   ogImage: imgSrc.value,
-//   twitterCard: "summary_large_image",
-//   ogType: "article",
-//   ogSiteName: "Bundle Lines",
-//   ogUrl: window.location.href,
-//   ogLocale: "tr_TR",
-//   twitterTitle: "Bundle Lines",
-//   twitterDescription: "Bundle Lines",
-//   twitterImage: imgSrc.value,
-// });
-
 onMounted(async () => {
-  try {
-    let data = await $fetch(`/api/newsletter-detail/getById?imageId=${id}`).then((res) => {
-      imgSrc.value = res.imgSrc
-      fullPostId.value = res.fullPostId
-      isLoading.value = false
-    });
-    return data;
-  } catch (e) {
-    alert(e);
-  }
+  fetchData();
 });
+
+const fetchData = async (retries = 3, delay = 2000) => {
+  try {
+    const response = await $fetch(
+      `/api/newsletter-detail/getById?imageId=${id}`
+    );
+    imgSrc.value = response.imgSrc;
+    fullPostId.value = response.fullPostId;
+
+    useSeoMeta({
+      title: "Bundle Lines",
+      ogTitle: "Bundle Lines",
+      description: "Bundle Lines",
+      ogDescription: "Bundle Lines",
+      ogImage: imgSrc.value,
+      twitterCard: "summary_large_image",
+      ogType: "article",
+      ogSiteName: "Bundle Lines",
+      ogUrl: window.location.href,
+      ogLocale: "tr_TR",
+      twitterTitle: "Bundle Lines",
+      twitterDescription: "Bundle Lines",
+      twitterImage: imgSrc.value,
+    });
+
+    isLoading.value = false;
+  } catch (e) {
+    if (retries > 0) {
+      console.error(
+        `Retrying in ${delay / 1000} seconds... (${retries} attempts left)`
+      );
+      await new Promise((res) => setTimeout(res, delay));
+      await fetchData(id, retries - 1, delay);
+    } else {
+      isLoading.value = false;
+      console.error("Failed to fetch data:", e);
+    }
+  }
+};
 
 useHead({
   bodyAttrs: {
