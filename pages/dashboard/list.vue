@@ -10,7 +10,7 @@
             append-icon="mdi-plus"
             @click="goDashboard"
           >
-            <span class="font-barlow">Create a News</span>
+            <span class="font-barlow">Yeni Oluştur</span>
           </v-btn>
           <v-icon
             icon="mdi-logout"
@@ -37,25 +37,34 @@
               hide-default-footer
               v-model:sort-by="sortBy"
             >
+              <template v-slot:[`item.title`]="{ item }">
+                <span v-html="item.title"></span>
+              </template>
+
+              <template v-slot:[`item.createdAt`]="{ item }">
+                {{ formatISODate(item.createdAt) }}
+              </template>
               <template v-slot:[`item.btn`]="{ item }">
                 <v-icon small @click="goNews(item._id)">
                   mdi-open-in-new
                 </v-icon>
               </template>
-              <template v-slot:[`item.createdAt`]="{ item }">
-                {{ formatISODate(item.createdAt) }}
-              </template>
             </v-data-table>
 
             <div v-if="items.length > 10">
-              <v-btn @click="prevPage" :disabled="page === 1" class="mr-1"
-                >Önceki</v-btn
+              <v-btn
+                size="x-small"
+                @click="prevPage"
+                :disabled="page === 1"
+                class="mr-1"
+                ><span class="font-barlow">Önceki</span></v-btn
               >
               <v-btn
+                size="x-small"
                 @click="nextPage"
                 :disabled="page === pageCount"
                 class="ml-1"
-                >Sonraki</v-btn
+                ><span class="font-barlow">Sonraki</span></v-btn
               >
             </div>
           </template>
@@ -66,6 +75,9 @@
 </template>
 
 <script setup>
+useHead({
+  title: "Karikatürlerim",
+});
 const isLoading = ref(true);
 const { status, data, getSession, signIn, signOut } = useAuth();
 if (!data?.value?.user) {
@@ -87,11 +99,11 @@ const page = ref(1);
 const itemsPerPage = ref(10);
 const headers = ref([
   {
-    title: "Title",
+    title: "Başlık",
     align: "start",
     key: "title",
   },
-  { title: "Created Date", align: "end", key: "createdAt" },
+  { title: "Oluşturma Tarihi", align: "end", key: "createdAt" },
   { align: "end", key: "btn" },
 ]);
 const items = ref([]);

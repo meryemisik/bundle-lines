@@ -7,9 +7,8 @@
     </v-row>
     <v-row class="mb-0 mb-md-4 mb-lg-8">
       <v-col cols="12">
-        <h1 class="font-weight-regular header-title">
           <template v-if="!isLoading">
-            {{ title }}
+            <h1 class="font-weight-regular header-title" v-html="title"></h1>
           </template>
           <template v-else>
             <v-skeleton-loader
@@ -17,11 +16,10 @@
               type="heading"
             ></v-skeleton-loader>
           </template>
-        </h1>
       </v-col>
       <v-col class="mt-n4" v-if="!isLoading">
         <div class="d-inline-flex">
-          <v-img :width="64" :src="sponsorshipLogo[0].url" class="mr-2" v-if="sponsorshipLogo" />
+          <v-img :width="64" :src="sponsorshipLogo[0].url" class="mr-2" v-if="sponsorshipLogo?.[0]?.url" />
           <span class="text-sponsorship font-weight-medium font-barlow">{{
             sponsorship
           }}</span>

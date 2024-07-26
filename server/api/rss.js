@@ -34,7 +34,7 @@ export default defineEventHandler(async (event) => {
       const imageUrl = getFirstImage?.content?.[0]?.url;
 
       feed.item({
-        title: caricatur.title,
+        title: caricatur.title.replace(/<\/?[^>]+>/gi, ''),
         description: `
         <p>${caricatur.sponsor || ''}</p>
         <img src="${imageUrl || ''}" alt="${caricatur.title || 'No title'}" />

@@ -9,6 +9,7 @@
       ></v-icon>
 
       <v-icon
+        v-if="!onlyBold"
         icon="mdi-format-italic"
         @click="editor.chain().focus().toggleItalic().run()"
         :disabled="!editor.can().chain().focus().toggleItalic().run()"
@@ -16,12 +17,14 @@
       ></v-icon>
 
       <v-icon
+        v-if="!onlyBold"
         icon="mdi-format-strikethrough"
         @click="editor.chain().focus().toggleStrike().run()"
         :disabled="!editor.can().chain().focus().toggleStrike().run()"
         :class="{ 'is-active': editor.isActive('strike') }"
       ></v-icon>
       <v-icon
+        v-if="!onlyBold"
         icon="mdi-code-tags"
         @click="editor.chain().focus().toggleCode().run()"
         :disabled="!editor.can().chain().focus().toggleCode().run()"
@@ -29,26 +32,34 @@
       ></v-icon>
 
       <v-icon
+        v-if="!onlyBold"
         icon="mdi-format-clear"
         @click="editor.chain().focus().unsetAllMarks().run()"
       ></v-icon>
       <v-icon
+        v-if="!onlyBold"
         icon="mdi-format-paragraph"
         @click="editor.chain().focus().setParagraph().run()"
         :class="{ 'is-active': editor.isActive('paragraph') }"
       ></v-icon>
       <v-icon
+        v-if="!onlyBold"
         icon="mdi-format-list-bulleted"
         @click="editor.chain().focus().toggleBulletList().run()"
         :class="{ 'is-active': editor.isActive('bulletList') }"
       ></v-icon>
 
       <v-icon
+        v-if="!onlyBold"
         icon="mdi-format-list-numbered"
         @click="editor.chain().focus().toggleOrderedList().run()"
         :class="{ 'is-active': editor.isActive('orderedList') }"
       ></v-icon>
-      <v-icon icon="mdi-link-variant" @click="setLink(editor)"></v-icon>
+      <v-icon
+        v-if="!onlyBold"
+        icon="mdi-link-variant"
+        @click="setLink(editor)"
+      ></v-icon>
     </div>
     <TiptapEditorContent :editor="editor" class="tip-tap-editor" />
   </div>
@@ -68,8 +79,18 @@ import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
 
 const props = defineProps({
-  modelValue: String,
-  "onUpdate:modelValue": Function,
+  modelValue: {
+    type: String,
+    default: "",
+  },
+  "onUpdate:modelValue": {
+    type: Function,
+    default: () => {},
+  },
+  onlyBold: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const emit = defineEmits(["update:modelValue"]);
@@ -81,7 +102,7 @@ const editor = useEditor({
       openOnClick: false,
     }),
     Placeholder.configure({
-      placeholder: "Start typing here...",
+      placeholder: "Buraya yaz...",
     }),
   ],
   content: props.modelValue,
@@ -91,7 +112,7 @@ const editor = useEditor({
 });
 
 const setLink = (editor) => {
-  const url = prompt("Enter the URL");
+  const url = prompt("Linki ekle");
   if (url) {
     editor.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
   }
@@ -117,13 +138,15 @@ watchEffect(() => {
   justify-content: center;
   flex-direction: column;
   margin-bottom: 10px;
-  & > div:first-child {
-    display: flex;
-    gap: 10px;
-    background: #8080803d;
-    justify-content: center;
-    border-radius: 5px 5px 0 0;
-    padding: 5px;
+  & > div {
+    &:first-child {
+      display: flex;
+      gap: 10px;
+      background: #8080803d;
+      justify-content: flex-start;
+      border-radius: 5px 5px 0 0;
+      padding: 5px;
+    }
   }
 
   .tip-tap-editor {
@@ -133,7 +156,7 @@ watchEffect(() => {
       }
     }
     > * {
-      min-height: 100px;
+      min-height: 80px;
     }
   }
 }

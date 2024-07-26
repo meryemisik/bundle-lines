@@ -32,7 +32,7 @@
                 <v-text-field
                   variant="solo-filled"
                   density="compact"
-                  label="Ex: G-XXXXXXXXXX"
+                  label="Örn: G-XXXXXXXXXX"
                   v-model="formCaricatures.analyticsId"
                   :rules="analyticsIdRules"
                 ></v-text-field>
@@ -46,7 +46,7 @@
                 <v-text-field
                   variant="solo-filled"
                   density="compact"
-                  label="Ex: studio-fairy-temmuz-2020"
+                  label="Örn: studio-fairy-temmuz-2024"
                   v-model="formCaricatures.campaignName"
                   :rules="campaignNameRules"
                 ></v-text-field>
@@ -54,16 +54,14 @@
             </v-card>
             <v-card class="mx-auto my-4" elevation="1">
               <v-card-item>
-                <v-card-subtitle>Title</v-card-subtitle>
+                <v-card-subtitle>Başlık</v-card-subtitle>
               </v-card-item>
               <v-card-text class="form-input-text">
-                <v-text-field
-                  variant="solo-filled"
-                  density="compact"
-                  label="Enter Title"
+                <tiptap-editor
+                  :editor="editor"
                   v-model="formCaricatures.title"
-                  :rules="titleRules"
-                ></v-text-field>
+                  onlyBold
+                />
               </v-card-text>
             </v-card>
             <v-card class="mx-auto my-4" elevation="1">
@@ -74,10 +72,11 @@
                 <v-text-field
                   variant="solo-filled"
                   density="compact"
-                  label="Enter Sponsor"
+                  label="Sponsor metni ekle"
                   v-model="formCaricatures.sponsor"
                 ></v-text-field>
                 <the-file-upload
+                  ref="fileUploadRef"
                   @single-file="
                     fileUploadFunction($event, index, 'sponsorImage')
                   "
@@ -100,7 +99,7 @@
 
                 <div v-if="comp.type === '0'" class="file-component">
                   <v-card-item>
-                    <v-card-subtitle>File Upload</v-card-subtitle>
+                    <v-card-subtitle>Görsel Yükle</v-card-subtitle>
                   </v-card-item>
                   <v-card-text class="form-input-text">
                     <tiptap-editor
@@ -116,7 +115,7 @@
                 </div>
                 <div v-else-if="comp.type === '1'" class="video-component">
                   <v-card-item>
-                    <v-card-subtitle>Video Upload</v-card-subtitle>
+                    <v-card-subtitle>Video Yükle</v-card-subtitle>
                   </v-card-item>
                   <v-card-text class="form-input-text">
                     <tiptap-editor
@@ -132,7 +131,7 @@
                 </div>
                 <div v-else-if="comp.type === '2'" class="multi-file-component">
                   <v-card-item>
-                    <v-card-subtitle>Slider Upload</v-card-subtitle>
+                    <v-card-subtitle>Slider Yükle</v-card-subtitle>
                   </v-card-item>
                   <v-card-text class="form-input-text">
                     <tiptap-editor
@@ -155,10 +154,10 @@
                     <div class="file-upload">
                       <v-icon icon="mdi-file-image-outline"></v-icon>
                       <v-label class="title font-barlow cursor-pointer"
-                        >File Upload</v-label
+                        >Görsel Yükle</v-label
                       >
                       <v-label class="description font-barlow cursor-pointer"
-                        >Upload single image</v-label
+                        >Tekli görsel ekle</v-label
                       >
                     </div>
                   </div>
@@ -166,10 +165,10 @@
                     <div class="file-upload">
                       <v-icon icon="mdi-folder-multiple-image"></v-icon>
                       <v-label class="title font-barlow cursor-pointer"
-                        >Slider Upload</v-label
+                        >Slider Yükle</v-label
                       >
                       <v-label class="description font-barlow cursor-pointer"
-                        >Upload multiple image</v-label
+                        >Çoklu görsel ekle</v-label
                       >
                     </div>
                   </div>
@@ -177,10 +176,10 @@
                     <div class="file-upload">
                       <v-icon icon="mdi-file-video-outline"></v-icon>
                       <v-label class="title font-barlow cursor-pointer"
-                        >Video Upload</v-label
+                        >Video Yükle</v-label
                       >
                       <v-label class="description font-barlow cursor-pointer"
-                        >Upload video</v-label
+                        >Video Yükle</v-label
                       >
                     </div>
                   </div>
@@ -188,10 +187,17 @@
               </v-col>
             </v-row>
             <v-btn
+              :disabled="isSubmitBtnDisabled"
               @click="createCaricatures(formCaricatures)"
               color="success"
               class="mt-5"
-              ><span class="font-barlow">Create</span></v-btn
+              ><span class="font-barlow">Paylaş</span></v-btn
+            >
+            <v-btn
+              @click="showReview"
+              color="primary"
+              class="mt-5 mx-2"
+              ><span class="font-barlow">Önizleme</span></v-btn
             >
           </v-card>
         </v-col>
@@ -199,16 +205,41 @@
     </v-form>
     <v-snackbar
       v-model="isSnackbarVisible"
-      timeout="30000"
+      timeout="3000"
       location="top right"
       :color="snackbarColor"
     >
       {{ snackbarMsg }}
     </v-snackbar>
+    <v-dialog v-model="reviewDialog" max-width="90%" scrollable>
+      <v-card>
+        <the-news-container :isLoading="false" :posts="reviewData" />
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
 <script setup>
+const reviewData = ref({});
+const reviewDialog = ref(false);
+const showReview = () => {
+  const formData = {
+    sponsor: formCaricatures.value.sponsor,
+    title: formCaricatures.value.title,
+    news: components.value,
+    analyticsId: formCaricatures.value.analyticsId,
+    campaignName: formCaricatures.value.campaignName,
+    sponsorImage: formCaricatures.value.sponsorImage,
+    creator: data?.value?.user.email,
+  };
+  reviewData.value = formData;
+  reviewDialog.value = true
+};
+
+useHead({
+  title: "Karikatür Oluştur",
+});
+
 const { status, data, getSession, signIn, signOut } = useAuth();
 if (!data?.value?.user) {
   signIn();
@@ -221,27 +252,25 @@ const router = useRouter();
 const goListPage = () => {
   router.push("/dashboard/list");
 };
-
+const measurementId = ref("G-7PNZ5E4JDZ");
 const form = ref(null);
-const analyticsIdRules = [(v) => !!v || "Analytics Id Required"];
-const campaignNameRules = [(v) => !!v || "Analytics Campaign Id Required"];
-const titleRules = [(v) => !!v || "Title Required"];
+const analyticsIdRules = [(v) => !!v || "Analytics Id Zorunludur"];
+const campaignNameRules = [(v) => !!v || "Analytics Campaign Id Zorunludur"];
+const fileUploadRef = ref({});
 
 const isSnackbarVisible = ref(false);
+const isSubmitBtnDisabled = ref(false);
 const snackbarMsg = ref("");
 const snackbarColor = ref("");
-const files = ref([]);
-const multipleFileResult = ref([]);
 const formCaricatures = ref({
   sponsor: "",
   title: "",
   news: [],
-  analyticsId: "G-7PNZ5E4JDZ",
+  analyticsId: measurementId.value,
   campaignName: "",
   sponsorImage: "",
 });
 
-const selectedComponent = ref("2");
 const components = ref([
   {
     type: "0",
@@ -296,7 +325,55 @@ const getAll = async () => {
     console.error(e);
   }
 };
+
+var tempNews = [];
+
+const updateUrls = (newUrls, oldUrls) => {
+  const updatedData = tempNews.map((item) => ({
+    ...item,
+    content: item.content.map((contentItem) => ({
+      ...contentItem,
+      url: contentItem.url === oldUrls ? newUrls : contentItem.url,
+    })),
+  }));
+  tempNews = updatedData;
+};
+
+const sendFilesS3 = async (urls) => {
+  return Promise.all(
+    urls.map(async (urlObj) => {
+      try {
+        const formData = new FormData();
+        formData.append("file", urlObj.file);
+
+        const response = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data) {
+            updateUrls(data.url, urlObj.url);
+          }
+        }
+
+        if (!response.ok)
+          throw new Error(`HTTP error! status: ${response.status}`);
+        return { url: urlObj.url, status: response.status };
+      } catch (error) {
+        console.error(`Error fetching ${urlObj.url}:`, error);
+        return { url: urlObj.url, error: error.message };
+      }
+    })
+  );
+};
+
 const createCaricatures = async (event) => {
+  isSubmitBtnDisabled.value = true;
+  setTimeout(() => {
+    isSubmitBtnDisabled.value = false;
+  }, 5000);
   const { valid } = await form.value.validate();
 
   const sliderComponentLengthControl = components.value.filter(
@@ -306,11 +383,17 @@ const createCaricatures = async (event) => {
     (item) => !item.content || item.content.length < 2
   );
 
+  if (formCaricatures.value.title.replace(/<\/?[^>]+>/gi, "").length == 0) {
+    isSnackbarVisible.value = true;
+    snackbarColor.value = "error";
+    snackbarMsg.value = "Başlık zorunludur!";
+    return false;
+  }
+
   if (checkResult.length > 0) {
     isSnackbarVisible.value = true;
     snackbarColor.value = "error";
-    snackbarMsg.value =
-      "A minimum of 2 images must be selected in the slider file upload fields.!";
+    snackbarMsg.value = "Slider için minimum 2 görsel seçilmelidir!";
     return false;
   }
 
@@ -325,15 +408,22 @@ const createCaricatures = async (event) => {
     if (!newsAreAllFieldsFilled) {
       isSnackbarVisible.value = true;
       snackbarColor.value = "error";
-      snackbarMsg.value =
-        "Do not leave the file upload and description fields blank!";
+      snackbarMsg.value = "Dosya yükleme ve açıklama alanlarını boş geçmeyin!";
       return false;
     }
+
+    tempNews = components.value;
+
+    const allRequests = components.value.flatMap((item) =>
+      item.content ? sendFilesS3(item.content) : []
+    );
+
+    const results = await Promise.all(allRequests);
 
     const formData = {
       sponsor: formCaricatures.value.sponsor,
       title: formCaricatures.value.title,
-      news: components.value,
+      news: tempNews,
       analyticsId: formCaricatures.value.analyticsId,
       campaignName: formCaricatures.value.campaignName,
       sponsorImage: formCaricatures.value.sponsorImage,
@@ -347,18 +437,36 @@ const createCaricatures = async (event) => {
       });
       isSnackbarVisible.value = true;
       snackbarColor.value = "success";
-      snackbarMsg.value =
-        "Caricature added successfully. You can go to your own list and see the record!";
+      snackbarMsg.value = "Karikatür başarıyla paylaşıldı!";
+
+      setTimeout(() => {
+        router.push("/dashboard/list");
+      }, 1500);
+
+      if (response) {
+        formCaricatures.value = {
+          sponsor: "",
+          title: "",
+          news: [],
+          analyticsId: "",
+          campaignName: "",
+          sponsorImage: "",
+        };
+
+        components.value = [];
+        fileUploadRef.value.reset();
+        formCaricatures.value.analyticsId = measurementId.value;
+      }
       await getAll();
     } catch (e) {
       isSnackbarVisible.value = true;
       snackbarColor.value = "error";
-      snackbarMsg.value = "An error occurred while adding the caricature!";
+      snackbarMsg.value = "Karikatür eklerken bir hata oluştu. Tekrar deneyin!";
     }
   } else {
     isSnackbarVisible.value = true;
     snackbarColor.value = "error";
-    snackbarMsg.value = "Do not leave required fields blank!";
+    snackbarMsg.value = "Zorunlu alanlar boş geçilemez!";
   }
 };
 </script>

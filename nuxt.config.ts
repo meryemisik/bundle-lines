@@ -20,6 +20,13 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     mongoUrl: process.env.NUXT_MONGO_URI,
+    awsAccessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    awsSecretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    awsBucketName: process.env.AWS_BUCKET_NAME,
+    awsRegion: process.env.AWS_REGION,
+    password: process.env.PASSWORD,
+    apiSecretKey: process.env.NUXT_API_SECRET_KEY,
+    measurementId: process.env.NUXT_MEASUREMENT_ID
   },
   nitro: {
     plugins: ["@/server/db/index.ts"],

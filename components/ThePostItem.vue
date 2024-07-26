@@ -1,13 +1,20 @@
 <template>
   <div class="post-item">
-    <v-container class="page-container my-2 my-md-6 my-lg-12">
+    <v-container
+      class="page-container my-2 my-md-6 my-lg-12"
+      v-if="postImages?.length > 0 || postImages?.[0]?.url"
+    >
       <v-row>
         <v-col>
           <template v-if="postType == 0">
-            <v-img :src="postImages[0].url" :id="`image-${dataIndex}`" />
+            <v-img
+              :src="postImages?.[0]?.url"
+              v-if="postImages?.[0]?.url"
+              :id="`image-${dataIndex}`"
+            />
           </template>
           <template v-else-if="postType == 1">
-            <v-col>
+            <v-col v-if="postImages?.[0]?.url">
               <v-responsive>
                 <div :id="`video-${dataIndex}`">
                   <video
@@ -17,7 +24,7 @@
                     controlsList="nodownload"
                     class="post-video"
                   >
-                    <source :src="postImages[0].url" type="video/mp4" />
+                    <source :src="postImages?.[0]?.url" type="video/mp4" />
                     Tarayıcınız bu videoyu desteklemiyor.
                   </video>
                 </div>
@@ -31,7 +38,7 @@
             </v-col>
           </template>
           <template v-else-if="postType == 2">
-            <div class="position-relative">
+            <div class="position-relative" v-if="postImages?.length > 0">
               <v-carousel
                 height="auto"
                 v-model="currentSlide"
@@ -75,7 +82,10 @@
         </v-col>
       </v-row>
       <v-row>
-        <v-col class="d-flex justify-center text-caption font-weight-medium">
+        <v-col
+          class="d-flex justify-center text-caption font-weight-medium"
+          v-if="postDescription || postImages?.[0]?.url"
+        >
           <div
             class="cursor-pointer mx-1 mx-sm-2 mx-md-4 d-flex align-center"
             @click="likeToggle(i)"
@@ -127,7 +137,7 @@
       ></canvas>
       <v-snackbar
         v-model="isSnackbarVisible"
-        timeout="30000"
+        timeout="3000"
         location="top right"
         color="success"
       >
@@ -140,12 +150,13 @@
 <script setup>
 import { sendGA4Events } from "~/services/ga4";
 import html2canvas from "html2canvas";
+const runtimeConfig = useRuntimeConfig();
 const props = defineProps(["data", "dataIndex", "posts"]);
 const isSnackbarVisible = ref(false);
 const snackbarMsg = ref("");
-const postType = ref(props?.data?.type);
-const postDescription = ref(props?.data?.description);
-const postImages = ref(props?.data?.content);
+const postType = ref(props?.data?.type || 0);
+const postDescription = ref(props?.data?.description || "");
+const postImages = ref(props?.data?.content || null);
 
 const stripHTMLTags = (input) => {
   return input.replace(/<\/?[^>]+(>|$)/g, "");
@@ -156,12 +167,12 @@ watchEffect(() => {
     let getFirstImage = props?.posts.news.find(
       (obj) => obj.type == 0 || obj.type == 2
     );
-    getFirstImage = getFirstImage.content[0].url;
+    getFirstImage = getFirstImage?.content?.[0]?.url;
     let getFirstDescription = props?.posts.news[0].description;
     getFirstDescription = stripHTMLTags(getFirstDescription);
     useSeoMeta({
-      title: props.posts.title,
-      ogTitle: props.posts.title,
+      title: props.posts.title.replace(/<\/?[^>]+>/gi, ""),
+      ogTitle: props.posts.title.replace(/<\/?[^>]+>/gi, ""),
       description: getFirstDescription,
       ogDescription: getFirstDescription,
       ogImage: getFirstImage,
@@ -170,7 +181,7 @@ watchEffect(() => {
       ogSiteName: "Bundle Lines",
       ogUrl: window.location.href,
       ogLocale: "tr_TR",
-      twitterTitle: props.posts.title,
+      twitterTitle: props.posts.title.replace(/<\/?[^>]+>/gi, ""),
       twitterDescription: getFirstDescription,
       twitterImage: getFirstImage,
     });
@@ -183,7 +194,7 @@ const campaign = ref(props?.posts?.campaignName);
 const { sendItemImpression, sendItemClick } = sendGA4Events({
   campaign: campaign.value,
   measurementId: measurementId.value, // Your GA4 Measurement ID
-  apiSecretKey: "RU0cCzDxRbCbpV6xOZ7xQA", // Your GA4 API Secret Key
+  apiSecretKey: runtimeConfig.apiSecretKey, // Your GA4 API Secret Key
 });
 
 const socialIcons = [
@@ -220,7 +231,6 @@ onUnmounted(() => {
 const canvas = ref(null);
 const createImage = async (socialIconName) => {
   const sourceImage = ref("");
-
   const postDescriptionElement = ref(
     document.querySelector(`#description-${props.dataIndex}`)
   );
@@ -325,7 +335,6 @@ const createSharedNewsletter = async (image, imageId) => {
       method: "POST",
       body: formData,
     });
-    console.log("response", response);
   } catch (e) {
     console.log("error", e);
   }
@@ -350,7 +359,9 @@ const sharePost = async (socialIconName, image) => {
       postUrl
     )}&redirect_uri=${encodeURIComponent(postUrl)}`;
   } else if (socialIconName == "linkedin") {
-    socialUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(postUrl)}`;
+    socialUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
+      postUrl
+    )}`;
   } else if (socialIconName == "link") {
     socialUrl = postUrl;
     isSnackbarVisible.value = "true";

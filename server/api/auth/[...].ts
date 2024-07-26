@@ -1,5 +1,6 @@
 import CredentialsProvider from "next-auth/providers/credentials";
 import { NuxtAuthHandler } from "#auth";
+const runtimeConfig = useRuntimeConfig();
 
 export default NuxtAuthHandler({
   providers: [
@@ -11,16 +12,10 @@ export default NuxtAuthHandler({
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials, req) {
-        const today = new Date();
-
-        const day = String(today.getDate()).padStart(2, "0");
-        const month = String(today.getMonth() + 1).padStart(2, "0");
-        const year = today.getFullYear();
-
-        const formattedDate = `${day}${month}${year}`;
+        
         const user = {};
 
-        if (credentials.password == formattedDate && user) {
+        if (credentials.password == runtimeConfig.password && user) {
           return {
             ...credentials,
             user,

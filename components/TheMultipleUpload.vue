@@ -21,18 +21,15 @@
         class="file-label h-100 d-flex align-center justify-center"
         v-if="!internalFiles.length"
       >
-        <div v-if="isDragging">Release to drop files here.</div>
+        <div v-if="isDragging">Dosyaları buraya bırakın.</div>
         <div v-else class="d-flex flex-column align-center">
-          <div class="text-grey">Drag and drop here to add more</div>
-          <span class="my-4 d-block text-grey">or</span>
+          <div class="text-grey">Sürükle bırak</div>
+          <span class="my-4 d-block text-grey">veya</span>
           <div
             class="d-flex rounded-pill bg-grey-lighten-4 text-grey-darken-3 text-center px-8 py-2 text-body-2"
           >
             <v-icon icon="mdi-folder-open" class="mr-4" />
-            <span>Browse a file</span>
-          </div>
-          <div class="font-weight-thin text-body-2 text-grey mt-3">
-            Please read our Data & Privacy Policy for any concerns.
+            <span>Dosya seç</span>
           </div>
         </div>
       </label>
@@ -51,7 +48,7 @@
             {{ file.name }}<br />
           </p>
 
-          <button type="button" @click="remove(idx)" title="Remove file">
+          <button type="button" @click="remove(idx)" title="Sil">
             <b>×</b>
           </button>
         </div>
@@ -101,7 +98,7 @@ export default {
       selectedFiles.forEach((file) => {
         const reader = new FileReader();
         reader.onload = (e) => {
-          internalFiles.value.push({ url: e.target.result });
+          internalFiles.value.push({ url: e.target.result, file:file });
           emit("multiple-file", internalFiles.value, props.index, props.fileKey);
         };
         reader.readAsDataURL(file);
