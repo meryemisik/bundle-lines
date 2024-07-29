@@ -1,7 +1,8 @@
 <template>
   <div class="post-item">
     <v-container
-      class="page-container my-2 my-md-6 my-lg-12"
+      style="border-bottom: 1px solid #eee"
+      class="page-container my-0 my-md-6"
       v-if="postImages?.length > 0 || postImages?.[0]?.url"
     >
       <v-row>
@@ -78,12 +79,19 @@
             class="text-subtitle-2 text-md-subtitle-1 font-weight-medium text-center post-description"
             :id="`description-${dataIndex}`"
             v-html="postDescription"
+            style="
+              width: 90%;
+              display: flex;
+              justify-content: center;
+              text-align: center;
+              margin: 0 auto;
+            "
           ></div>
         </v-col>
       </v-row>
       <v-row>
         <v-col
-          class="d-flex justify-center text-caption font-weight-medium"
+          class="d-flex justify-center text-caption font-weight-medium mb-5"
           v-if="postDescription || postImages?.[0]?.url"
         >
           <div
@@ -100,6 +108,7 @@
             <span>Beğen</span>
           </div>
           <div
+            v-if="!isWebView"
             class="cursor-pointer position-relative mx-1 mx-md-2 mx-lg-4 d-flex align-center"
             @click="shareTooltip = !shareTooltip"
           >
@@ -197,6 +206,11 @@ const { sendItemImpression, sendItemClick } = sendGA4Events({
   apiSecretKey: runtimeConfig.apiSecretKey, // Your GA4 API Secret Key
 });
 
+const socialIconsForWebView = [
+  {
+    name: "link",
+  },
+];
 const socialIcons = [
   {
     name: "facebook",
@@ -213,15 +227,50 @@ const socialIcons = [
   {
     name: "link",
   },
+  {
+    name: "download",
+  },
 ];
 const shareTooltip = ref(false);
 
 const handleScroll = () => {
   shareTooltip.value = false;
 };
+
+const isWebView = computed(() => {
+  const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+  // Android WebView detection
+  if (/android/i.test(userAgent) && /wv/.test(userAgent)) {
+    return true;
+  }
+  // iOS WebView detection
+  if (/iPhone|iPod|iPad/i.test(userAgent) && !window.MSStream) {
+    if (
+      (navigator.standalone && !window.navigator.standalone) ||
+      !/safari/i.test(userAgent)
+    ) {
+      return true;
+    }
+  }
+  return false;
+});
+const isIOSWebView = computed(() => {
+  const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+  // iOS WebView detection
+  if (/iPhone|iPod|iPad/i.test(userAgent) && !window.MSStream) {
+    if (
+      (navigator.standalone && !window.navigator.standalone) ||
+      !/safari/i.test(userAgent)
+    ) {
+      return true;
+    }
+  }
+  return false;
+});
+
 onMounted(() => {
   window.addEventListener("scroll", handleScroll);
-  sendItemImpression("homepage");
+  sendItemImpression(`caricature-${props.dataIndex + 1}`);
 });
 
 onUnmounted(() => {
@@ -342,8 +391,8 @@ const createSharedNewsletter = async (image, imageId) => {
 
 const sharePost = async (socialIconName, image) => {
   let imageId = generateUniqueId();
-  let postTitle = props.posts.title;
-  let postUrl = `${location.origin}/${imageId}`;
+  let postTitle = props.posts.title.replace(/<\/?[^>]+>/gi, "");
+  let postUrl = `${location.origin}/c/${imageId}`;
 
   createSharedNewsletter(image, imageId);
   var socialUrl = null;
@@ -351,24 +400,43 @@ const sharePost = async (socialIconName, image) => {
     socialUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(
       postTitle
     )}&url=${encodeURIComponent(postUrl)}`;
+    setTimeout(() => {
+      window.open(socialUrl, "_top");
+    });
   } else if (socialIconName == "whatsapp") {
     const text = encodeURIComponent(`${postTitle}: ${postUrl}`);
     socialUrl = `https://wa.me/?text=${text}`;
+    setTimeout(() => {
+      window.open(socialUrl, "_top");
+    });
   } else if (socialIconName == "facebook") {
     socialUrl = `https://www.facebook.com/dialog/share?app_id=584568938807562&display=popup&href=${encodeURIComponent(
       postUrl
     )}&redirect_uri=${encodeURIComponent(postUrl)}`;
+    setTimeout(() => {
+      window.open(socialUrl, "_top");
+    });
   } else if (socialIconName == "linkedin") {
     socialUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
       postUrl
     )}`;
+    setTimeout(() => {
+      window.open(socialUrl, "_top");
+    });
   } else if (socialIconName == "link") {
-    socialUrl = postUrl;
+    socialUrl = `${location.origin}/c/${imageId}`;
     isSnackbarVisible.value = "true";
-    snackbarMsg.value = "Copied!";
+    snackbarMsg.value = "Kopyalandı!";
     await navigator.clipboard.writeText(socialUrl);
   }
-  window.open(socialUrl, "_blank");
+  else if (socialIconName == "download") {
+    socialUrl = `${location.origin}/c/${imageId}`;
+    isSnackbarVisible.value = "true";
+    snackbarMsg.value = "Oluşturuldu!";
+    setTimeout(() => {
+    window.open(socialUrl, "_top");
+    });
+  }
 };
 
 const currentSlide = ref(0);
@@ -391,7 +459,7 @@ const isLiked = ref(false);
 const likeToggle = (id) => {
   isLiked.value = !isLiked.value;
   if (isLiked.value) {
-    sendItemClick("visit_ad");
+    sendItemClick(`caricature-${props.dataIndex + 1}`);
   }
 };
 

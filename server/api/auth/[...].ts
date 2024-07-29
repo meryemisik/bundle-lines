@@ -27,6 +27,6 @@ export default NuxtAuthHandler({
   ],
   pages: {},
   theme: {
-    logo: "/logo/logo.png",
+    logo: "/logo/logo-short.png",
   },
 });

@@ -6,6 +6,7 @@ export default defineNuxtConfig({
     "@nuxt/content",
     "nuxt-tiptap-editor",
     "@sidebase/nuxt-auth",
+    "@nuxt/image",
   ],
 
   build: {
@@ -26,7 +27,7 @@ export default defineNuxtConfig({
     awsRegion: process.env.AWS_REGION,
     password: process.env.PASSWORD,
     apiSecretKey: process.env.NUXT_API_SECRET_KEY,
-    measurementId: process.env.NUXT_MEASUREMENT_ID
+    measurementId: process.env.NUXT_MEASUREMENT_ID,
   },
   nitro: {
     plugins: ["@/server/db/index.ts"],

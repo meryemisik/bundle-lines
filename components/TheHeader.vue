@@ -1,14 +1,16 @@
 <template>
-  <v-container class="page-container">
+  <v-container class="page-container pb-0">
     <v-row class="mb-0 mb-md-4 mb-lg-8 mt-n16">
       <v-col>
-        <v-img :width="180" src="/logo/logo.svg" />
+        <v-img :width="180" src="/logo/logo.png" />
       </v-col>
     </v-row>
     <v-row class="mb-0 mb-md-4 mb-lg-8">
-      <v-col cols="12">
+      <v-col cols="12" class="pb-0">
           <template v-if="!isLoading">
-            <h1 class="font-weight-regular header-title" v-html="title"></h1>
+            <h1 style="font-weight: 350!important"  class="font-weight-regular header-title">
+              <span v-html="title"></span>
+            </h1>
           </template>
           <template v-else>
             <v-skeleton-loader
@@ -17,7 +19,7 @@
             ></v-skeleton-loader>
           </template>
       </v-col>
-      <v-col class="mt-n4" v-if="!isLoading">
+      <v-col class="mt-n4" v-show="sponsorship" v-if="!isLoading">
         <div class="d-inline-flex">
           <v-img :width="64" :src="sponsorshipLogo[0].url" class="mr-2" v-if="sponsorshipLogo?.[0]?.url" />
           <span class="text-sponsorship font-weight-medium font-barlow">{{

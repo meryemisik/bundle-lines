@@ -1,0 +1,27 @@
+@font-face {
+    font-family: 'CCWildWordsTR';
+    src: url('CCWildWordsTR.woff2') format('woff2'),
+        url('CCWildWordsTR.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'CCWildWordsBoldTR';
+    src: url('CCWildWordsBoldTR.woff2') format('woff2'),
+        url('CCWildWordsBoldTR.woff') format('woff');
+    font-weight: bold;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'CCWildWordsItalicTR';
+    src: url('CCWildWordsItalicTR.woff2') format('woff2'),
+        url('CCWildWordsItalicTR.woff') format('woff');
+    font-weight: normal;
+    font-style: italic;
+    font-display: swap;
+}
+
