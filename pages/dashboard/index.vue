@@ -222,6 +222,7 @@
 <script setup>
 const reviewData = ref({});
 const reviewDialog = ref(false);
+const likeCount = Math.floor(Math.random() * 51) + 50
 const showReview = () => {
   const formData = {
     sponsor: formCaricatures.value.sponsor,
@@ -231,6 +232,7 @@ const showReview = () => {
     campaignName: formCaricatures.value.campaignName,
     sponsorImage: formCaricatures.value.sponsorImage,
     creator: data?.value?.user.email,
+    likeCount : likeCount
   };
   reviewData.value = formData;
   reviewDialog.value = true
@@ -428,6 +430,7 @@ const createCaricatures = async (event) => {
       campaignName: formCaricatures.value.campaignName,
       sponsorImage: formCaricatures.value.sponsorImage,
       creator: data?.value?.user.email,
+      likeCount : likeCount
     };
 
     try {

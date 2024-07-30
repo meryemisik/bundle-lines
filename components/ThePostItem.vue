@@ -105,7 +105,7 @@
               "
               :class="`mr-2 like-button ${isLiked && 'liked'} `"
             />
-            <span>Beğen</span>
+            <span> {{likeCount}} Beğen</span>
           </div>
           <div
             v-if="!isWebView"
@@ -166,7 +166,7 @@ const snackbarMsg = ref("");
 const postType = ref(props?.data?.type || 0);
 const postDescription = ref(props?.data?.description || "");
 const postImages = ref(props?.data?.content || null);
-
+const likeCount = ref(props?.posts?.likeCount);
 const stripHTMLTags = (input) => {
   return input.replace(/<\/?[^>]+(>|$)/g, "");
 };
@@ -461,10 +461,11 @@ const likeToggle = (id) => {
   if (isLiked.value) {
     sendItemClick(`caricature-${props.dataIndex + 1}`);
   }
+  likeCount.value = isLiked.value ? likeCount.value + 1 : likeCount.value - 1;
+  updateLikeCount(props?.posts?._id, likeCount.value)
 };
 
 const isPlaying = ref(false);
-
 const playVideo = () => {
   const videoElement = document.querySelector(
     `#video-${props.dataIndex} video`
@@ -473,4 +474,16 @@ const playVideo = () => {
     videoElement.play();
   }
 };
+
+const updateLikeCount = async (caricatureId, newLikeCount) => {
+  try {
+    const response = await $fetch(`/api/caricatures/${caricatureId}`, {
+      method: "PATCH",
+      body: { likeCount: newLikeCount },
+    });
+  } catch (e) {
+    console.error("Error updating like count:", e);
+  }
+};
+
 </script>

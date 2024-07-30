@@ -30,6 +30,10 @@ const schema: mongoose.Schema = new mongoose.Schema(
 			type: String,
 			requied: false,
 		},
+		likeCount:{
+			type: Number,
+			requied: false,
+		},
 	},
 	{ timestamps: true }
 );
