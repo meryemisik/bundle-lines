@@ -5,8 +5,7 @@ export default defineNuxtConfig({
     "nuxt-icon",
     "@nuxt/content",
     "nuxt-tiptap-editor",
-    "@sidebase/nuxt-auth",
-    "@nuxt/image",
+    "@sidebase/nuxt-auth"
   ],
 
   build: {
