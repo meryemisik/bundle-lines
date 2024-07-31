@@ -1,25 +1,30 @@
 .post-item {
     //border-bottom: 1px solid #EEEEEE;
-
-    &:last-child {
+    .page-container {
+        border-bottom: 1px solid #eee;
+    }
+    &:last-of-type {
         border-bottom: none;
-        .page-container{
+
+        .page-container {
             border-bottom: none !important;
         }
-        &>* {
-            border-bottom: 1px solid red !important;
+    }
+    &:last-child {
+        border-bottom: none;
+
+        & > * {
             padding-bottom: 3em !important;
 
             @media screen and (max-width: 573px) {
                 padding-bottom: 2em !important;
             }
-
         }
     }
 
     .post-description {
         a {
-            color: #E62C33;
+            color: #e62c33;
             text-decoration: none !important;
         }
     }
@@ -56,7 +61,6 @@
     }
 }
 
-
 .share-tooltip {
     bottom: 2rem;
     left: 50%;
@@ -69,7 +73,7 @@
 
     &::before,
     &::after {
-        content: '';
+        content: "";
         position: absolute;
         top: -2px;
         height: calc(100% + 4px);
@@ -80,7 +84,7 @@
 
     &::before {
         left: -24px;
-        background-image: url('/share-border-left.svg');
+        background-image: url("/share-border-left.svg");
         background-position: 6px 0px;
         border-start-start-radius: 20px;
         border-end-start-radius: 20px;
@@ -88,7 +92,7 @@
 
     &::after {
         right: -24px;
-        background-image: url('/share-border-right.svg');
+        background-image: url("/share-border-right.svg");
         background-position: -6px 0px;
         border-end-end-radius: 20px;
         border-start-end-radius: 20px;
@@ -98,7 +102,7 @@
 .post-video {
     max-height: 500px;
     width: 100%;
-    height: 100%
+    height: 100%;
 }
 
 .v-window__container {
@@ -110,10 +114,10 @@
 }
 
 .like-button {
-    transition: all .15s linear;
+    transition: all 0.15s linear;
 
     &.liked {
-        animation: like .3s .1s linear;
+        animation: like 0.3s 0.1s linear;
     }
 }
 

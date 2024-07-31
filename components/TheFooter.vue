@@ -1,5 +1,5 @@
 <template>
-     <v-container class="page-container">
+     <v-container>
         <v-row>
           <v-col class="d-flex justify-center align-center flex-column">
             <v-img :width="90" src="/logo/footer-logo.svg" />
