@@ -5,7 +5,7 @@
       v-if="postImages?.length > 0 || postImages?.[0]?.url"
     >
       <v-row>
-        <v-col>
+        <v-col :id="`imagecover-${dataIndex}`">
           <template v-if="postType == 0">
             <div
               @mousedown="startPress"
@@ -16,6 +16,7 @@
               :class="{ 'pressed-class': isPressed }"
             >
               <v-img
+                crossorigin="anonymous"
                 :src="postImages?.[0]?.url"
                 v-if="postImages?.[0]?.url"
                 :id="`image-${dataIndex}`"
@@ -32,6 +33,7 @@
                     @play="isPlaying = true"
                     controlsList="nodownload"
                     class="post-video"
+                    crossorigin="anonymous"
                   >
                     <source :src="postImages?.[0]?.url" type="video/mp4" />
                     Tarayıcınız bu videoyu desteklemiyor.
@@ -58,10 +60,14 @@
                 <v-carousel-item
                   v-for="(image, index) in postImages"
                   :key="index"
-                  :src="image.url"
-                  :value="index"
-                  :id="`slider-item-${index}`"
-                ></v-carousel-item>
+                >
+                  <v-img
+                    crossorigin="anonymous"
+                    :src="image.url"
+                    :id="`slider-item-${index}`"
+                    :value="index"
+                  />
+                </v-carousel-item>
               </v-carousel>
               <div class="position-absolute slider-control">
                 <v-btn @click="prevImg" variant="plain" rounded="xl">
@@ -318,81 +324,80 @@ onUnmounted(() => {
 
 const canvas = ref(null);
 const createImage = async (socialIconName) => {
-  const sourceImage = ref("");
+  const sourceImage = ref(
+    document.querySelector(`#imagecover-${props.dataIndex}`)
+  );
   const postDescriptionElement = ref(
     document.querySelector(`#description-${props.dataIndex}`)
   );
 
-  if (postType.value == 0) {
-    sourceImage.value = document.querySelector(`#image-${props.dataIndex} img`);
-  } else if (postType.value == 1) {
-    var captureDivElement = document.querySelector(`#video-${props.dataIndex}`);
-    var createCanvas = await html2canvas(captureDivElement);
-    var createImgFromCanvas = createCanvas.toDataURL("image/png");
-    sourceImage.value = document.createElement("img");
-    sourceImage.value.src = createImgFromCanvas;
-  } else if (postType.value == 2) {
-    sourceImage.value = document.querySelector(
-      `#slider-${props.dataIndex} #slider-item-${currentSlide.value} img`
-    );
-  }
+  // if (postType.value == 0) {
+  //   sourceImage.value = document.querySelector(`#image-${props.dataIndex} img`);
+  // } else if (postType.value == 1) {
+  //   var captureDivElement = document.querySelector(`#video-${props.dataIndex}`);
+  //   var createCanvas = await html2canvas(captureDivElement, { useCORS: true });
+  //   var createImgFromCanvas = createCanvas.toDataURL("image/png");
+  //   sourceImage.value = document.createElement("img");
+  //   sourceImage.value.src = createImgFromCanvas;
+  // } else if (postType.value == 2) {
+  //   sourceImage.value = document.querySelector(
+  //     `#slider-${props.dataIndex} #slider-item-${currentSlide.value} img`
+  //   );
+  //   console.log("sourceImage.value : ", sourceImage.value)
+  // }
 
-  const context = canvas.value.getContext("2d", { willReadFrequently: true });
-  const imageElement = sourceImage.value;
+  const frameImg = new Image();
 
-  const firstImage = new Image();
-  firstImage.src = "/canvas-frame.png";
-  firstImage.onload = async () => {
-    context.clearRect(0, 0, 1080, 1350);
-    context.fillStyle = "white";
-    context.fillRect(0, 0, canvas.value.width, canvas.value.height);
+  frameImg.src = "/canvas-frame.png";
+  sourceImage.value.crossOrigin = "anonymous";
+  frameImg.crossOrigin = "anonymous";
+  //img.crossOrigin = "anonymous";
+  frameImg.onload = () => {
+    const ctx = canvas.value.getContext("2d");
+    ctx.clearRect(0, 0, 1080, 1350);
+    ctx.fillStyle = "white";
+    ctx.fillRect(0, 0, canvas.value.width, canvas.value.height);
 
-    context.drawImage(firstImage, 0, 0, canvas.value.width, canvas.value.width);
+    const canvasContentWidth = (canvas.value.width / 38) * 30;
+    var imgWidth = 0;
+    var imgHeight = 0;
+    var imgX = (canvas.value.width / 38) * 4;
+    var imgY = (canvas.value.width / 38) * 2.5;
+    if (sourceImage.value.offsetHeight > sourceImage.value.offsetWidth) {
+      imgWidth =
+        (sourceImage.value.offsetWidth / sourceImage.value.offsetHeight) *
+        canvasContentWidth;
+      imgHeight = canvasContentWidth;
+      imgX = imgX + (canvasContentWidth - imgWidth) / 2;
+    } else {
+      imgWidth = canvasContentWidth;
+      imgHeight =
+        (sourceImage.value.offsetHeight / sourceImage.value.offsetWidth) *
+        canvasContentWidth;
+      imgY = imgY + (canvasContentWidth - imgHeight) / 2;
+    }
 
-    const img = new Image();
-    img.onload = async () => {
-      const canvasContentWidth = (canvas.value.width / 38) * 30;
-      var imgWidth = 0;
-      var imgHeight = 0;
-      var imgX = (canvas.value.width / 38) * 4;
-      var imgY = (canvas.value.width / 38) * 2.5;
+    ctx.drawImage(frameImg, 0, 0, canvas.value.width, canvas.value.width);
 
-      if (img.height > img.width) {
-        imgWidth = (img.width / img.height) * canvasContentWidth;
-        imgHeight = canvasContentWidth;
-        imgX = imgX + (canvasContentWidth - imgWidth) / 2;
-      } else {
-        imgWidth = canvasContentWidth;
-        imgHeight = (img.height / img.width) * canvasContentWidth;
-        imgY = imgY + (canvasContentWidth - imgHeight) / 2;
-      }
+    html2canvas(sourceImage.value, { useCORS: true }).then((imageElement) => {
+      ctx.drawImage(imageElement, imgX, imgY, imgWidth, imgHeight);
 
-      context.drawImage(img, imgX, imgY, imgWidth, imgHeight);
+      html2canvas(postDescriptionElement.value, { useCORS: true }).then(
+        (descriptionElement) => {
+          const textY = canvas.value.width;
+          ctx.drawImage(
+            descriptionElement,
+            0,
+            textY,
+            canvas.value.width,
+            (canvas.value.width / postDescriptionElement.value.offsetWidth) *
+              postDescriptionElement.value.offsetHeight
+          );
 
-      const textY = canvas.value.width;
-
-      var createCanvasDescription = await html2canvas(
-        postDescriptionElement.value
+          sharePost(socialIconName, canvas.value.toDataURL("image/png"));
+        }
       );
-      var createImgFromDescriptionCanvas =
-        createCanvasDescription.toDataURL("image/png");
-      var sourceDescriptionImage = document.createElement("img");
-      sourceDescriptionImage.src = createImgFromDescriptionCanvas;
-
-      sourceDescriptionImage.onload = () => {
-        context.drawImage(
-          sourceDescriptionImage,
-          0,
-          textY,
-          canvas.value.width,
-          (canvas.value.width / postDescriptionElement.value.offsetWidth) *
-            postDescriptionElement.value.offsetHeight
-        );
-        sharePost(socialIconName, canvas.value.toDataURL("image/png"));
-      };
-    };
-
-    img.src = imageElement.src;
+    });
   };
 };
 
