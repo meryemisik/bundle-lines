@@ -13,6 +13,7 @@
         max-width="530"
       />
     </template>
+   <the-share-instagram/>
   </v-sheet>
   <the-footer />
 </template>

@@ -1,18 +1,26 @@
 <template>
   <div class="post-item">
     <v-container
-      style="border-bottom: 1px solid #eee"
       class="page-container my-0 my-md-6"
       v-if="postImages?.length > 0 || postImages?.[0]?.url"
     >
       <v-row>
         <v-col>
           <template v-if="postType == 0">
-            <v-img
-              :src="postImages?.[0]?.url"
-              v-if="postImages?.[0]?.url"
-              :id="`image-${dataIndex}`"
-            />
+            <div
+              @mousedown="startPress"
+              @mouseup="endPress"
+              @mouseleave="endPress"
+              @touchstart="startPress"
+              @touchend="endPress"
+              :class="{ 'pressed-class': isPressed }"
+            >
+              <v-img
+                :src="postImages?.[0]?.url"
+                v-if="postImages?.[0]?.url"
+                :id="`image-${dataIndex}`"
+              />
+            </div>
           </template>
           <template v-else-if="postType == 1">
             <v-col v-if="postImages?.[0]?.url">
@@ -96,7 +104,7 @@
         >
           <div
             class="cursor-pointer mx-1 mx-sm-2 mx-md-4 d-flex align-center"
-            @click="likeToggle(i)"
+            @click="likeToggle(data?.newsId)"
           >
             <v-img
               :width="24"
@@ -105,7 +113,22 @@
               "
               :class="`mr-2 like-button ${isLiked && 'liked'} `"
             />
-            <span> {{likeCount}} Beğen</span>
+            <span
+              v-if="likeCount < 50"
+              style="
+                font-family: CCWildWordsTR;
+                font-size: 12px;
+                font-weight: 400;
+                line-height: 15.72px;
+                letter-spacing: 0.01em;
+                text-align: center;
+              "
+            >
+              {{ likeCount + randomLikeCount }}
+            </span>
+            <span v-else>
+              {{ likeCount }}
+            </span>
           </div>
           <div
             v-if="!isWebView"
@@ -166,9 +189,25 @@ const snackbarMsg = ref("");
 const postType = ref(props?.data?.type || 0);
 const postDescription = ref(props?.data?.description || "");
 const postImages = ref(props?.data?.content || null);
-const likeCount = ref(props?.posts?.likeCount);
+const likeCount = ref(props?.data?.likeCount);
+const randomLikeCount = ref(props?.data?.randomLikeCount);
 const stripHTMLTags = (input) => {
   return input.replace(/<\/?[^>]+(>|$)/g, "");
+};
+const isPressed = ref(false);
+const pressTimer = ref(null);
+
+const startPress = () => {
+  pressTimer.value = setTimeout(() => {
+    isPressed.value = true;
+    console.log("Görsele basılı tutuldu!");
+  }, 500);
+};
+
+const endPress = () => {
+  clearTimeout(pressTimer.value);
+  pressTimer.value = null;
+  isPressed.value = false;
 };
 
 watchEffect(() => {
@@ -428,13 +467,12 @@ const sharePost = async (socialIconName, image) => {
     isSnackbarVisible.value = "true";
     snackbarMsg.value = "Kopyalandı!";
     await navigator.clipboard.writeText(socialUrl);
-  }
-  else if (socialIconName == "download") {
+  } else if (socialIconName == "download") {
     socialUrl = `${location.origin}/c/${imageId}`;
     isSnackbarVisible.value = "true";
     snackbarMsg.value = "Oluşturuldu!";
     setTimeout(() => {
-    window.open(socialUrl, "_top");
+      window.open(socialUrl, "_top");
     });
   }
 };
@@ -456,13 +494,13 @@ const nextImg = () => {
 };
 
 const isLiked = ref(false);
-const likeToggle = (id) => {
+const likeToggle = (newsId) => {
   isLiked.value = !isLiked.value;
   if (isLiked.value) {
     sendItemClick(`caricature-${props.dataIndex + 1}`);
   }
   likeCount.value = isLiked.value ? likeCount.value + 1 : likeCount.value - 1;
-  updateLikeCount(props?.posts?._id, likeCount.value)
+  updateLikeCount(props?.posts?._id, newsId, likeCount.value);
 };
 
 const isPlaying = ref(false);
@@ -475,15 +513,59 @@ const playVideo = () => {
   }
 };
 
-const updateLikeCount = async (caricatureId, newLikeCount) => {
+const updateLikeCount = async (id, likeCountIndex, likeCount) => {
   try {
-    const response = await $fetch(`/api/caricatures/${caricatureId}`, {
+    const response = await $fetch(`/api/caricatures/updateLikeCount`, {
       method: "PATCH",
-      body: { likeCount: newLikeCount },
+      body: { newsId: likeCountIndex, likeCount: likeCount, id: id },
     });
   } catch (e) {
     console.error("Error updating like count:", e);
   }
 };
-
 </script>
+<style lang="scss">
+.image-container {
+  position: relative;
+  display: inline-block;
+}
+
+.image-container.active::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(5px);
+  z-index: 1;
+}
+
+.image-container .v-img {
+  transition: transform 0.3s ease;
+}
+
+.image-container.active .v-img {
+  transform: scale(1.05);
+}
+.pressed-class {
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); /* Gölge efekti */
+}
+
+.deneme.blurred {
+  position: relative;
+}
+
+.deneme.blurred::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.7); /* Yarı saydam beyaz arka plan */
+  backdrop-filter: blur(5px); /* Arka plan bulanıklığı */
+  z-index: 999; /* İçeriklerin üstünde görünmesi için yüksek z-index */
+}
+</style>

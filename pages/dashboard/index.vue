@@ -32,9 +32,9 @@
                 <v-text-field
                   variant="solo-filled"
                   density="compact"
-                  label="Örn: G-XXXXXXXXXX"
                   v-model="formCaricatures.analyticsId"
                   :rules="analyticsIdRules"
+                  disabled
                 ></v-text-field>
               </v-card-text>
             </v-card>
@@ -222,7 +222,6 @@
 <script setup>
 const reviewData = ref({});
 const reviewDialog = ref(false);
-const likeCount = Math.floor(Math.random() * 51) + 50
 const showReview = () => {
   const formData = {
     sponsor: formCaricatures.value.sponsor,
@@ -232,7 +231,6 @@ const showReview = () => {
     campaignName: formCaricatures.value.campaignName,
     sponsorImage: formCaricatures.value.sponsorImage,
     creator: data?.value?.user.email,
-    likeCount : likeCount
   };
   reviewData.value = formData;
   reviewDialog.value = true
@@ -272,12 +270,29 @@ const formCaricatures = ref({
   campaignName: "",
   sponsorImage: "",
 });
+const getRandomChar = () => {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+  return chars.charAt(Math.floor(Math.random() * chars.length));
+};
+
+const generateUniqueId = () => {
+  const timestamp = new Date().getTime();
+  let uniqueId = "";
+  for (let i = 0; i < 5; i++) {
+    uniqueId += getRandomChar();
+  }
+  return `${uniqueId}${timestamp}`;
+};
+
 
 const components = ref([
   {
     type: "0",
     content: null,
     description: "",
+    likeCount : null,
+    randomLikeCount : Math.floor(Math.random() * 51) + 50,
+    newsId:generateUniqueId()
   },
 ]);
 
@@ -287,18 +302,27 @@ const addComponents = (type) => {
       type: "0",
       content: null,
       description: "",
+      likeCount : null,
+      randomLikeCount : Math.floor(Math.random() * 51) + 50,
+      newsId:generateUniqueId()
     });
   } else if (type === 1) {
     components.value.push({
       type: "1",
       content: null,
       description: "",
+      likeCount : null,
+      randomLikeCount : Math.floor(Math.random() * 51) + 50,
+      newsId:generateUniqueId()
     });
   } else if (type === 2) {
     components.value.push({
       type: "2",
       content: [],
       description: "",
+      likeCount : null,
+      randomLikeCount : Math.floor(Math.random() * 51) + 50,
+      newsId:generateUniqueId()
     });
   }
 };
@@ -430,7 +454,6 @@ const createCaricatures = async (event) => {
       campaignName: formCaricatures.value.campaignName,
       sponsorImage: formCaricatures.value.sponsorImage,
       creator: data?.value?.user.email,
-      likeCount : likeCount
     };
 
     try {

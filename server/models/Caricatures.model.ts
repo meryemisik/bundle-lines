@@ -34,6 +34,10 @@ const schema: mongoose.Schema = new mongoose.Schema(
 			type: Number,
 			requied: false,
 		},
+		randomLikeCount:{
+			type: Number,
+			requied: false,
+		}
 	},
 	{ timestamps: true }
 );

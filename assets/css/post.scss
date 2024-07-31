@@ -3,9 +3,11 @@
 
     &:last-child {
         border-bottom: none;
-
+        .page-container{
+            border-bottom: none !important;
+        }
         &>* {
-            border-bottom: 1px solid #EEEEEE;
+            border-bottom: 1px solid red !important;
             padding-bottom: 3em !important;
 
             @media screen and (max-width: 573px) {
