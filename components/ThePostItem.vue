@@ -7,21 +7,12 @@
       <v-row>
         <v-col :id="`imagecover-${dataIndex}`">
           <template v-if="postType == 0">
-            <div
-              @mousedown="startPress"
-              @mouseup="endPress"
-              @mouseleave="endPress"
-              @touchstart="startPress"
-              @touchend="endPress"
-              :class="{ 'pressed-class': isPressed }"
-            >
-              <v-img
-                crossorigin="anonymous"
-                :src="postImages?.[0]?.url"
-                v-if="postImages?.[0]?.url"
-                :id="`image-${dataIndex}`"
-              />
-            </div>
+            <v-img
+              crossorigin="anonymous"
+              :src="postImages?.[0]?.url"
+              v-if="postImages?.[0]?.url"
+              :id="`image-${dataIndex}`"
+            />
           </template>
           <template v-else-if="postType == 1">
             <v-col v-if="postImages?.[0]?.url">
@@ -200,21 +191,6 @@ const randomLikeCount = ref(props?.data?.randomLikeCount);
 const stripHTMLTags = (input) => {
   return input.replace(/<\/?[^>]+(>|$)/g, "");
 };
-const isPressed = ref(false);
-const pressTimer = ref(null);
-
-const startPress = () => {
-  pressTimer.value = setTimeout(() => {
-    isPressed.value = true;
-    console.log("Görsele basılı tutuldu!");
-  }, 500);
-};
-
-const endPress = () => {
-  clearTimeout(pressTimer.value);
-  pressTimer.value = null;
-  isPressed.value = false;
-};
 
 watchEffect(() => {
   if (props?.posts) {
@@ -247,8 +223,8 @@ const campaign = ref(props?.posts?.campaignName);
 
 const { sendItemImpression, sendItemClick } = sendGA4Events({
   campaign: campaign.value,
-  measurementId: measurementId.value, // Your GA4 Measurement ID
-  apiSecretKey: runtimeConfig.apiSecretKey, // Your GA4 API Secret Key
+  measurementId: measurementId.value, 
+  apiSecretKey: runtimeConfig.apiSecretKey,
 });
 
 const socialIconsForWebView = [
@@ -447,12 +423,14 @@ const sharePost = async (socialIconName, image) => {
     setTimeout(() => {
       window.open(socialUrl, "_top");
     });
+    sendItemClick(`X`);
   } else if (socialIconName == "whatsapp") {
     const text = encodeURIComponent(`${postTitle}: ${postUrl}`);
     socialUrl = `https://wa.me/?text=${text}`;
     setTimeout(() => {
       window.open(socialUrl, "_top");
     });
+    sendItemClick(`whatsapp`);
   } else if (socialIconName == "facebook") {
     socialUrl = `https://www.facebook.com/dialog/share?app_id=584568938807562&display=popup&href=${encodeURIComponent(
       postUrl
@@ -460,6 +438,7 @@ const sharePost = async (socialIconName, image) => {
     setTimeout(() => {
       window.open(socialUrl, "_top");
     });
+    sendItemClick(`facebook`);
   } else if (socialIconName == "linkedin") {
     socialUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
       postUrl
@@ -467,17 +446,21 @@ const sharePost = async (socialIconName, image) => {
     setTimeout(() => {
       window.open(socialUrl, "_top");
     });
+    sendItemClick(`linkedin`);
   } else if (socialIconName == "link") {
     socialUrl = `${location.origin}/c/${imageId}`;
     isSnackbarVisible.value = "true";
     snackbarMsg.value = "Kopyalandı!";
     await navigator.clipboard.writeText(socialUrl);
-  } else if (socialIconName == "download") {
+    sendItemClick(`link`);
+  }
+  else if (socialIconName == "download") {
     socialUrl = `${location.origin}/c/${imageId}`;
     isSnackbarVisible.value = "true";
     snackbarMsg.value = "Oluşturuldu!";
     setTimeout(() => {
-      window.open(socialUrl, "_top");
+    window.open(socialUrl, "_top");
+    sendItemClick(`download`);
     });
   }
 };
@@ -528,49 +511,5 @@ const updateLikeCount = async (id, likeCountIndex, likeCount) => {
     console.error("Error updating like count:", e);
   }
 };
+
 </script>
-<style lang="scss">
-.image-container {
-  position: relative;
-  display: inline-block;
-}
-
-.image-container.active::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(5px);
-  z-index: 1;
-}
-
-.image-container .v-img {
-  transition: transform 0.3s ease;
-}
-
-.image-container.active .v-img {
-  transform: scale(1.05);
-}
-.pressed-class {
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); /* Gölge efekti */
-}
-
-.deneme.blurred {
-  position: relative;
-}
-
-.deneme.blurred::before {
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(255, 255, 255, 0.7); /* Yarı saydam beyaz arka plan */
-  backdrop-filter: blur(5px); /* Arka plan bulanıklığı */
-  z-index: 999; /* İçeriklerin üstünde görünmesi için yüksek z-index */
-}
-</style>
