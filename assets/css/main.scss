@@ -43,6 +43,38 @@ body {
 * {
     font-family: "MetaSerifPro";
     user-select: none !important;
+    scrollbar-width: thin;
+    &:hover {
+        &::-webkit-scrollbar {
+            &-track {
+                background: #ebebeb;
+            }
+            &-thumb {
+                background: #1d2939;
+            }
+        }
+    }
+
+    &::-webkit-scrollbar {
+        width: 4px;
+        height: 4px;
+        border-radius: 100px;
+        margin-left: 26px;
+
+        &-track {
+            background: transparent;
+            border-radius: 100px;
+        }
+
+        &-thumb {
+            background: transparent;
+            border-radius: 100px;
+
+            &:hover {
+                background: #081b36;
+            }
+        }
+    }
 }
 
 * > p {
@@ -76,7 +108,7 @@ body {
 }
 
 div[id^="image-"] .v-responsive__sizer {
-	padding-bottom: 90% !important;
+    padding-bottom: 90% !important;
 }
 
 @media screen and (max-width: 573px) {

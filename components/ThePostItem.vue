@@ -5,7 +5,12 @@
       v-if="postImages?.length > 0 || postImages?.[0]?.url"
     >
       <v-row>
-        <v-col :id="`imagecover-${dataIndex}`">
+        <v-col
+          :id="`imagecover-${dataIndex}`"
+          @mousedown="startPress(`imagecover-${dataIndex}`)"
+          @mouseup="cancelPress(`imagecover-${dataIndex}`)"
+          @mouseleave="cancelPress(`imagecover-${dataIndex}`)"
+        >
           <template v-if="postType == 0">
             <v-img
               crossorigin="anonymous"
@@ -84,13 +89,6 @@
             class="text-subtitle-2 text-md-subtitle-1 font-weight-medium text-center post-description"
             :id="`description-${dataIndex}`"
             v-html="postDescription"
-            style="
-              width: 90%;
-              display: flex;
-              justify-content: center;
-              text-align: center;
-              margin: 0 auto;
-            "
           ></div>
         </v-col>
       </v-row>
@@ -173,6 +171,7 @@
         {{ snackbarMsg }}
       </v-snackbar>
     </v-container>
+    <div class="blur-bg" v-if="blurIsVisible"></div>
   </div>
 </template>
 
@@ -190,6 +189,42 @@ const likeCount = ref(props?.data?.likeCount);
 const randomLikeCount = ref(props?.data?.randomLikeCount);
 const stripHTMLTags = (input) => {
   return input.replace(/<\/?[^>]+(>|$)/g, "");
+};
+
+const blurTimer = ref(null);
+const blurIsVisible = ref(false);
+
+const startPress = (id) => {
+  cancelPress(id);
+  blurTimer.value = setTimeout(() => {
+    handleLongPress(id);
+  }, 2000);
+};
+
+const cancelPress = (id) => {
+  blurIsVisible.value = false;
+  document.querySelector("body").style.overflow = "auto";
+  document.querySelector("html").style.overflow = "auto";
+
+  if (id) {
+    document.getElementById(id).style.zIndex = "9";
+  }
+
+  if (blurTimer.value) {
+    clearTimeout(blurTimer.value);
+    blurTimer.value = null;
+  }
+};
+
+const handleLongPress = (id) => {
+  if (id) {
+    document.getElementById(id).style.zIndex = "9999999";
+  }
+
+  document.querySelector("body").style.overflow = "hidden";
+  document.querySelector("html").style.overflow = "hidden";
+
+  blurIsVisible.value = true;
 };
 
 watchEffect(() => {
@@ -223,7 +258,7 @@ const campaign = ref(props?.posts?.campaignName);
 
 const { sendItemImpression, sendItemClick } = sendGA4Events({
   campaign: campaign.value,
-  measurementId: measurementId.value, 
+  measurementId: measurementId.value,
   apiSecretKey: runtimeConfig.apiSecretKey,
 });
 
@@ -453,14 +488,13 @@ const sharePost = async (socialIconName, image) => {
     snackbarMsg.value = "Kopyalandı!";
     await navigator.clipboard.writeText(socialUrl);
     sendItemClick(`link`);
-  }
-  else if (socialIconName == "download") {
+  } else if (socialIconName == "download") {
     socialUrl = `${location.origin}/c/${imageId}`;
     isSnackbarVisible.value = "true";
     snackbarMsg.value = "Oluşturuldu!";
     setTimeout(() => {
-    window.open(socialUrl, "_top");
-    sendItemClick(`download`);
+      window.open(socialUrl, "_top");
+      sendItemClick(`download`);
     });
   }
 };
@@ -511,5 +545,4 @@ const updateLikeCount = async (id, likeCountIndex, likeCount) => {
     console.error("Error updating like count:", e);
   }
 };
-
 </script>
