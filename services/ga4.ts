@@ -10,8 +10,8 @@ export const sendGA4Events = ({
   ga4ClientId?: string;
 }) => {
   const GA4_CLIENT_ID = ga4ClientId || Math.random().toString(36).substring(7);
-  const ANALYTICS_ID = measurementId;
-  const API_SECRET = apiSecretKey;
+  const ANALYTICS_ID = measurementId || "G-7PNZ5E4JDZ";
+  const API_SECRET = apiSecretKey  || "RU0cCzDxRbCbpV6xOZ7xQA";
 
   async function sendGA4Event(name: string, action: string, label: string) {
     return await fetch(
