@@ -1,6 +1,6 @@
 <template>
   <v-container class="page-container pb-0">
-    <v-row class="mb-0 mb-md-4 mb-lg-8 mt-n16">
+    <v-row class="mb-0 mb-md-4 mb-lg-8">
       <v-col>
         <v-img :width="180" src="/logo/logo.png" />
       </v-col>

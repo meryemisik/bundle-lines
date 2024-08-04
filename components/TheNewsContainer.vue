@@ -14,7 +14,7 @@
       />
     </template>
   </v-sheet>
-  <the-share-instagram/>
+  <the-share-instagram />
   <the-footer />
 </template>
 <script setup>
@@ -24,8 +24,9 @@ const props = defineProps({
     required: true,
   },
   posts: {
-    type: Array,
+    type: Object,
     required: true,
+    default: () => ({}),
   },
 });
 </script>

@@ -8,7 +8,7 @@
 
 <script setup>
 const isLoading = ref(true);
-const posts = ref(null);
+const posts = ref({});
 
 const route = useRoute();
 const id = route.params.id;

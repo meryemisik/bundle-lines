@@ -13,7 +13,6 @@
         >
           <template v-if="postType == 0">
             <v-img
-              crossorigin="anonymous"
               :src="postImages?.[0]?.url"
               v-if="postImages?.[0]?.url"
               :id="`image-${dataIndex}`"
@@ -29,7 +28,7 @@
                     @play="isPlaying = true"
                     controlsList="nodownload"
                     class="post-video"
-                    crossorigin="anonymous"
+                    
                   >
                     <source :src="postImages?.[0]?.url" type="video/mp4" />
                     Tarayıcınız bu videoyu desteklemiyor.
@@ -58,7 +57,6 @@
                   :key="index"
                 >
                   <v-img
-                    crossorigin="anonymous"
                     :src="image.url"
                     :id="`slider-item-${index}`"
                     :value="index"
@@ -104,9 +102,9 @@
             <v-img
               :width="24"
               :src="
-                isLiked ? '/icons/favorite.svg' : '/icons/favorite-outline.svg'
+                checkPostIsLiked(props?.posts?._id,data?.newsId) ? '/icons/favorite.svg' : '/icons/favorite-outline.svg'
               "
-              :class="`mr-2 like-button ${isLiked && 'liked'} `"
+              :class="`mr-2 like-button ${checkPostIsLiked(props?.posts?._id,data?.newsId) && 'liked'} `"
             />
             <span
               v-if="likeCount < 50"
@@ -203,8 +201,8 @@ const startPress = (id) => {
 
 const cancelPress = (id) => {
   blurIsVisible.value = false;
-  document.querySelector("body").style.overflow = "auto";
-  document.querySelector("html").style.overflow = "auto";
+  document.querySelector("body").style.overflow = "visible";
+  document.querySelector("html").style.overflow = "visible";
 
   if (id) {
     document.getElementById(id).style.zIndex = "9";
@@ -515,8 +513,44 @@ const nextImg = () => {
   }
 };
 
+const checkPostIsLiked = (postId, newsId) => {
+  let likedPosts = JSON.parse(localStorage.getItem("likedBundlePosts")) || [{}];
+  let posts = likedPosts[0];
+
+  if (posts[postId] && posts[postId].includes(newsId)) {
+    isLiked.value = true
+    return true;
+  }
+  isLiked.value = false
+  return false;
+};
+
+const toggleNewsInPost = (postId, newsId) => {
+  let likedPosts = JSON.parse(localStorage.getItem("likedBundlePosts")) || [{}];
+  let posts = likedPosts[0];
+
+  if (posts[postId]) {
+    let newsIndex = posts[postId].indexOf(newsId);
+
+    if (newsIndex !== -1) {
+      posts[postId].splice(newsIndex, 1);
+
+      if (posts[postId].length === 0) {
+        delete posts[postId];
+      }
+    } else {
+      posts[postId].push(newsId);
+    }
+  } else {
+    posts[postId] = [newsId];
+  }
+
+  localStorage.setItem("likedBundlePosts", JSON.stringify(likedPosts));
+};
+
 const isLiked = ref(false);
 const likeToggle = (newsId) => {
+  toggleNewsInPost(props?.posts?._id, newsId);
   isLiked.value = !isLiked.value;
   if (isLiked.value) {
     sendItemClick(`caricature-${props.dataIndex + 1}`);
