@@ -37,6 +37,10 @@ const schema: mongoose.Schema = new mongoose.Schema(
 		randomLikeCount:{
 			type: Number,
 			requied: false,
+		},
+		caricaturist:{
+			type: String,
+			requied: false,
 		}
 	},
 	{ timestamps: true }

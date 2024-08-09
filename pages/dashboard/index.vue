@@ -52,6 +52,20 @@
                 ></v-text-field>
               </v-card-text>
             </v-card>
+            <v-card class="mx-auto mb-4" elevation="1">
+              <v-card-item>
+                <v-card-subtitle>Karikatürist</v-card-subtitle>
+              </v-card-item>
+              <v-card-text class="form-input-text">
+                <v-text-field
+                  variant="solo-filled"
+                  density="compact"
+                  label="Çizer İsmi Ekle"
+                  v-model="formCaricatures.caricaturist"
+                  :rules="caricaturistRules"
+                ></v-text-field>
+              </v-card-text>
+            </v-card>
             <v-card class="mx-auto my-4" elevation="1">
               <v-card-item>
                 <v-card-subtitle>Başlık</v-card-subtitle>
@@ -231,6 +245,7 @@ const showReview = () => {
     campaignName: formCaricatures.value.campaignName,
     sponsorImage: formCaricatures.value.sponsorImage,
     creator: data?.value?.user.email,
+    caricaturist: formCaricatures.value.caricaturist
   };
   reviewData.value = formData;
   reviewDialog.value = true
@@ -256,6 +271,7 @@ const measurementId = ref("G-7PNZ5E4JDZ");
 const form = ref(null);
 const analyticsIdRules = [(v) => !!v || "Analytics Id Zorunludur"];
 const campaignNameRules = [(v) => !!v || "Analytics Campaign Id Zorunludur"];
+const caricaturistRules = [(v) => !!v || "Karikatürist Bilgisi Zorunludur"];
 const fileUploadRef = ref({});
 
 const isSnackbarVisible = ref(false);
@@ -269,6 +285,7 @@ const formCaricatures = ref({
   analyticsId: measurementId.value,
   campaignName: "",
   sponsorImage: "",
+  caricaturist:""
 });
 const getRandomChar = () => {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -454,6 +471,7 @@ const createCaricatures = async (event) => {
       campaignName: formCaricatures.value.campaignName,
       sponsorImage: formCaricatures.value.sponsorImage,
       creator: data?.value?.user.email,
+      caricaturist : formCaricatures.value.caricaturist
     };
 
     try {
