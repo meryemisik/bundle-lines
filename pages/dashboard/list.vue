@@ -48,6 +48,9 @@
                 <v-icon small @click="goNews(item._id)">
                   mdi-open-in-new
                 </v-icon>
+                <v-icon small class="ml-2" @click="goDetail(item._id)"
+                  >mdi-eye-outline</v-icon
+                >
               </template>
             </v-data-table>
 
@@ -72,12 +75,47 @@
       </v-col>
     </v-row>
   </v-container>
+
+  <v-dialog
+    v-model="newsletterDetailDialog"
+    max-width="90%"
+    class="newsletter-detail-dialog"
+  >
+    <v-card>
+      <v-card-title>
+        <span v-html="newsletterDetailData?.title" class="m-6"></span>
+      </v-card-title>
+      <v-data-table
+        :headers="detailHeaders"
+        :items="newsletterDetailData?.news"
+        class="newsletter-detail-dialog-table"
+        hide-default-footer
+      >
+        <template v-slot:[`item.image`]="{ item }">
+          <v-img
+            :src="item.content[0]?.url"
+            class="newsletter-detail-dialog-table-image"
+          ></v-img>
+        </template>
+        <template v-slot:[`item.description`]="{ item }">
+          <span v-html="item.description"></span>
+        </template>
+        <template v-slot:[`item.likeCount`]="{ item }">
+          <span class="newsletter-detail-dialog-table-like-count">
+            {{ item.likeCount }}</span
+          >
+        </template>
+      </v-data-table>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script setup>
 useHead({
   title: "Karikatürlerim",
 });
+const newsletterDetailDialog = ref(false);
+const newsletterDetailData = ref([]);
 const isLoading = ref(true);
 const { status, data, getSession, signIn, signOut } = useAuth();
 if (!data?.value?.user) {
@@ -95,6 +133,17 @@ const goDashboard = () => {
 const goNews = (id) => {
   window.open(`/newsletter/${id}`, "_blank");
 };
+const goDetail = async (id) => {
+  try {
+    const response = await $fetch(`/api/caricatures/getById?id=${id}`);
+    if (response && response.news) {
+      newsletterDetailDialog.value = true;
+      newsletterDetailData.value = response;
+    }
+  } catch (e) {
+    console.error("Error fetching posts:", e);
+  }
+};
 const page = ref(1);
 const itemsPerPage = ref(10);
 const headers = ref([
@@ -105,6 +154,24 @@ const headers = ref([
   },
   { title: "Oluşturma Tarihi", align: "end", key: "createdAt" },
   { align: "end", key: "btn" },
+]);
+
+const detailHeaders = ref([
+  {
+    title: "Görsel",
+    align: "start",
+    key: "image",
+  },
+  {
+    title: "Açıklama",
+    align: "start",
+    key: "description",
+  },
+  {
+    title: "Beğeni Sayısı",
+    align: "start",
+    key: "likeCount",
+  },
 ]);
 const items = ref([]);
 
@@ -160,3 +227,25 @@ const formatISODate = (isoDate) => {
   return `${day}.${month}.${year} ${hours}:${minutes}`;
 };
 </script>
+<style lang="scss">
+.newsletter-detail-dialog {
+  .v-card-title {
+    p {
+      padding: 10px;
+    }
+  }
+  table {
+    width: 90% !important;
+    border-spacing: 0;
+    margin: auto !important;
+  }
+  &-table {
+    &-image {
+      width: 150px;
+    }
+    &-like-count {
+      font-size: 20px !important;
+    }
+  }
+}
+</style>
