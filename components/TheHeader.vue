@@ -1,6 +1,6 @@
 <template>
   <v-container class="page-container pb-0">
-    <v-row class="mb-0 mb-md-4 mb-lg-8 mt-n16">
+    <v-row class="mb-0 mb-md-4 mb-lg-8">
       <v-col>
         <v-img :width="180" src="/logo/logo.png" />
       </v-col>
@@ -8,7 +8,7 @@
     <v-row class="mb-0 mb-md-4 mb-lg-8">
       <v-col cols="12" class="pb-0">
           <template v-if="!isLoading">
-            <h1 style="font-weight: 350!important"  class="font-weight-regular header-title">
+            <h1 style="font-family: 'MetaSerifPro'!important; font-weight: 350!important"  class="font-weight-regular header-title">
               <span v-html="title"></span>
             </h1>
           </template>

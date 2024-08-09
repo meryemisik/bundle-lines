@@ -10,6 +10,19 @@ const s3 = new S3Client({
     },
 });
 
+const getFileExtension = (fileName) => {
+    const dotIndex = fileName.lastIndexOf('.');
+    return dotIndex !== -1 ? fileName.substring(dotIndex) : '';
+};
+
+const generateUUID = () => {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        const r = (Math.random() * 16) | 0,
+            v = c === 'x' ? r : (r & 0x3) | 0x8;
+        return v.toString(16);
+    });
+}
+
 export const uploadFileToS3 = async (file) => {
 
     if (!file || !file[0].filepath) {
@@ -18,8 +31,7 @@ export const uploadFileToS3 = async (file) => {
 
     const fileStream = fs.createReadStream(file[0].filepath);
 
-    const fileName= `${Math.floor(Math.random() * 1000)}-${file[0].originalFilename}`
-
+    const fileName = `${generateUUID()}${getFileExtension(file[0].originalFilename)}`;
     const uploadParams = {
         Bucket: runtimeConfig.awsBucketName,
         Key: fileName,

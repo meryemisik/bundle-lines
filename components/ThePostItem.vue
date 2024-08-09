@@ -1,5 +1,5 @@
 <template>
-  <div class="post-item">
+  <div class="post-item" :id="`post-item-${dataIndex}`">
     <v-container
       class="page-container my-0 my-md-6"
       v-if="postImages?.length > 0 || postImages?.[0]?.url"
@@ -7,13 +7,9 @@
       <v-row>
         <v-col
           :id="`imagecover-${dataIndex}`"
-          @mousedown="startPress(`imagecover-${dataIndex}`)"
-          @mouseup="cancelPress(`imagecover-${dataIndex}`)"
-          @mouseleave="cancelPress(`imagecover-${dataIndex}`)"
         >
           <template v-if="postType == 0">
             <v-img
-              crossorigin="anonymous"
               :src="postImages?.[0]?.url"
               v-if="postImages?.[0]?.url"
               :id="`image-${dataIndex}`"
@@ -29,7 +25,6 @@
                     @play="isPlaying = true"
                     controlsList="nodownload"
                     class="post-video"
-                    crossorigin="anonymous"
                   >
                     <source :src="postImages?.[0]?.url" type="video/mp4" />
                     Tarayıcınız bu videoyu desteklemiyor.
@@ -58,7 +53,6 @@
                   :key="index"
                 >
                   <v-img
-                    crossorigin="anonymous"
                     :src="image.url"
                     :id="`slider-item-${index}`"
                     :value="index"
@@ -104,9 +98,13 @@
             <v-img
               :width="24"
               :src="
-                isLiked ? '/icons/favorite.svg' : '/icons/favorite-outline.svg'
+                checkPostIsLiked(props?.posts?._id, data?.newsId)
+                  ? '/icons/favorite.svg'
+                  : '/icons/favorite-outline.svg'
               "
-              :class="`mr-2 like-button ${isLiked && 'liked'} `"
+              :class="`mr-2 like-button ${
+                checkPostIsLiked(props?.posts?._id, data?.newsId) && 'liked'
+              } `"
             />
             <span
               v-if="likeCount < 50"
@@ -126,9 +124,8 @@
             </span>
           </div>
           <div
-            v-if="!isWebView"
             class="cursor-pointer position-relative mx-1 mx-md-2 mx-lg-4 d-flex align-center"
-            @click="shareTooltip = !shareTooltip"
+            @click="shareFunction(props?.posts)"
           >
             <v-img :width="24" src="/icons/share.svg" class="mr-2" />
             <span>Paylaş</span>
@@ -171,7 +168,6 @@
         {{ snackbarMsg }}
       </v-snackbar>
     </v-container>
-    <div class="blur-bg" v-if="blurIsVisible"></div>
   </div>
 </template>
 
@@ -191,46 +187,88 @@ const stripHTMLTags = (input) => {
   return input.replace(/<\/?[^>]+(>|$)/g, "");
 };
 
-const blurTimer = ref(null);
-const blurIsVisible = ref(false);
+const isWebView = computed(() => {
+  const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+  // Android WebView detection
+  if (/android/i.test(userAgent) && /wv/.test(userAgent)) {
+    return true;
+  }
+  // iOS WebView detection
+  if (/iPhone|iPod|iPad/i.test(userAgent) && !window.MSStream) {
+    if (
+      (navigator.standalone && !window.navigator.standalone) ||
+      !/safari/i.test(userAgent)
+    ) {
+      return true;
+    }
+  }
+  return false;
+});
 
-const startPress = (id) => {
-  cancelPress(id);
-  blurTimer.value = setTimeout(() => {
-    handleLongPress(id);
-  }, 2000);
+const isIOSWebView = computed(() => {
+  const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+  // iOS WebView detection
+  if (/iPhone|iPod|iPad/i.test(userAgent) && !window.MSStream) {
+    if (
+      (navigator.standalone && !window.navigator.standalone) ||
+      !/safari/i.test(userAgent)
+    ) {
+      return true;
+    }
+  }
+  return false;
+});
+
+const isIOS = computed(() => {
+  return [
+      "iPad Simulator",
+      "iPhone Simulator",
+      "iPod Simulator",
+      "iPad",
+      "iPhone",
+      "iPod",
+    ].includes(navigator.platform) ||
+    (navigator.userAgent.includes("Mac") && "ontouchend" in document);
+});
+
+const shareFunction = async (data) => {
+  if (isIOS.value) {
+    const shareData = {
+      title: data.title.replace(/<\/?[^>]+(>|$)/g, ""),
+      text: data.title.replace(/<\/?[^>]+(>|$)/g, ""),
+      url: `${window.location.origin}/newsletter/${data._id}`,
+    };
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      }
+    } catch (err) {
+      console.error(`Error: ${err}`);
+    }
+  } else {
+    shareTooltip.value = !shareTooltip.value;
+  }
 };
 
-const cancelPress = (id) => {
-  blurIsVisible.value = false;
-  document.querySelector("body").style.overflow = "auto";
-  document.querySelector("html").style.overflow = "auto";
 
-  if (id) {
-    document.getElementById(id).style.zIndex = "9";
+
+
+
+const scrollToContent = () => {
+  const route = useRoute();
+  const newsId = route.query.newsId;
+  if (parseInt(newsId) === props.dataIndex) {
+    const element = document.getElementById(`post-item-${props.dataIndex}`);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+    }
   }
-
-  if (blurTimer.value) {
-    clearTimeout(blurTimer.value);
-    blurTimer.value = null;
-  }
-};
-
-const handleLongPress = (id) => {
-  if (id) {
-    document.getElementById(id).style.zIndex = "9999999";
-  }
-
-  document.querySelector("body").style.overflow = "hidden";
-  document.querySelector("html").style.overflow = "hidden";
-
-  blurIsVisible.value = true;
 };
 
 watchEffect(() => {
   if (props?.posts) {
     let getFirstImage = props?.posts.news.find(
-      (obj) => obj.type == 0 || obj.type == 2
+      (obj) => obj.type == 0 || obj.type == 2,
     );
     getFirstImage = getFirstImage?.content?.[0]?.url;
     let getFirstDescription = props?.posts.news[0].description;
@@ -293,40 +331,10 @@ const handleScroll = () => {
   shareTooltip.value = false;
 };
 
-const isWebView = computed(() => {
-  const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-  // Android WebView detection
-  if (/android/i.test(userAgent) && /wv/.test(userAgent)) {
-    return true;
-  }
-  // iOS WebView detection
-  if (/iPhone|iPod|iPad/i.test(userAgent) && !window.MSStream) {
-    if (
-      (navigator.standalone && !window.navigator.standalone) ||
-      !/safari/i.test(userAgent)
-    ) {
-      return true;
-    }
-  }
-  return false;
-});
-const isIOSWebView = computed(() => {
-  const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-  // iOS WebView detection
-  if (/iPhone|iPod|iPad/i.test(userAgent) && !window.MSStream) {
-    if (
-      (navigator.standalone && !window.navigator.standalone) ||
-      !/safari/i.test(userAgent)
-    ) {
-      return true;
-    }
-  }
-  return false;
-});
-
 onMounted(() => {
   window.addEventListener("scroll", handleScroll);
-  sendItemImpression(`caricature-${props.dataIndex + 1}`);
+  sendItemImpression("homepage");
+  scrollToContent();
 });
 
 onUnmounted(() => {
@@ -336,10 +344,10 @@ onUnmounted(() => {
 const canvas = ref(null);
 const createImage = async (socialIconName) => {
   const sourceImage = ref(
-    document.querySelector(`#imagecover-${props.dataIndex}`)
+    document.querySelector(`#imagecover-${props.dataIndex}`),
   );
   const postDescriptionElement = ref(
-    document.querySelector(`#description-${props.dataIndex}`)
+    document.querySelector(`#description-${props.dataIndex}`),
   );
 
   // if (postType.value == 0) {
@@ -402,11 +410,11 @@ const createImage = async (socialIconName) => {
             textY,
             canvas.value.width,
             (canvas.value.width / postDescriptionElement.value.offsetWidth) *
-              postDescriptionElement.value.offsetHeight
+              postDescriptionElement.value.offsetHeight,
           );
 
           sharePost(socialIconName, canvas.value.toDataURL("image/png"));
-        }
+        },
       );
     });
   };
@@ -426,21 +434,61 @@ const generateUniqueId = () => {
   return `${uniqueId}${timestamp}`;
 };
 
-const createSharedNewsletter = async (image, imageId) => {
-  const route = useRoute();
-  const id = route.params.id;
-  const formData = {
-    imgSrc: image,
-    fullPostId: id,
-    imageId: imageId,
-  };
+const sendFilesS3 = async (base64Data) => {
   try {
-    const response = await $fetch("/api/newsletter-detail/create", {
+    const byteString = atob(base64Data.split(",")[1]);
+    const arrayBuffer = new ArrayBuffer(byteString.length);
+    const uint8Array = new Uint8Array(arrayBuffer);
+
+    for (let i = 0; i < byteString.length; i++) {
+      uint8Array[i] = byteString.charCodeAt(i);
+    }
+
+    const blob = new Blob([uint8Array], { type: "image/jpeg" });
+    const formData = new FormData();
+    formData.append("file", blob, "image.jpg");
+
+    const response = await fetch("/api/upload", {
       method: "POST",
       body: formData,
     });
+
+    if (response.ok) {
+      const data = await response.json();
+      if (data) {
+        return data.url;
+      }
+    } else {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+  } catch (error) {
+    console.error(`Error during upload:`, error);
+    return null;
+  }
+};
+
+const createSharedNewsletter = async (imageBase64, imageId) => {
+  try {
+    const imgSrc = await sendFilesS3(imageBase64);
+
+    if (imgSrc) {
+      const route = useRoute();
+      const id = route.params.id;
+      const formData = {
+        imgSrc: imgSrc,
+        fullPostId: id,
+        imageId: imageId,
+      };
+
+      const response = await $fetch("/api/newsletter-detail/create", {
+        method: "POST",
+        body: formData,
+      });
+    } else {
+      console.error("Failed to get image URL from S3");
+    }
   } catch (e) {
-    console.log("error", e);
+    console.log("Error creating newsletter:", e);
   }
 };
 
@@ -449,11 +497,11 @@ const sharePost = async (socialIconName, image) => {
   let postTitle = props.posts.title.replace(/<\/?[^>]+>/gi, "");
   let postUrl = `${location.origin}/c/${imageId}`;
 
-  createSharedNewsletter(image, imageId);
+  await createSharedNewsletter(image, imageId);
   var socialUrl = null;
   if (socialIconName == "x") {
     socialUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(
-      postTitle
+      postTitle,
     )}&url=${encodeURIComponent(postUrl)}`;
     setTimeout(() => {
       window.open(socialUrl, "_top");
@@ -468,15 +516,15 @@ const sharePost = async (socialIconName, image) => {
     sendItemClick(`whatsapp`);
   } else if (socialIconName == "facebook") {
     socialUrl = `https://www.facebook.com/dialog/share?app_id=584568938807562&display=popup&href=${encodeURIComponent(
-      postUrl
+      postUrl,
     )}&redirect_uri=${encodeURIComponent(postUrl)}`;
     setTimeout(() => {
       window.open(socialUrl, "_top");
     });
     sendItemClick(`facebook`);
   } else if (socialIconName == "linkedin") {
-    socialUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
-      postUrl
+    socialUrl = `https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(
+      postUrl,
     )}`;
     setTimeout(() => {
       window.open(socialUrl, "_top");
@@ -486,6 +534,13 @@ const sharePost = async (socialIconName, image) => {
     socialUrl = `${location.origin}/c/${imageId}`;
     isSnackbarVisible.value = "true";
     snackbarMsg.value = "Kopyalandı!";
+    const textArea = document.createElement("textarea");
+    textArea.value = socialUrl;
+    document.body.appendChild(textArea);
+    textArea.select();
+    document.execCommand("copy");
+    document.body.removeChild(textArea);
+
     await navigator.clipboard.writeText(socialUrl);
     sendItemClick(`link`);
   } else if (socialIconName == "download") {
@@ -517,6 +572,7 @@ const nextImg = () => {
 
 const isLiked = ref(false);
 const likeToggle = (newsId) => {
+  toggleNewsInPost(props?.posts?._id, newsId);
   isLiked.value = !isLiked.value;
   if (isLiked.value) {
     sendItemClick(`caricature-${props.dataIndex + 1}`);
@@ -525,10 +581,38 @@ const likeToggle = (newsId) => {
   updateLikeCount(props?.posts?._id, newsId, likeCount.value);
 };
 
+const checkPostIsLiked = (postId, newsId) => {
+  let likedPosts = JSON.parse(localStorage.getItem("likedBundlePosts")) || [{}];
+  let posts = likedPosts[0];
+  if (posts[postId] && posts[postId].includes(newsId)) {
+    isLiked.value = true;
+    return true;
+  }
+  isLiked.value = false;
+  return false;
+};
+const toggleNewsInPost = (postId, newsId) => {
+  let likedPosts = JSON.parse(localStorage.getItem("likedBundlePosts")) || [{}];
+  let posts = likedPosts[0];
+  if (posts[postId]) {
+    let newsIndex = posts[postId].indexOf(newsId);
+    if (newsIndex !== -1) {
+      posts[postId].splice(newsIndex, 1);
+      if (posts[postId].length === 0) {
+        delete posts[postId];
+      }
+    } else {
+      posts[postId].push(newsId);
+    }
+  } else {
+    posts[postId] = [newsId];
+  }
+  localStorage.setItem("likedBundlePosts", JSON.stringify(likedPosts));
+};
 const isPlaying = ref(false);
 const playVideo = () => {
   const videoElement = document.querySelector(
-    `#video-${props.dataIndex} video`
+    `#video-${props.dataIndex} video`,
   );
   if (videoElement && isPlaying) {
     videoElement.play();

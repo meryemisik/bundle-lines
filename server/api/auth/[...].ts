@@ -3,6 +3,7 @@ import { NuxtAuthHandler } from "#auth";
 const runtimeConfig = useRuntimeConfig();
 
 export default NuxtAuthHandler({
+  secret: runtimeConfig.apiSecretKey,
   providers: [
     CredentialsProvider.default({
       name: "Credentials",

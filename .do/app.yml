@@ -1,0 +1,38 @@
+alerts:
+- disabled: true
+  rule: DEPLOYMENT_FAILED
+- rule: DOMAIN_FAILED
+domains:
+- domain: bundlelines.bundle.app
+  type: PRIMARY
+envs:
+- key: AUTH_ORIGIN
+  scope: RUN_AND_BUILD_TIME
+  value: https://bundlelines.bundle.app
+features:
+- buildpack-stack=ubuntu-22
+ingress:
+  rules:
+  - component:
+      name: bundle-lines
+    match:
+      path:
+        prefix: /
+name: bundlelines
+region: fra
+services:
+- autoscaling:
+    max_instance_count: 5
+    metrics:
+      cpu:
+        percent: 70
+    min_instance_count: 1
+  http_port: 8080
+  image:
+    deploy_on_push:
+      enabled: false
+    registry_type: DOCR
+    repository: bundle-lines
+    tag: latest
+  instance_size_slug: apps-d-1vcpu-1gb
+  name: bundle-lines

@@ -20,66 +20,55 @@
 </template>
 
 <script setup>
+import { ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { useAsyncData, useHead } from "#app";
+
 const route = useRoute();
-const id = route.params.id;
+const router = useRouter();
+
 const imgSrc = ref(null);
 const fullPostId = ref(null);
 const isLoading = ref(true);
 
-const router = useRouter();
+const { data, pending, error } = await useAsyncData("newsletterDetails", async () => {
+  const response = await $fetch(`/api/newsletter-detail/getById?imageId=${route.params.id}`);
+  return response;
+});
+
+if (!error.value) {
+  imgSrc.value = data.value.imgSrc;
+  fullPostId.value = data.value.fullPostId;
+  isLoading.value = false;
+}
+
+useHead(() => ({
+  title: !isLoading.value ? "Bundle Lines" : "Loading Bundle Lines",
+  meta: [
+    { name: "description", content: "Bundle Lines" },
+    { property: "og:title", content: "Bundle Lines" },
+    { property: "og:description", content: "Bundle Lines" },
+    { property: "og:image", content: imgSrc.value },
+    { property: "og:type", content: "article" },
+    { property: "og:site_name", content: "Bundle Lines" },
+    { property: "og:url", content: `https://bundlelines.bundle.app${route.fullPath}` },
+    { property: "og:locale", content: "tr_TR" },
+    { name: "twitter:card", content: "summary_large_image" },
+    { name: "twitter:title", content: "Bundle Lines" },
+    { name: "twitter:description", content: "Bundle Lines" },
+    { name: "twitter:image", content: imgSrc.value },
+  ],
+  link: [
+    {
+      rel: "canonical",
+      href: `https://bundlelines.bundle.app${route.fullPath}`,
+    },
+  ],
+}));
 
 const goToPost = () => {
   router.push(`/newsletter/${fullPostId.value}`);
 };
-
-onMounted(async () => {
-  fetchData();
-});
-
-const fetchData = async (retries = 3, delay = 2000) => {
-  try {
-    const response = await $fetch(
-      `/api/newsletter-detail/getById?imageId=${id}`
-    );
-    imgSrc.value = response.imgSrc;
-    fullPostId.value = response.fullPostId;
-
-    useSeoMeta({
-      title: "Bundle Lines",
-      ogTitle: "Bundle Lines",
-      description: "Bundle Lines",
-      ogDescription: "Bundle Lines",
-      ogImage: imgSrc.value,
-      twitterCard: "summary_large_image",
-      ogType: "article",
-      ogSiteName: "Bundle Lines",
-      ogUrl: window.location.href,
-      ogLocale: "tr_TR",
-      twitterTitle: "Bundle Lines",
-      twitterDescription: "Bundle Lines",
-      twitterImage: imgSrc.value,
-    });
-
-    isLoading.value = false;
-  } catch (e) {
-    if (retries > 0) {
-      console.error(
-        `Retrying in ${delay / 1000} seconds... (${retries} attempts left)`
-      );
-      await new Promise((res) => setTimeout(res, delay));
-      await fetchData(id, retries - 1, delay);
-    } else {
-      isLoading.value = false;
-      console.error("Failed to fetch data:", e);
-    }
-  }
-};
-
-useHead({
-  bodyAttrs: {
-    class: "shared-image",
-  },
-});
 </script>
 
 <style lang="scss">

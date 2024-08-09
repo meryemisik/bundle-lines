@@ -5,7 +5,7 @@ export default defineEventHandler(async (event) => {
   try {
     const { newsId, likeCount, id } = await readBody(event);
     if (!newsId || !id) {
-      throw new Error("Missing componentsId or id in request body");
+      throw new Error("Missing newsId or id in request body");
     }
     const caricature = await CaricaturesModel.findOneAndUpdate(
       { "news.newsId": newsId }, 

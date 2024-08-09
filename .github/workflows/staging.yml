@@ -1,0 +1,49 @@
+name: Deploy to DigitalOcean App Platform
+
+on:
+  push:
+    branches:
+      - staging
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Log in to DigitalOcean
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_API_TOKEN }}
+
+      - name: Log in to DigitalOcean Container Registry
+        run: doctl registry login --expiry-seconds 1800
+        env:
+          DO_API_TOKEN: ${{ secrets.DIGITALOCEAN_API_TOKEN }}
+
+      - name: Set up .env file
+        run: |
+          echo "AUTH_ORIGIN=${{ secrets.AUTH_ORIGIN }}" >> .env
+          echo "NUXT_MEASUREMENT_ID=${{ secrets.NUXT_MEASUREMENT_STAGING_ID }}" >> .env
+          echo "NUXT_API_SECRET_KEY=${{ secrets.NUXT_API_SECRET_KEY }}" >> .env
+          echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> .env
+          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> .env
+          echo "AWS_BUCKET_NAME=${{ secrets.AWS_BUCKET_NAME }}" >> .env
+          echo "AWS_REGION=${{ secrets.AWS_REGION }}" >> .env
+          echo "NUXT_MONGO_URI=${{ secrets.NUXT_MONGO_STAGING_URI }}" >> .env
+          echo "PASSWORD=${{ secrets.PASSWORD }}" >> .env
+
+      - name: Build Docker image
+        run: docker buildx build  $(grep -v '^#' .env | xargs -I {} echo "--build-arg {}") -t registry.digitalocean.com/bundlenews/bundle-lines:staging .
+      - name: Push Docker image to DigitalOcean Container Registry
+        run: docker push registry.digitalocean.com/bundlenews/bundle-lines:staging
+
+      - name: Deploy to DigitalOcean App Platform
+        run: |
+          cat .do/staging.yml
+          doctl apps update ${{ secrets.DIGITALOCEAN_STAGING_APP_ID }} --spec .do/staging.yml
+          doctl apps create-deployment ${{ secrets.DIGITALOCEAN_STAGING_APP_ID }}
+        env:
+          DO_API_TOKEN: ${{ secrets.DIGITALOCEAN_API_TOKEN }}
