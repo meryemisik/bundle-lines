@@ -7,119 +7,89 @@
 @import "@mdi/font/css/materialdesignicons.min";
 @import url("https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
 
-body {
-    margin: 40px 0;
-
-    @media screen and (max-width: 573px) {
-        margin: 20px 0;
-    }
-
-    &::before {
-        content: "";
-        position: absolute;
-        width: 100%;
-        height: 80px;
-        left: 0;
-        top: 0;
-        background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(255, 255, 255, 1) 100%),
-            repeating-linear-gradient(
-                to right,
-                transparent,
-                transparent 18px,
-                rgba(144, 214, 244, 0.3) 18px,
-                rgba(144, 214, 244, 0.3) 19px
-            ),
-            repeating-linear-gradient(
-                to bottom,
-                transparent,
-                transparent 18px,
-                rgba(144, 214, 244, 0.3) 18px,
-                rgba(144, 214, 244, 0.3) 19px
-            ),
-            linear-gradient(45deg, #fcfcfc, #fcfcfc);
-    }
-}
-
 * {
-    font-family: "MetaSerifPro";
-    user-select: none !important;
-    scrollbar-width: thin;
-    &:hover {
-        &::-webkit-scrollbar {
-            &-track {
-                background: #ebebeb;
-            }
-            &-thumb {
-                background: #1d2939;
-            }
-        }
-    }
-
+  font-family: "MetaSerifPro";
+  user-select: none !important;
+  scrollbar-width: thin;
+  &:hover {
     &::-webkit-scrollbar {
-        width: 4px;
-        height: 4px;
-        border-radius: 100px;
-        margin-left: 26px;
-
-        &-track {
-            background: transparent;
-            border-radius: 100px;
-        }
-
-        &-thumb {
-            background: transparent;
-            border-radius: 100px;
-
-            &:hover {
-                background: #081b36;
-            }
-        }
+      &-track {
+        background: #ebebeb;
+      }
+      &-thumb {
+        background: #1d2939;
+      }
     }
-}
+  }
 
+  &::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+    border-radius: 100px;
+    margin-left: 26px;
+
+    &-track {
+      background: transparent;
+      border-radius: 100px;
+    }
+
+    &-thumb {
+      background: transparent;
+      border-radius: 100px;
+
+      &:hover {
+        background: #081b36;
+      }
+    }
+  }
+}
 
 * > p {
-    color: black !important;
-    font-size: 16px !important;
-    font-family: "CCWildWordsTR";
-    font-weight: 350 !important;
-    line-height: 20px !important;
-    letter-spacing: 0.13px !important;
+  color: black !important;
+  font-size: 16px !important;
+  font-family: "CCWildWordsTR";
+  font-weight: 350 !important;
+  line-height: 20px !important;
+  letter-spacing: 0.13px !important;
 }
 
-h1 p, h1 * {
-    font-family: "MetaSerifPro"!important;
-    font-size: 31px!important;
-    line-height: 38px!important;
+h1 p,
+h1 * {
+  font-family: "MetaSerifPro" !important;
+  font-size: 31px !important;
+  line-height: 38px !important;
 }
 
 @media screen and (max-width: 573px) {
-    * > p {
-        color: black !important;
-        font-size: 13px !important;
-        font-family: "CCWildWordsTR" !important;
-        font-weight: 350 !important;
-        line-height: 17.55px !important;
-        letter-spacing: 0.13px !important;
-    }
+  * > p {
+    color: black !important;
+    font-size: 13px !important;
+    font-family: "CCWildWordsTR" !important;
+    font-weight: 350 !important;
+    line-height: 17.55px !important;
+    letter-spacing: 0.13px !important;
+  }
 }
 
 .page-container {
-    max-width: 600px !important;
-    margin: 0 auto;
-    //border-bottom: 1px solid #eee
+  max-width: 600px !important;
+  margin: 0 auto;
 }
 
 .font-barlow {
-    font-family: "Barlow", sans-serif !important;
+  font-family: "Barlow", sans-serif !important;
 }
 
 div[id^="image-"] .v-responsive__sizer {
-    padding-bottom: 90% !important;
+  padding-bottom: 90% !important;
 }
 
 @media screen and (max-width: 573px) {
-    div[id^="image-"] .v-responsive__sizer {
-        padding-bottom: 100% !important;
-    }
+  div[id^="image-"] .v-responsive__sizer {
+    padding-bottom: 100% !important;
+  }
+}
+
+.v-application {
+  background-color: #f4f6f6 !important;
 }

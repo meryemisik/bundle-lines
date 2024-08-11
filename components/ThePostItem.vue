@@ -4,10 +4,8 @@
       class="page-container my-0 my-md-6"
       v-if="postImages?.length > 0 || postImages?.[0]?.url"
     >
-      <v-row>
-        <v-col
-          :id="`imagecover-${dataIndex}`"
-        >
+      <v-row class="bg-white rounded-xl">
+        <v-col :id="`imagecover-${dataIndex}`">
           <template v-if="postType == 0">
             <v-img
               :src="postImages?.[0]?.url"
@@ -220,7 +218,8 @@ const isIOSWebView = computed(() => {
 });
 
 const isIOS = computed(() => {
-  return [
+  return (
+    [
       "iPad Simulator",
       "iPhone Simulator",
       "iPod Simulator",
@@ -228,7 +227,8 @@ const isIOS = computed(() => {
       "iPhone",
       "iPod",
     ].includes(navigator.platform) ||
-    (navigator.userAgent.includes("Mac") && "ontouchend" in document);
+    (navigator.userAgent.includes("Mac") && "ontouchend" in document)
+  );
 });
 
 const shareFunction = async (data) => {
@@ -250,10 +250,6 @@ const shareFunction = async (data) => {
   }
 };
 
-
-
-
-
 const scrollToContent = () => {
   const route = useRoute();
   const newsId = route.query.newsId;
@@ -268,7 +264,7 @@ const scrollToContent = () => {
 watchEffect(() => {
   if (props?.posts) {
     let getFirstImage = props?.posts.news.find(
-      (obj) => obj.type == 0 || obj.type == 2,
+      (obj) => obj.type == 0 || obj.type == 2
     );
     getFirstImage = getFirstImage?.content?.[0]?.url;
     let getFirstDescription = props?.posts.news[0].description;
@@ -344,10 +340,10 @@ onUnmounted(() => {
 const canvas = ref(null);
 const createImage = async (socialIconName) => {
   const sourceImage = ref(
-    document.querySelector(`#imagecover-${props.dataIndex}`),
+    document.querySelector(`#imagecover-${props.dataIndex}`)
   );
   const postDescriptionElement = ref(
-    document.querySelector(`#description-${props.dataIndex}`),
+    document.querySelector(`#description-${props.dataIndex}`)
   );
 
   // if (postType.value == 0) {
@@ -410,11 +406,11 @@ const createImage = async (socialIconName) => {
             textY,
             canvas.value.width,
             (canvas.value.width / postDescriptionElement.value.offsetWidth) *
-              postDescriptionElement.value.offsetHeight,
+              postDescriptionElement.value.offsetHeight
           );
 
           sharePost(socialIconName, canvas.value.toDataURL("image/png"));
-        },
+        }
       );
     });
   };
@@ -501,7 +497,7 @@ const sharePost = async (socialIconName, image) => {
   var socialUrl = null;
   if (socialIconName == "x") {
     socialUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(
-      postTitle,
+      postTitle
     )}&url=${encodeURIComponent(postUrl)}`;
     setTimeout(() => {
       window.open(socialUrl, "_top");
@@ -516,7 +512,7 @@ const sharePost = async (socialIconName, image) => {
     sendItemClick(`whatsapp`);
   } else if (socialIconName == "facebook") {
     socialUrl = `https://www.facebook.com/dialog/share?app_id=584568938807562&display=popup&href=${encodeURIComponent(
-      postUrl,
+      postUrl
     )}&redirect_uri=${encodeURIComponent(postUrl)}`;
     setTimeout(() => {
       window.open(socialUrl, "_top");
@@ -524,7 +520,7 @@ const sharePost = async (socialIconName, image) => {
     sendItemClick(`facebook`);
   } else if (socialIconName == "linkedin") {
     socialUrl = `https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(
-      postUrl,
+      postUrl
     )}`;
     setTimeout(() => {
       window.open(socialUrl, "_top");
@@ -612,7 +608,7 @@ const toggleNewsInPost = (postId, newsId) => {
 const isPlaying = ref(false);
 const playVideo = () => {
   const videoElement = document.querySelector(
-    `#video-${props.dataIndex} video`,
+    `#video-${props.dataIndex} video`
   );
   if (videoElement && isPlaying) {
     videoElement.play();

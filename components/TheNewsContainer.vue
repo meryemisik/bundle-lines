@@ -1,7 +1,7 @@
 <template>
   <div v-if="isClientMounted">
     <the-header v-if="hasPosts" :data="posts" />
-    <v-sheet>
+    <v-col>
       <template v-if="hasPosts">
         <template v-for="(item, index) in posts.news" :key="index">
           <the-post-item
@@ -21,7 +21,7 @@
           max-width="530"
         />
       </template>
-    </v-sheet>
+    </v-col>
     <the-share-instagram />
     <the-footer />
   </div>
@@ -48,14 +48,14 @@ const props = defineProps({
     type: Object,
     required: true,
     default: () => ({
-      news: [], 
+      news: [],
     }),
   },
 });
 
 const isClientMounted = ref(false);
 const hasPosts = computed(
-  () => props.posts.news && props.posts.news.length > 0,
+  () => props.posts.news && props.posts.news.length > 0
 );
 
 onMounted(() => {

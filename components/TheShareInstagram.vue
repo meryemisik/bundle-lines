@@ -1,5 +1,5 @@
 <template>
-  <v-container class="page-container border-b mb-4 pb-10">
+  <v-container class="page-container border-b border-t mb-4 py-6">
     <v-row>
       <v-col class="px-0 px-sm-3 px-md-6">
         <div class="centered-content">
