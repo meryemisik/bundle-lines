@@ -1,10 +1,10 @@
 <template>
-  <v-container class="page-container mb-4">
+  <v-container class="page-container">
     <v-row class="align-center">
       <v-col class="d-flex justify-center flex-column m-0 p-0">
         <v-img :width="138" src="/logo/footer-logo.svg" />
       </v-col>
-      <v-col class="d-flex align-end flex-column m-0 p-0 footer-text"
+      <v-col class="d-flex align-end flex-column m-0 p-0 footer-text font-roboto"
         >Bundle ürünüdür.</v-col
       >
     </v-row>
@@ -12,9 +12,8 @@
 </template>
 <style>
 .footer-text {
-  font-family: Roboto;
-  font-size: 10px;
-  font-weight: 500;
+  font-size: 10px !important;
+  font-weight: 500 !important;
   line-height: 10px;
   letter-spacing: 0.02em;
   text-align: left;

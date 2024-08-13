@@ -8,12 +8,17 @@
         <v-col :id="`imagecover-${dataIndex}`">
           <template v-if="postType == 0">
             <v-img
+              @click="goToDetailNews(props?.data, dataIndex)"
               :src="postImages?.[0]?.url"
               v-if="postImages?.[0]?.url"
               :id="`image-${dataIndex}`"
+              class="cursor-pointer"
             />
           </template>
-          <template v-else-if="postType == 1">
+          <template
+            v-else-if="postType == 1"
+            @click="goToDetailNews(props?.data, dataIndex)"
+          >
             <v-col v-if="postImages?.[0]?.url">
               <v-responsive>
                 <div :id="`video-${dataIndex}`">
@@ -37,7 +42,10 @@
               </v-responsive>
             </v-col>
           </template>
-          <template v-else-if="postType == 2">
+          <template
+            v-else-if="postType == 2"
+            @click="goToDetailNews(props?.data, dataIndex)"
+          >
             <div class="position-relative" v-if="postImages?.length > 0">
               <v-carousel
                 height="auto"
@@ -104,20 +112,8 @@
                 checkPostIsLiked(props?.posts?._id, data?.newsId) && 'liked'
               } `"
             />
-            <span
-              v-if="likeCount < 50"
-              style="
-                font-family: CCWildWordsTR;
-                font-size: 12px;
-                font-weight: 400;
-                line-height: 15.72px;
-                letter-spacing: 0.01em;
-                text-align: center;
-              "
-            >
-              {{ likeCount + randomLikeCount }}
-            </span>
-            <span v-else>
+
+            <span>
               {{ likeCount }}
             </span>
           </div>
@@ -184,7 +180,10 @@ const randomLikeCount = ref(props?.data?.randomLikeCount);
 const stripHTMLTags = (input) => {
   return input.replace(/<\/?[^>]+(>|$)/g, "");
 };
-
+const goToDetailNews = (content, dataIndex) => {
+  const router = useRouter();
+  router.push(`/detail/${props?.posts?._id}?newsId=${dataIndex}`);
+};
 const isWebView = computed(() => {
   const userAgent = navigator.userAgent || navigator.vendor || window.opera;
   // Android WebView detection

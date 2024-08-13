@@ -1,6 +1,6 @@
 <template>
   <v-container fluid class="pb-0">
-    <v-row class="mb-0 mb-md-4 mb-lg-8 bg-white pa-0">
+    <v-row class="mb-0 mb-md-4 mb-lg-8 bg-white pa-0 align-center">
       <v-col cols="auto" class="pa-0">
         <div class="bg-grey-darken-4 py-2 px-4">
           <v-img :width="28" src="/logo/logo-icon.png" />
@@ -9,7 +9,7 @@
       <v-col class="page-container">
         <v-img :width="180" src="/logo/logo-dark.png" />
       </v-col>
-      <v-col cols="auto"> paylaş </v-col>
+      <v-col cols="auto "> <v-img :width="30" src="/icons/share-button.png" class="cursor-pointer" @click="shareWebSite()"/> </v-col>
     </v-row>
     <v-row class="mb-0 mb-md-4 mb-lg-8 page-container mx-auto">
       <v-col cols="12" class="pb-0">
@@ -42,6 +42,14 @@
         </div>
       </v-col>
     </v-row>
+    <v-snackbar
+      v-model="isSnackbarVisible"
+      timeout="3000"
+      location="top right"
+      :color="snackbarColor"
+    >
+      {{ snackbarMsg }}
+    </v-snackbar>
   </v-container>
 </template>
 
@@ -54,7 +62,19 @@ const isLoading = ref(true);
 const title = ref(null);
 const sponsorship = ref(null);
 const sponsorshipLogo = ref(null);
+const isSnackbarVisible = ref(false);
+const snackbarMsg = ref("");
+const snackbarColor = ref("");
 
+const shareWebSite = () => {
+  const currentUrl = window.location.href;
+  navigator.clipboard.writeText(currentUrl)
+    .then(() => {
+      isSnackbarVisible.value = true;
+      snackbarColor.value = "success";
+      snackbarMsg.value = "URL kopyalandı!";
+    })
+};
 watch(
   () => props.data,
   (newData) => {

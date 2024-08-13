@@ -241,7 +241,7 @@ const formatISODate = (isoDate) => {
   }
   &-table {
     &-image {
-      width: 150px;
+      width: 100px;
     }
     &-like-count {
       font-size: 20px !important;
