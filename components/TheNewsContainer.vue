@@ -1,16 +1,14 @@
 <template>
-  <div v-if="isClientMounted">
+  <div v-if="isClientMounted || isLoading">
     <!-- <the-header v-if="hasPosts" :data="posts" /> -->
     <v-col>
       <template v-if="hasPosts">
-        <template v-for="(item, index) in posts.news" :key="index">
           <the-post-item
             v-if="isClientMounted"
-            :data="item"
+            :data="posts.news"
             :posts="posts"
-            :dataIndex="index"
+            :dataIndex="dataIndex"
           />
-        </template>
       </template>
       <template v-if="isLoading">
         <v-skeleton-loader
@@ -43,19 +41,25 @@ const props = defineProps({
   isLoading: {
     type: Boolean,
     required: true,
+    default: true
   },
   posts: {
     type: Object,
     required: true,
     default: () => ({
-      news: [],
+      news: {},
     }),
+  },
+  dataIndex: {
+    type: Number,
+    required: true,
+    
   },
 });
 
 const isClientMounted = ref(false);
 const hasPosts = computed(
-  () => props.posts.news && props.posts.news.length > 0
+  () => props.posts.news
 );
 
 onMounted(() => {

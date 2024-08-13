@@ -83,6 +83,16 @@
           </template>
         </v-col>
       </v-row>
+      <v-row v-if="postCaricaturist">
+        <v-col class="px-0 px-sm-3 px-md-6">
+          <div
+            class="font-playfair post-caricaturist"
+            :id="`description-${dataIndex}`"
+          >
+            Çizer: {{ postCaricaturist }}
+          </div>
+        </v-col>
+      </v-row>
       <v-row>
         <v-col class="px-0 px-sm-3 px-md-6">
           <div
@@ -97,6 +107,7 @@
           class="d-flex justify-center text-caption font-weight-medium mb-5"
           v-if="postDescription || postImages?.[0]?.url"
         >
+          <div>{{ postCreatedAt }}</div>
           <div
             class="cursor-pointer mx-1 mx-sm-2 mx-md-4 d-flex align-center"
             @click="likeToggle(data?.newsId)"
@@ -170,6 +181,9 @@ import { sendGA4Events } from "~/services/ga4";
 import html2canvas from "html2canvas";
 const runtimeConfig = useRuntimeConfig();
 const props = defineProps(["data", "dataIndex", "posts"]);
+const { $formatDate } = useNuxtApp();
+const postCaricaturist = ref(props?.posts?.caricaturist || "");
+const postCreatedAt = ref($formatDate(props?.posts?.createdAt) || "");
 const isSnackbarVisible = ref(false);
 const snackbarMsg = ref("");
 const postType = ref(props?.data?.type || 0);
@@ -262,18 +276,18 @@ const scrollToContent = () => {
 
 watchEffect(() => {
   if (props?.posts) {
-    let getFirstImage = props?.posts.news.find(
-      (obj) => obj.type == 0 || obj.type == 2
-    );
-    getFirstImage = getFirstImage?.content?.[0]?.url;
-    let getFirstDescription = props?.posts.news[0].description;
+    // let getFirstImage = props?.posts.news.find(
+    //   (obj) => obj.type == 0 || obj.type == 2
+    // );
+    // getFirstImage = getFirstImage?.content?.[0]?.url;
+    let getFirstDescription = props?.posts?.news?.description;
     getFirstDescription = stripHTMLTags(getFirstDescription);
     useSeoMeta({
       title: props.posts.title.replace(/<\/?[^>]+>/gi, ""),
       ogTitle: props.posts.title.replace(/<\/?[^>]+>/gi, ""),
       description: getFirstDescription,
       ogDescription: getFirstDescription,
-      ogImage: getFirstImage,
+      //ogImage: getFirstImage,
       twitterCard: "summary_large_image",
       ogType: "article", // veya uygun tür
       ogSiteName: "Bundle Lines",
@@ -281,7 +295,7 @@ watchEffect(() => {
       ogLocale: "tr_TR",
       twitterTitle: props.posts.title.replace(/<\/?[^>]+>/gi, ""),
       twitterDescription: getFirstDescription,
-      twitterImage: getFirstImage,
+      //twitterImage: getFirstImage,
     });
   }
 });

@@ -42,7 +42,10 @@
               </template>
 
               <template v-slot:[`item.createdAt`]="{ item }">
-                {{ formatISODate(item.createdAt) }}
+                {{ $formatDate(item.createdAt) }}
+              </template>
+              <template v-slot:[`item.caricaturist`]="{ item }">
+                {{item?.caricaturist}}
               </template>
               <template v-slot:[`item.btn`]="{ item }">
                 <v-icon small @click="goNews(item._id)">
@@ -111,6 +114,10 @@
 </template>
 
 <script setup>
+definePageMeta({
+  layout: 'dashboard'
+})
+const { $formatDate } = useNuxtApp();
 useHead({
   title: "Karikatürlerim",
 });
@@ -152,7 +159,8 @@ const headers = ref([
     align: "start",
     key: "title",
   },
-  { title: "Oluşturma Tarihi", align: "end", key: "createdAt" },
+  { title: "Oluşturma Tarihi", align: "start", key: "createdAt" },
+  { title: "Karikatürist", align: "start", key: "caricaturist" },
   { align: "end", key: "btn" },
 ]);
 
@@ -215,17 +223,7 @@ onMounted(async () => {
   }
 });
 
-const formatISODate = (isoDate) => {
-  const date = new Date(isoDate);
 
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  const hours = String(date.getHours()).padStart(2, "0");
-  const minutes = String(date.getMinutes()).padStart(2, "0");
-
-  return `${day}.${month}.${year} ${hours}:${minutes}`;
-};
 </script>
 <style lang="scss">
 .newsletter-detail-dialog {

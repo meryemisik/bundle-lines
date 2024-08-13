@@ -1,7 +1,7 @@
 <template>
   <v-app>
     <v-main>
-      <the-news-container :isLoading="isLoading" :posts="posts" />
+      <!-- <the-news-container :isLoading="isLoading" :posts="posts" /> -->
     </v-main>
   </v-app>
 </template>

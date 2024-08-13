@@ -7,6 +7,7 @@ export default defineNuxtConfig({
     "@nuxt/content",
     "nuxt-tiptap-editor",
     "@sidebase/nuxt-auth",
+    "@nuxt/image",
   ],
 
   build: {
@@ -52,4 +53,8 @@ export default defineNuxtConfig({
       process.exit();
     },
   },
+
+  plugins: ["~/plugins/formatDate"],
+
+  compatibilityDate: "2024-08-13",
 });

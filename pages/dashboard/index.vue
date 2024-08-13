@@ -227,13 +227,16 @@
     </v-snackbar>
     <v-dialog v-model="reviewDialog" max-width="90%" scrollable>
       <v-card>
-        <the-news-container :isLoading="false" :posts="reviewData" />
+        <!-- <the-news-container :isLoading="false" :posts="reviewData" /> -->
       </v-card>
     </v-dialog>
   </v-container>
 </template>
 
 <script setup>
+definePageMeta({
+  layout: 'dashboard'
+})
 const reviewData = ref({});
 const reviewDialog = ref(false);
 const showReview = () => {
