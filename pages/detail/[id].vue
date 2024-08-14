@@ -13,7 +13,6 @@
  
  const route = useRoute();
  const imgSrc = ref("");
- const isLoading = ref(true);
  const posts = ref({
    news: [],
  });
@@ -27,12 +26,10 @@
        imgSrc.value = response.news[0]?.content[0]?.url || '/default-image.jpg';
        pageTitle.value = response.news[0]?.title || 'Bundle Lines';
      } else {
-       posts.value = { news: [] };  // Ensure the structure if the response is malformed
+       posts.value = { news: [] }; 
        console.warn('Response has no news array!');
      }
-     isLoading.value = false;
    } catch (e) {
-     // Handle error appropriately
      console.error('Error fetching posts:', e);
    }
  };
