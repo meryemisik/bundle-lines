@@ -1,7 +1,7 @@
 <template>
   <div class="post-item" :id="`post-item-${dataIndex}`">
     <v-container
-      class="page-container my-0 my-md-6"
+      class="page-container my-0 my-md-2"
       v-if="postImages?.length > 0 || postImages?.[0]?.url"
     >
       <v-row class="bg-white rounded-xl">
@@ -96,7 +96,7 @@
       <v-row>
         <v-col class="px-0 px-sm-3 px-md-6">
           <div
-            class="text-subtitle-2 text-md-subtitle-1 font-weight-medium text-center post-description"
+            class="font-weight-medium text-center post-description font-playfair  "
             :id="`description-${dataIndex}`"
             v-html="postDescription"
           ></div>
@@ -104,7 +104,7 @@
       </v-row>
       <v-row>
         <v-col
-          class="d-flex justify-center text-caption font-weight-medium mb-5"
+          class="d-flex justify-center text-caption font-weight-medium"
           v-if="postDescription || postImages?.[0]?.url"
         >
           <div>{{ postCreatedAt }}</div>

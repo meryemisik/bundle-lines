@@ -4,8 +4,8 @@
     <main>
       <slot />
     </main>
-    <the-share-instagram />
-    <the-footer />
+    <the-share-instagram :data="headerData"/>
+    <the-footer :data="headerData"/>
   </div>
 </template>
 

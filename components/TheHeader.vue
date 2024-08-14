@@ -26,7 +26,7 @@
               <div class="header-title mt-4">
                 <span class="font-playfair" v-html="title"></span>
               </div>
-              <div class="header- mt-3">
+              <div class="header-subtitle mt-3">
                 <span class="font-playfair">{{ subTitle }}</span>
               </div>
             </template>
@@ -79,7 +79,7 @@ const props = defineProps({
 
 const isLoading = ref(true);
 const title = ref(null);
-const subTitle = ref(null);
+const subTitle = ref(null)
 const sponsorship = ref(null);
 const sponsorshipLogo = ref(null);
 const isSnackbarVisible = ref(false);
@@ -100,7 +100,7 @@ watch(
     if (newData) {
       isLoading.value = false;
       title.value = newData.title;
-      subTitle.value = newData.subTitle;
+      subTitle.value = newData.subTitle
       sponsorship.value = newData.sponsorship;
       sponsorshipLogo.value = newData.sponsorshipLogo;
     }

@@ -1,24 +1,50 @@
 <template>
-  <v-container class="page-container border-b border-t mb-4 py-6">
-    <v-row>
-      <v-col class="px-0 px-sm-3 px-md-6">
-        <div class="centered-content">
-          <span class="follow-instagram" @click="redirectToInstagram">
-            <p>Bundle Lines’ı</p>
-            <v-img
-              src="/icons/instagram-1.png"
-              alt="Instagram Logo"
-              class="instagram-icon"
-            ></v-img>
-            <p>Instagramda <span>takip et</span></p>
-          </span>
-        </div>
-      </v-col>
-    </v-row>
-  </v-container>
+  <div>
+    <template v-if="!isLoading">
+      <v-container class="page-container border-b border-t mb-4 py-6">
+        <v-row>
+          <v-col class="px-0 px-sm-3 px-md-6">
+            <div class="centered-content">
+              <span class="follow-instagram" @click="redirectToInstagram">
+                <p>Bundle Lines’ı</p>
+                <v-img
+                  src="/icons/instagram-1.png"
+                  alt="Instagram Logo"
+                  class="instagram-icon"
+                ></v-img>
+                <p>Instagramda <span>takip et</span></p>
+              </span>
+            </div>
+          </v-col>
+        </v-row>
+      </v-container>
+    </template>
+    <template v-else>
+      <div class="page-container my-3 mx-auto">
+        <v-skeleton-loader
+          class="mx-auto rounded-xl"
+          type="heading"
+        ></v-skeleton-loader>
+      </div>
+    </template>
+  </div>
 </template>
 <script setup>
 import { ref } from "vue";
+
+const props = defineProps({
+  data: Object,
+});
+const isLoading = ref(true);
+watch(
+  () => props.data,
+  (newData) => {
+    if (newData) {
+      isLoading.value = false;
+    }
+  },
+  { immediate: true }
+);
 
 const redirectToInstagram = () => {
   window.open(
