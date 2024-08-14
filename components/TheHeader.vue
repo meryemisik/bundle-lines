@@ -2,26 +2,22 @@
   <div>
     <template v-if="!isLoading">
       <v-container fluid class="pa-0">
-        <v-row
-          class="mb-0 mb-md-4 mb-lg-8 bg-white pa-0 mt-0 mx-0 align-center"
-        >
-          <v-col cols="auto" class="pa-0">
-            <div class="bg-grey-darken-4 py-2 px-4">
-              <v-img :width="28" src="/logo/logo-icon.png" />
-            </div>
-          </v-col>
-          <v-col class="page-container">
+        <div class="mb-0 mb-md-4 mb-lg-8 bg-white pa-0 mt-0 mx-0 align-center d-flex">
+          <div class="bg-grey-darken-4 py-6 px-8 mr-2">
+            <v-img :width="28" src="/logo/logo-icon.png" />
+          </div>
+          <div class="page-container">
             <v-img :width="180" src="/logo/logo-dark.png" />
-          </v-col>
-          <v-col cols="auto ">
+          </div>
+          <div>
             <v-img
               :width="30"
               src="/icons/share-button.png"
               class="cursor-pointer"
               @click="shareWebSite()"
             />
-          </v-col>
-        </v-row>
+          </div>
+        </div>
         <v-row class="mb-0 mb-md-4 mb-lg-8 page-container mx-auto">
           <v-col cols="12" class="pb-0">
             <template v-if="!isLoading">
@@ -104,8 +100,8 @@ watch(
     if (newData) {
       isLoading.value = false;
       // title.value = newData.title;
-       sponsorship.value = newData.sponsorship;
-       sponsorshipLogo.value = newData.sponsorshipLogo;
+      sponsorship.value = newData.sponsorship;
+      sponsorshipLogo.value = newData.sponsorshipLogo;
     }
   },
   { immediate: true }
