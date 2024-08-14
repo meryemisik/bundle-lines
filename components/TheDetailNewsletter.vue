@@ -1,21 +1,20 @@
 <template>
   <div v-if="isClientMounted">
-    <pre>{{ posts }}</pre>
+    <pre>{{ posts.news[route.query.newsId].content[0].url }}</pre>
   </div>
   <div v-else>
     <v-skeleton-loader
       v-for="i in 3"
       :key="i"
       type="image,paragraph,actions"
-      class="my-3 mx-auto"
-      max-width="530"
+      class="my-3 mx-auto pa-3 bg-light rounded-xl"
+      max-width="600"
     />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-
+const route = useRoute();
 const props = defineProps({
   isLoading: {
     type: Boolean,

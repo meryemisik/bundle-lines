@@ -5,7 +5,7 @@
         <div
           class="mb-0 mb-md-4 mb-lg-8 bg-white pa-0 mt-0 mx-0 align-center d-flex"
         >
-          <div class="bg-grey-darken-4 py-6 px-8 mr-2">
+          <div class="bg-grey-darken-4 py-6 px-8">
             <v-img :width="28" src="/logo/logo-icon.png" />
           </div>
           <div class="page-container">
@@ -21,7 +21,7 @@
           </div>
         </div>
         <v-row class="mb-0 mb-md-4 mb-lg-8 page-container mx-auto">
-          <v-col cols="12" class="pb-0">
+          <v-col cols="12" class="pb-0 mx-n2">
             <template v-if="!isLoading">
               <div class="header-title mt-4">
                 <span class="font-playfair" v-html="title"></span>
@@ -37,7 +37,7 @@
               ></v-skeleton-loader>
             </template>
           </v-col>
-          <v-col class="mt-n4" v-show="sponsorship" v-if="!isLoading">
+          <v-col class="mt-n4 mx-n2" v-show="sponsorship" v-if="!isLoading">
             <div class="d-inline-flex">
               <v-img
                 :width="64"
