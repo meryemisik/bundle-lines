@@ -1,15 +1,30 @@
 <template>
   <div>
     <div v-for="(caricature, index) in allCaricaturesData" :key="index">
-      <the-news-container :posts="caricature" :isLoading="isLoading" :dataIndex="index" />
+      <the-news-container
+        :posts="caricature"
+        :isLoading="isLoading"
+        :dataIndex="index"
+      />
     </div>
-    <v-btn @click="moreLoad">Daha fazla</v-btn>
+    <div class="page-container d-flex justify-center mb-5" v-if="allCaricaturesData.length > 0">
+      <v-btn @click="moreLoad">Daha fazla</v-btn>
+    </div>
+    <div v-if="isLoading">
+      <v-skeleton-loader
+        v-for="i in 3"
+        :key="i"
+        type="image,paragraph,actions"
+        class="my-3 mx-auto"
+        max-width="530"
+      />
+    </div>
   </div>
 </template>
 
 <script setup>
-const isLoading = ref(true)
-const headerData = inject('headerData');
+const isLoading = ref(true);
+const headerData = inject("headerData");
 const allCaricaturesData = ref([]);
 // import { useRouter } from 'vue-router'
 
@@ -27,9 +42,9 @@ const getAllCaricatureWithPagination = async (num) => {
     const data = await $fetch(`/api/caricatures/getByPageNum?pageNum=${num}`);
     hasPosts.value = true;
     pageNum.value++;
-    headerData.value = {"asd":"123", "sdcsdc":"3232342"};
-    isLoading.value = false
+    headerData.value = { sponsorship: "buraya sponsor adı", sponsorshipLogo: "buraya sponsor logosu" };
     allCaricaturesData.value = [...allCaricaturesData.value, ...data];
+    isLoading.value = false;
     return allCaricaturesData.value;
   } catch (e) {
     console.error(e);

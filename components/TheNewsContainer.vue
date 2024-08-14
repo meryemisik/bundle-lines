@@ -1,5 +1,5 @@
 <template>
-  <div v-if="isClientMounted || isLoading">
+  <div v-if="isClientMounted">
     <!-- <the-header v-if="hasPosts" :data="posts" /> -->
     <v-col>
       <template v-if="hasPosts">

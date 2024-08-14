@@ -104,8 +104,8 @@ watch(
     if (newData) {
       isLoading.value = false;
       // title.value = newData.title;
-      // sponsorship.value = newData.sponsor;
-      // sponsorshipLogo.value = newData.sponsorImage;
+       sponsorship.value = newData.sponsorship;
+       sponsorshipLogo.value = newData.sponsorshipLogo;
     }
   },
   { immediate: true }
