@@ -2,7 +2,9 @@
   <div>
     <template v-if="!isLoading">
       <v-container fluid class="pa-0">
-        <div class="mb-0 mb-md-4 mb-lg-8 bg-white pa-0 mt-0 mx-0 align-center d-flex">
+        <div
+          class="mb-0 mb-md-4 mb-lg-8 bg-white pa-0 mt-0 mx-0 align-center d-flex"
+        >
           <div class="bg-grey-darken-4 py-6 px-8 mr-2">
             <v-img :width="28" src="/logo/logo-icon.png" />
           </div>
@@ -21,15 +23,12 @@
         <v-row class="mb-0 mb-md-4 mb-lg-8 page-container mx-auto">
           <v-col cols="12" class="pb-0">
             <template v-if="!isLoading">
-              <h1
-                style="
-                  font-family: 'MetaSerifPro' !important;
-                  font-weight: 350 !important;
-                "
-                class="font-weight-regular header-title"
-              >
-                <span v-html="title"></span>
-              </h1>
+              <div class="header-title mt-4">
+                <span class="font-playfair" v-html="title"></span>
+              </div>
+              <div class="header- mt-3">
+                <span class="font-playfair">{{ subTitle }}</span>
+              </div>
             </template>
             <template v-else>
               <v-skeleton-loader
@@ -80,6 +79,7 @@ const props = defineProps({
 
 const isLoading = ref(true);
 const title = ref(null);
+const subTitle = ref(null);
 const sponsorship = ref(null);
 const sponsorshipLogo = ref(null);
 const isSnackbarVisible = ref(false);
@@ -99,7 +99,8 @@ watch(
   (newData) => {
     if (newData) {
       isLoading.value = false;
-      // title.value = newData.title;
+      title.value = newData.title;
+      subTitle.value = newData.subTitle;
       sponsorship.value = newData.sponsorship;
       sponsorshipLogo.value = newData.sponsorshipLogo;
     }
