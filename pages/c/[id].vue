@@ -20,7 +20,6 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useAsyncData, useHead } from "#app";
 definePageMeta({

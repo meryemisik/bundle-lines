@@ -14,7 +14,7 @@
   &:last-child {
     border-bottom: none;
 
-    &>* {
+    & > * {
       // padding-bottom: 3em !important;
 
       @media screen and (max-width: 573px) {
@@ -24,14 +24,12 @@
   }
 
   .post-description {
-    width: 70%;
     display: flex;
-    justify-content: center;
-    text-align: center;
     margin: 0 auto;
+    font-size: 18px;
 
     p {
-      font-size: 18px;
+      font-size: 18px !important;
       font-weight: 400;
     }
 
@@ -47,6 +45,9 @@
     line-height: 17.36px;
     letter-spacing: -0.02em;
     text-align: left;
+  }
+  .post-date {
+    color: #4a4e52;
   }
 }
 
@@ -76,7 +77,6 @@
   &-subtitle {
     font-weight: 400;
     font-size: 18px;
-
   }
 }
 
@@ -179,7 +179,7 @@
   }
 }
 
-.more-load{
+.more-load {
   padding: 14px 26px;
   gap: 0px;
   border-radius: 40px;

@@ -4,6 +4,7 @@
 @import "carousel.scss";
 @import "post.scss";
 @import "upload.scss";
+@import "components/share-instagram.scss";
 @import "@mdi/font/css/materialdesignicons.min";
 @import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
@@ -48,7 +49,7 @@
   }
 }
 
-*>p {
+* > p {
   color: black !important;
   font-size: 16px !important;
   font-family: "Playfair Display", sans-serif !important;
@@ -65,7 +66,7 @@ h1 * {
 }
 
 @media screen and (max-width: 573px) {
-  *>p {
+  * > p {
     color: black !important;
     font-size: 13px !important;
     font-family: "Playfair Display", sans-serif !important;
@@ -106,7 +107,7 @@ div[id^="image-"] .v-responsive__sizer {
 .v-application {
   background-color: #f4f6f6 !important;
 }
-.v-application__wrap{
+.v-application__wrap {
   min-height: auto !important;
 }
 

@@ -46,7 +46,7 @@
             <img :src="file.url" alt="Preview" class="preview-image" />
           </template>
           <template v-else>
-            <video  class="post-video" controls>
+            <video class="post-video" controls>
               <source :src="file.url" type="video/mp4" />
               Tarayıcınız bu videoyu desteklemiyor.
             </video>
@@ -97,7 +97,11 @@ export default {
       selectedFiles.forEach((file) => {
         const reader = new FileReader();
         reader.onload = (e) => {
-          internalFiles.value.push({ url: e.target.result, file: file });
+          internalFiles.value.push({
+            url: e.target.result,
+            file: file,
+            uuid: generateUniqueId(),
+          });
           emit("single-file", internalFiles.value, props.index, props.fileKey);
         };
         reader.readAsDataURL(file);
@@ -137,6 +141,19 @@ export default {
       return props.fileKey === "video" ? "video/*" : "image/*";
     });
 
+    const getRandomChar = () => {
+      const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+      return chars.charAt(Math.floor(Math.random() * chars.length));
+    };
+    const generateUniqueId = () => {
+      const timestamp = new Date().getTime();
+      let uniqueId = "";
+      for (let i = 0; i < 5; i++) {
+        uniqueId += getRandomChar();
+      }
+      return `${uniqueId}${timestamp}`;
+    };
+
     return {
       fileInput,
       isDragging,
@@ -149,6 +166,8 @@ export default {
       reset,
       acceptType,
       props,
+      getRandomChar,
+      generateUniqueId,
     };
   },
 };

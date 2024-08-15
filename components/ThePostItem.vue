@@ -84,11 +84,8 @@
         </v-col>
       </v-row>
       <v-row v-if="postCaricaturist">
-        <v-col class="px-0 px-sm-3 px-md-6">
-          <div
-            class="font-playfair post-caricaturist"
-            :id="`description-${dataIndex}`"
-          >
+        <v-col class="px-0 px-sm-3 px-md-6 mt-4 mb-n4">
+          <div class="font-playfair post-caricaturist text-black">
             Çizer: {{ postCaricaturist }}
           </div>
         </v-col>
@@ -96,7 +93,7 @@
       <v-row>
         <v-col class="px-0 px-sm-3 px-md-6">
           <div
-            class="font-weight-medium text-center post-description font-playfair  "
+            class="font-weight-medium post-description font-playfair"
             :id="`description-${dataIndex}`"
             v-html="postDescription"
           ></div>
@@ -104,53 +101,54 @@
       </v-row>
       <v-row>
         <v-col
-          class="d-flex justify-center text-caption font-weight-medium"
+          class="d-flex justify-center align-center text-caption font-weight-medium px-0 px-sm-3 px-md-6"
           v-if="postDescription || postImages?.[0]?.url"
         >
-          <div>{{ postCreatedAt }}</div>
-          <div
-            class="cursor-pointer mx-1 mx-sm-2 mx-md-4 d-flex align-center"
-            @click="likeToggle(data?.newsId)"
-          >
-            <v-img
-              :width="24"
-              :src="
-                checkPostIsLiked(props?.posts?._id, data?.newsId)
-                  ? '/icons/favorite.svg'
-                  : '/icons/favorite-outline.svg'
-              "
-              :class="`mr-2 like-button ${
-                checkPostIsLiked(props?.posts?._id, data?.newsId) && 'liked'
-              } `"
-            />
-
-            <span>
-              {{ likeCount }}
-            </span>
-          </div>
-          <div
-            class="cursor-pointer position-relative mx-1 mx-md-2 mx-lg-4 d-flex align-center"
-            @click="shareFunction(props?.posts)"
-          >
-            <v-img :width="24" src="/icons/share.svg" class="mr-2" />
-            <span>Paylaş</span>
+          <div class="post-date font-roboto">{{ postCreatedAt }}</div>
+          <div class="d-flex justify-center align-center flex-fill">
             <div
-              v-show="shareTooltip"
-              class="position-absolute share-tooltip py-3 cursor-default"
+              class="cursor-pointer mx-1 mx-sm-2 mx-md-4 d-flex align-center"
+              @click="likeToggle(data?.newsId)"
             >
-              <div class="d-flex justify-space-between">
-                <div
-                  v-for="icon in socialIcons"
-                  :key="icon.name"
-                  rel="noopener noreferrer"
-                >
-                  <v-img
-                    :width="24"
-                    :src="`/icons/${icon.name}.svg`"
-                    :alt="icon.name"
-                    class="cursor-pointer"
-                    @click="createImage(icon.name)"
-                  />
+              <span class="mr-2 font-roboto like-count text-black">
+                {{ likeCount }}
+              </span>
+              <v-img
+                :width="24"
+                :src="
+                  checkPostIsLiked(props?.posts?._id, data?.newsId)
+                    ? '/icons/favorite.svg'
+                    : '/icons/favorite-outline.svg'
+                "
+                :class="`mr-2 like-button ${
+                  checkPostIsLiked(props?.posts?._id, data?.newsId) && 'liked'
+                } `"
+              />
+            </div>
+            <div
+              class="cursor-pointer position-relative mx-1 mx-md-2 mx-lg-4 d-flex align-center"
+              @click="shareFunction(props?.posts)"
+            >
+              <span class="mr-2 font-roboto share-text text-black">Paylaş</span>
+              <v-img :width="24" src="/icons/share.svg" />
+              <div
+                v-show="shareTooltip"
+                class="position-absolute share-tooltip py-3 cursor-default"
+              >
+                <div class="d-flex justify-space-between">
+                  <div
+                    v-for="icon in socialIcons"
+                    :key="icon.name"
+                    rel="noopener noreferrer"
+                  >
+                    <v-img
+                      :width="24"
+                      :src="`/icons/${icon.name}.svg`"
+                      :alt="icon.name"
+                      class="cursor-pointer"
+                      @click="createImage(icon.name)"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -179,7 +177,7 @@
 <script setup>
 import { sendGA4Events } from "~/services/ga4";
 import html2canvas from "html2canvas";
-import { useGlobalStore } from '~/stores/globalStore';
+import { useGlobalStore } from "~/stores/globalStore";
 
 const globalStore = useGlobalStore();
 const runtimeConfig = useRuntimeConfig();

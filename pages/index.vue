@@ -1,30 +1,30 @@
 <template>
   <div>
     <v-row class="mb-0 mb-md-4 mb-lg-8 page-container mx-auto">
-          <v-col cols="12" class="pb-0 mx-n2">
-            <template v-if="!isLoading">
-              <div class="header-title mt-4">
-                <span class="font-playfair" v-html="title"></span>
-              </div>
-              <div class="header-subtitle mt-3">
-                <span class="font-playfair">{{ subTitle }}</span>
-              </div>
-            </template>
-          </v-col>
-          <v-col class="mt-n4 mx-n2" v-show="sponsorship" v-if="!isLoading">
-            <div class="d-inline-flex">
-              <v-img
-                :width="64"
-                :src="sponsorshipLogo[0].url"
-                class="mr-2"
-                v-if="sponsorshipLogo?.[0]?.url"
-              />
-              <span class="text-sponsorship font-weight-medium font-barlow">{{
-                sponsorship
-              }}</span>
-            </div>
-          </v-col>
-        </v-row>
+      <v-col cols="12" class="pb-0 mx-n2">
+        <template v-if="!isLoading">
+          <div class="header-title mt-4 text-black">
+            <span class="font-playfair" v-html="title"></span>
+          </div>
+          <div class="header-subtitle mt-3 text-black">
+            <span class="font-playfair">{{ subTitle }}</span>
+          </div>
+        </template>
+      </v-col>
+      <v-col class="mt-n4 mx-n2" v-show="sponsorship" v-if="!isLoading">
+        <div class="d-inline-flex">
+          <v-img
+            :width="64"
+            :src="sponsorshipLogo[0].url"
+            class="mr-2"
+            v-if="sponsorshipLogo?.[0]?.url"
+          />
+          <span class="text-sponsorship font-weight-medium font-barlow">{{
+            sponsorship
+          }}</span>
+        </div>
+      </v-col>
+    </v-row>
     <div v-for="(caricature, index) in allCaricaturesData" :key="index">
       <the-news-container
         :posts="caricature"
@@ -33,11 +33,11 @@
       />
     </div>
     <div
-      class="page-container d-flex justify-center mb-5"
+      class="page-container d-flex justify-center mb-8"
       @click="moreLoad"
       v-if="allCaricaturesData.length > 0"
     >
-      <span class="cursor-pointer font-playfair more-load"
+      <span class="cursor-pointer font-playfair more-load text-black"
         >Daha Fazlasını Gör</span
       >
     </div>
@@ -54,7 +54,7 @@
 </template>
 
 <script setup>
-import { useGlobalStore } from '~/stores/globalStore';
+import { useGlobalStore } from "~/stores/globalStore";
 
 const globalStore = useGlobalStore();
 const isLoading = ref(true);
@@ -62,7 +62,9 @@ const allCaricaturesData = ref([]);
 const hasPosts = ref(false);
 const pageNum = ref(1);
 const title = ref("Türkiye’nin gündem bazlı ilk çizim mecrası ");
-const subTitle = ref("Bundle Lines, Türkiye ve dünya gündeminin en konuşulan konularını, sevilen karikatüristlerin çizgileriyle buluşturuyor.")
+const subTitle = ref(
+  "Bundle Lines, Türkiye ve dünya gündeminin en konuşulan konularını, sevilen karikatüristlerin çizgileriyle buluşturuyor."
+);
 const sponsorship = ref(null);
 const sponsorshipLogo = ref(null);
 onMounted(() => {
@@ -88,4 +90,3 @@ const moreLoad = () => {
   getAllCaricatureWithPagination(pageNum.value);
 };
 </script>
-
