@@ -88,12 +88,4 @@ const moreLoad = () => {
   getAllCaricatureWithPagination(pageNum.value);
 };
 </script>
-<style>
-.more-load {
-  padding: 14px 26px;
-  gap: 0px;
-  border-radius: 40px;
-  opacity: 0px;
-  border: 1px solid black;
-}
-</style>
+
