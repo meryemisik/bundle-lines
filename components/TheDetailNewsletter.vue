@@ -1,10 +1,6 @@
 <template>
   <div v-if="isClientMounted">
-    <the-post-item
-      :data="posts.news[route.query.newsId]"
-      :posts="postsUpdated"
-      :dataIndex="route.query.newsId"
-    />
+    <the-post-item :data="postsUpdated.news" :posts="postsUpdated" />
   </div>
   <div v-else>
     <v-skeleton-loader
@@ -39,12 +35,35 @@ const hasPosts = computed(
 onMounted(() => {
   isClientMounted.value = true;
 
-  const selectedNews = props?.posts.news[route.query.newsId];
+  const contentArray = props?.posts?.news?.[0]?.content?.map((item) => {
+    if (!item.uuid) {
+      return { ...item, uuid: "null" };
+    }
+    return item;
+  });
+
+  const targetObject = contentArray?.find(
+    (item) => item.uuid === route.query.newsId
+  );
+
+  const selectedNews = [];
+  selectedNews.push(targetObject);
+
+  let typeNum = props?.posts?.news?.[0].type;
+  if (props?.posts?.news?.[0].type == 2) {
+    typeNum = "0";
+  }
 
   const updatedData = {
     ...props?.posts,
-    news: selectedNews,
+    news: {
+      ...props?.posts?.news?.[0],
+      content: selectedNews,
+      type: typeNum,
+    },
+    ...props?.posts?.news.slice(1),
   };
+
   postsUpdated.value = updatedData;
 });
 </script>

@@ -1,9 +1,5 @@
 <template>
-  <the-post-item
-    :data="posts.news"
-    :posts="posts"
-    :dataIndex="dataIndex"
-  />
+  <the-post-item :data="posts.news" :posts="posts" />
 </template>
 
 <script setup>
@@ -15,10 +11,5 @@ const props = defineProps({
       news: {},
     }),
   },
-  dataIndex: {
-    type: Number,
-    required: true,
-  },
 });
-const hasPosts = computed(() => props.posts.news);
 </script>

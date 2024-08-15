@@ -29,7 +29,6 @@
       <the-news-container
         :posts="caricature"
         :isLoading="isLoading"
-        :dataIndex="index"
       />
     </div>
     <div

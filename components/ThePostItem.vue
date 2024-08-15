@@ -8,18 +8,17 @@
         <v-col :id="`imagecover-${dataIndex}`">
           <template v-if="postType == 0">
             <v-img
-              @click="goToDetailNews(props?.data, dataIndex)"
+              @click="goToDetailNews(props?.data, postImages?.[0]?.uuid)"
               :src="postImages?.[0]?.url"
               v-if="postImages?.[0]?.url"
-              :id="`image-${dataIndex}`"
               class="cursor-pointer"
             />
           </template>
-          <template
-            v-else-if="postType == 1"
-            @click="goToDetailNews(props?.data, dataIndex)"
-          >
-            <v-col v-if="postImages?.[0]?.url">
+          <template v-else-if="postType == 1">
+            <v-col
+              v-if="postImages?.[0]?.url"
+              @click="goToDetailNews(props?.data, postImages?.[0]?.uuid)"
+            >
               <v-responsive>
                 <div :id="`video-${dataIndex}`">
                   <video
@@ -27,7 +26,7 @@
                     :controls="isPlaying"
                     @play="isPlaying = true"
                     controlsList="nodownload"
-                    class="post-video"
+                    class="post-video rounded-lg"
                   >
                     <source :src="postImages?.[0]?.url" type="video/mp4" />
                     Tarayıcınız bu videoyu desteklemiyor.
@@ -42,27 +41,22 @@
               </v-responsive>
             </v-col>
           </template>
-          <template
-            v-else-if="postType == 2"
-            @click="goToDetailNews(props?.data, dataIndex)"
-          >
+          <template v-else-if="postType == 2">
             <div class="position-relative" v-if="postImages?.length > 0">
               <v-carousel
                 height="auto"
                 v-model="currentSlide"
                 hide-delimiter-background
                 :show-arrows="false"
-                :id="`slider-${dataIndex}`"
               >
                 <v-carousel-item
                   v-for="(image, index) in postImages"
                   :key="index"
+                  @click="
+                    goToDetailNews(props?.data, postImages?.[index]?.uuid)
+                  "
                 >
-                  <v-img
-                    :src="image.url"
-                    :id="`slider-item-${index}`"
-                    :value="index"
-                  />
+                  <v-img :src="image.url" :value="index" />
                 </v-carousel-item>
               </v-carousel>
               <div class="position-absolute slider-control">
@@ -181,7 +175,7 @@ import { useGlobalStore } from "~/stores/globalStore";
 
 const globalStore = useGlobalStore();
 const runtimeConfig = useRuntimeConfig();
-const props = defineProps(["data", "dataIndex", "posts"]);
+const props = defineProps(["data", "posts"]);
 const { $formatDate } = useNuxtApp();
 const postCaricaturist = ref(props?.posts?.caricaturist || "");
 const postCreatedAt = ref($formatDate(props?.posts?.createdAt) || "");
@@ -192,13 +186,14 @@ const postDescription = ref(props?.data?.description || "");
 const postImages = ref(props?.data?.content || null);
 const likeCount = ref(props?.data?.likeCount);
 const randomLikeCount = ref(props?.data?.randomLikeCount);
+const dataIndex = ref(props?.posts?._id);
 const stripHTMLTags = (input) => {
   return input.replace(/<\/?[^>]+(>|$)/g, "");
 };
-const goToDetailNews = (content, dataIndex) => {
+const goToDetailNews = (content, uuid) => {
   globalStore.setActiveDetailPage(false);
   const router = useRouter();
-  router.push(`/detail/${props?.posts?._id}?newsId=${dataIndex}`);
+  router.push(`/detail/${props?.posts?._id}?newsId=${uuid || "null"}`);
 };
 const isWebView = computed(() => {
   const userAgent = navigator.userAgent || navigator.vendor || window.opera;
@@ -268,8 +263,8 @@ const shareFunction = async (data) => {
 const scrollToContent = () => {
   const route = useRoute();
   const newsId = route.query.newsId;
-  if (parseInt(newsId) === props.dataIndex) {
-    const element = document.getElementById(`post-item-${props.dataIndex}`);
+  if (parseInt(newsId) === dataIndex.value) {
+    const element = document.getElementById(`post-item-${dataIndex.value}`);
     if (element) {
       element.scrollIntoView({ behavior: "smooth" });
     }
@@ -355,23 +350,23 @@ onUnmounted(() => {
 const canvas = ref(null);
 const createImage = async (socialIconName) => {
   const sourceImage = ref(
-    document.querySelector(`#imagecover-${props.dataIndex}`)
+    document.querySelector(`#imagecover-${dataIndex.value}`)
   );
   const postDescriptionElement = ref(
-    document.querySelector(`#description-${props.dataIndex}`)
+    document.querySelector(`#description-${dataIndex.value}`)
   );
 
   // if (postType.value == 0) {
-  //   sourceImage.value = document.querySelector(`#image-${props.dataIndex} img`);
+  //   sourceImage.value = document.querySelector(`#image-${dataIndex.value} img`);
   // } else if (postType.value == 1) {
-  //   var captureDivElement = document.querySelector(`#video-${props.dataIndex}`);
+  //   var captureDivElement = document.querySelector(`#video-${dataIndex.value}`);
   //   var createCanvas = await html2canvas(captureDivElement, { useCORS: true });
   //   var createImgFromCanvas = createCanvas.toDataURL("image/png");
   //   sourceImage.value = document.createElement("img");
   //   sourceImage.value.src = createImgFromCanvas;
   // } else if (postType.value == 2) {
   //   sourceImage.value = document.querySelector(
-  //     `#slider-${props.dataIndex} #slider-item-${currentSlide.value} img`
+  //     `#slider-${dataIndex.value} #slider-item-${currentSlide.value} img`
   //   );
   //   console.log("sourceImage.value : ", sourceImage.value)
   // }
@@ -586,7 +581,7 @@ const likeToggle = (newsId) => {
   toggleNewsInPost(props?.posts?._id, newsId);
   isLiked.value = !isLiked.value;
   if (isLiked.value) {
-    sendItemClick(`caricature-${props.dataIndex + 1}`);
+    sendItemClick(`caricature-${dataIndex.value + 1}`);
   }
   likeCount.value = isLiked.value ? likeCount.value + 1 : likeCount.value - 1;
   updateLikeCount(props?.posts?._id, newsId, likeCount.value);
@@ -623,7 +618,7 @@ const toggleNewsInPost = (postId, newsId) => {
 const isPlaying = ref(false);
 const playVideo = () => {
   const videoElement = document.querySelector(
-    `#video-${props.dataIndex} video`
+    `#video-${dataIndex.value} video`
   );
   if (videoElement && isPlaying) {
     videoElement.play();
