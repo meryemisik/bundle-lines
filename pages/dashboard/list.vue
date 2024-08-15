@@ -114,6 +114,8 @@
 </template>
 
 <script setup>
+import { useGlobalStore } from '~/stores/globalStore';
+const globalStore = useGlobalStore();
 definePageMeta({
   layout: 'dashboard'
 })
@@ -144,6 +146,7 @@ const goDetail = async (id) => {
   try {
     const response = await $fetch(`/api/caricatures/getById?id=${id}`);
     if (response && response.news) {
+      globalStore.setLoading(true);
       newsletterDetailDialog.value = true;
       newsletterDetailData.value = response;
     }

@@ -8,8 +8,6 @@
   </div>
   <div v-else>
     <v-skeleton-loader
-      v-for="i in 3"
-      :key="i"
       type="image,paragraph,actions"
       class="my-3 mx-auto pa-3 bg-light rounded-xl"
       max-width="600"

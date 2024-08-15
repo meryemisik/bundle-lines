@@ -1,7 +1,7 @@
 <template>
   <div class="post-item" :id="`post-item-${dataIndex}`">
     <v-container
-      class="page-container my-0 my-md-2"
+      class="page-container my-0 my-md-6"
       v-if="postImages?.length > 0 || postImages?.[0]?.url"
     >
       <v-row class="bg-white rounded-xl">
@@ -179,6 +179,9 @@
 <script setup>
 import { sendGA4Events } from "~/services/ga4";
 import html2canvas from "html2canvas";
+import { useGlobalStore } from '~/stores/globalStore';
+
+const globalStore = useGlobalStore();
 const runtimeConfig = useRuntimeConfig();
 const props = defineProps(["data", "dataIndex", "posts"]);
 const { $formatDate } = useNuxtApp();
@@ -195,6 +198,7 @@ const stripHTMLTags = (input) => {
   return input.replace(/<\/?[^>]+(>|$)/g, "");
 };
 const goToDetailNews = (content, dataIndex) => {
+  globalStore.setActiveDetailPage(false);
   const router = useRouter();
   router.push(`/detail/${props?.posts?._id}?newsId=${dataIndex}`);
 };

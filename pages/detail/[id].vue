@@ -1,7 +1,7 @@
 <template>
    <v-app>
      <v-main>
-        <the-detail-newsletter :posts="posts"/>
+        <the-detail-newsletter :posts="posts" :isLoading="globalStore.isLoading"/>
      </v-main>
    </v-app>
  </template>
@@ -10,7 +10,8 @@
  import { ref } from 'vue';
  import { useRoute } from 'vue-router';
  import { useAsyncData, useHead } from '#app';
- 
+ import { useGlobalStore } from '~/stores/globalStore';
+const globalStore = useGlobalStore();
  const route = useRoute();
  const imgSrc = ref("");
  const posts = ref({
@@ -22,6 +23,7 @@
    try {
      const response = await $fetch(`/api/caricatures/getById?id=${route.params.id}`);
      if (response && response.news) {
+       globalStore.setLoading(true);
        posts.value = response;
        imgSrc.value = response.news[0]?.content[0]?.url || '/default-image.jpg';
        pageTitle.value = response.news[0]?.title || 'Bundle Lines';

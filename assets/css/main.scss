@@ -106,6 +106,9 @@ div[id^="image-"] .v-responsive__sizer {
 .v-application {
   background-color: #f4f6f6 !important;
 }
+.v-application__wrap{
+  min-height: auto !important;
+}
 
 body {
   background: #f4f6f6 !important;
