@@ -78,7 +78,7 @@ const getAllCaricatureWithPagination = async (num) => {
     const updatedDataArray = data.map((item) => {
       return {
         ...item,
-        news: [item.news], // 'news' alanını dizi haline getiriyoruz
+        news: [item.news],
       };
     });
     allCaricaturesData.value = [

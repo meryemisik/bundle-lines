@@ -17,7 +17,7 @@ const route = useRoute();
 const imgSrc = ref("");
 const isLoading = ref(true);
 const posts = ref({
-  news: [], // Initialize with a safe default structure
+  news: [],
 });
 const pageTitle = ref("Loading Bundle Lines");
 

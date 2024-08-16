@@ -590,21 +590,31 @@ const likeToggle = (newsId) => {
 };
 
 const checkPostIsLiked = (postId, newsId) => {
-  let likedPosts = [];
-
-  if (typeof window !== "undefined") {
-    likedPosts = JSON.parse(localStorage.getItem("likedBundlePosts")) || [];
-
-    let posts = likedPosts[0];
-    if (posts[postId] && posts[postId].includes(newsId)) {
-      isLiked.value = true;
-      return true;
-    }
-    isLiked.value = false;
+  if (
+    typeof localStorage === "undefined" ||
+    localStorage.getItem("likedBundlePosts") == null
+  ) {
+    console.warn("localStorage is not available.");
     return false;
   }
+  let likedPosts = JSON.parse(localStorage.getItem("likedBundlePosts")) || [];
+  let posts = likedPosts[0];
+  if (posts[postId] && posts[postId].includes(newsId)) {
+    isLiked.value = true;
+    return true;
+  }
+  isLiked.value = false;
+  return false;
 };
 const toggleNewsInPost = (postId, newsId) => {
+  if (
+    typeof localStorage === "undefined" ||
+    localStorage.getItem("likedBundlePosts") == null
+  ) {
+    let initialPosts = {};
+    initialPosts[postId] = [];
+    localStorage.setItem("likedBundlePosts", JSON.stringify([initialPosts]));
+  }
   let likedPosts = JSON.parse(localStorage?.getItem("likedBundlePosts")) || [];
   let posts = likedPosts[0];
   if (posts[postId]) {
@@ -622,6 +632,7 @@ const toggleNewsInPost = (postId, newsId) => {
   }
   localStorage.setItem("likedBundlePosts", JSON.stringify(likedPosts));
 };
+
 const isPlaying = ref(false);
 const playVideo = () => {
   const videoElement = document.querySelector(

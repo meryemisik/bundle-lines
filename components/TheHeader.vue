@@ -8,7 +8,7 @@
           <div class="bg-grey-darken-4 py-6 px-8" v-if="!isSmallScreen">
             <v-img :width="28" src="/logo/logo-icon.png" />
           </div>
-          <div class="ml-4 cursor-pointer" v-else @click="redirectToBundle">
+          <div class="ml-4 cursor-pointer" v-if="globalStore.activeDetailPage && isSmallScreen" @click="redirectToBundle">
             <v-img :width="40" src="/icons/arrow-left.png" />
           </div>
           <div
@@ -82,6 +82,7 @@ const checkScreenSize = () => {
 onMounted(() => {
   checkScreenSize();
   window.addEventListener("resize", checkScreenSize);
+  globalStore.setActiveDetailPage(false);
 });
 
 onUnmounted(() => {
