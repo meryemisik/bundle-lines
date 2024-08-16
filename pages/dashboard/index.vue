@@ -207,10 +207,7 @@
               class="mt-5"
               ><span class="font-barlow">Paylaş</span></v-btn
             >
-            <v-btn
-              @click="showReview"
-              color="primary"
-              class="mt-5 mx-2"
+            <v-btn @click="showReview" color="primary" class="mt-5 mx-2"
               ><span class="font-barlow">Önizleme</span></v-btn
             >
           </v-card>
@@ -227,7 +224,9 @@
     </v-snackbar>
     <v-dialog v-model="reviewDialog" max-width="90%" scrollable>
       <v-card>
-        <!-- <the-news-container :isLoading="false" :posts="reviewData" /> -->
+        <div v-for="(caricature, index) in reviewData" :key="index">
+          <the-news-container :posts="caricature" />
+        </div>
       </v-card>
     </v-dialog>
   </v-container>
@@ -235,23 +234,26 @@
 
 <script setup>
 definePageMeta({
-  layout: 'dashboard'
-})
+  layout: "dashboard",
+});
 const reviewData = ref({});
 const reviewDialog = ref(false);
 const showReview = () => {
-  const formData = {
+  const newObjectsArray = components.value.map((newsItem) => ({
+    _id: "review",
     sponsor: formCaricatures.value.sponsor,
     title: formCaricatures.value.title,
-    news: components.value,
+    sponsorImage: formCaricatures.value.sponsorImage,
+    news: [newsItem],
     analyticsId: formCaricatures.value.analyticsId,
     campaignName: formCaricatures.value.campaignName,
-    sponsorImage: formCaricatures.value.sponsorImage,
     creator: data?.value?.user.email,
-    caricaturist: formCaricatures.value.caricaturist
-  };
-  reviewData.value = formData;
-  reviewDialog.value = true
+    caricaturist: formCaricatures.value.caricaturist,
+    createdAt: new Date()
+  }));
+
+  reviewData.value = newObjectsArray;
+  reviewDialog.value = true;
 };
 
 useHead({
@@ -288,7 +290,7 @@ const formCaricatures = ref({
   analyticsId: measurementId.value,
   campaignName: "",
   sponsorImage: "",
-  caricaturist:""
+  caricaturist: "",
 });
 const getRandomChar = () => {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -304,15 +306,14 @@ const generateUniqueId = () => {
   return `${uniqueId}${timestamp}`;
 };
 
-
 const components = ref([
   {
     type: "0",
     content: null,
     description: "",
-    likeCount : null,
-    randomLikeCount : Math.floor(Math.random() * 51) + 50,
-    newsId:generateUniqueId()
+    likeCount: null,
+    randomLikeCount: Math.floor(Math.random() * 51) + 50,
+    newsId: generateUniqueId(),
   },
 ]);
 
@@ -322,27 +323,27 @@ const addComponents = (type) => {
       type: "0",
       content: null,
       description: "",
-      likeCount : null,
-      randomLikeCount : Math.floor(Math.random() * 51) + 50,
-      newsId:generateUniqueId()
+      likeCount: null,
+      randomLikeCount: Math.floor(Math.random() * 51) + 50,
+      newsId: generateUniqueId(),
     });
   } else if (type === 1) {
     components.value.push({
       type: "1",
       content: null,
       description: "",
-      likeCount : null,
-      randomLikeCount : Math.floor(Math.random() * 51) + 50,
-      newsId:generateUniqueId()
+      likeCount: null,
+      randomLikeCount: Math.floor(Math.random() * 51) + 50,
+      newsId: generateUniqueId(),
     });
   } else if (type === 2) {
     components.value.push({
       type: "2",
       content: [],
       description: "",
-      likeCount : null,
-      randomLikeCount : Math.floor(Math.random() * 51) + 50,
-      newsId:generateUniqueId()
+      likeCount: null,
+      randomLikeCount: Math.floor(Math.random() * 51) + 50,
+      newsId: generateUniqueId(),
     });
   }
 };
@@ -474,7 +475,7 @@ const createCaricatures = async (event) => {
       campaignName: formCaricatures.value.campaignName,
       sponsorImage: formCaricatures.value.sponsorImage,
       creator: data?.value?.user.email,
-      caricaturist : formCaricatures.value.caricaturist
+      caricaturist: formCaricatures.value.caricaturist,
     };
 
     try {
