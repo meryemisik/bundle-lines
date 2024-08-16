@@ -8,7 +8,7 @@ const props = defineProps({
     type: Object,
     required: true,
     default: () => ({
-      news: {},
+      news: [],
     }),
   },
 });

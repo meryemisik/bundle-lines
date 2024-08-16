@@ -28,9 +28,6 @@ const props = defineProps({
 });
 const postsUpdated = ref(null);
 const isClientMounted = ref(false);
-const hasPosts = computed(
-  () => props.posts.news && props.posts.news.length > 0
-);
 
 onMounted(() => {
   isClientMounted.value = true;
@@ -56,14 +53,15 @@ onMounted(() => {
 
   const updatedData = {
     ...props?.posts,
-    news: {
-      ...props?.posts?.news?.[0],
-      content: selectedNews,
-      type: typeNum,
-    },
+    news: [
+      {
+        ...props?.posts?.news?.[0],
+        content: selectedNews,
+        type: typeNum,
+      },
+    ],
     ...props?.posts?.news.slice(1),
   };
-
   postsUpdated.value = updatedData;
 });
 </script>

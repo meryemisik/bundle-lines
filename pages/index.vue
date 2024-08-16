@@ -26,10 +26,7 @@
       </v-col>
     </v-row>
     <div v-for="(caricature, index) in allCaricaturesData" :key="index">
-      <the-news-container
-        :posts="caricature"
-        :isLoading="isLoading"
-      />
+      <the-news-container :posts="caricature" />
     </div>
     <div
       class="page-container d-flex justify-center mb-8"
@@ -77,7 +74,17 @@ const getAllCaricatureWithPagination = async (num) => {
     pageNum.value++;
     globalStore.setLoading(true);
     globalStore.setActiveDetailPage(true);
-    allCaricaturesData.value = [...allCaricaturesData.value, ...data];
+
+    const updatedDataArray = data.map((item) => {
+      return {
+        ...item,
+        news: [item.news], // 'news' alanını dizi haline getiriyoruz
+      };
+    });
+    allCaricaturesData.value = [
+      ...allCaricaturesData.value,
+      ...updatedDataArray,
+    ];
     isLoading.value = false;
     return allCaricaturesData.value;
   } catch (e) {

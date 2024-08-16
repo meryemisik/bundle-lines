@@ -103,7 +103,7 @@
           <div class="d-flex justify-center align-center flex-fill">
             <div
               class="cursor-pointer mx-1 mx-sm-2 mx-md-4 d-flex align-center"
-              @click="likeToggle(data?.newsId)"
+              @click="likeToggle(data?.[0].newsId)"
             >
               <span class="mr-2 font-roboto like-count text-black">
                 {{ likeCount }}
@@ -111,12 +111,12 @@
               <v-img
                 :width="24"
                 :src="
-                  checkPostIsLiked(props?.posts?._id, data?.newsId)
+                  checkPostIsLiked(dataPostId, data?.[0].newsId)
                     ? '/icons/favorite.svg'
                     : '/icons/favorite-outline.svg'
                 "
                 :class="`mr-2 like-button ${
-                  checkPostIsLiked(props?.posts?._id, data?.newsId) && 'liked'
+                  checkPostIsLiked(dataPostId, data?.[0].newsId) && 'liked'
                 } `"
               />
             </div>
@@ -182,19 +182,20 @@ const postCaricaturist = ref(props?.posts?.caricaturist || "");
 const postCreatedAt = ref($formatDate(props?.posts?.createdAt) || "");
 const isSnackbarVisible = ref(false);
 const snackbarMsg = ref("");
-const postType = ref(props?.data?.type || 0);
-const postDescription = ref(props?.data?.description || "");
-const postImages = ref(props?.data?.content || null);
-const likeCount = ref(props?.data?.likeCount);
-const randomLikeCount = ref(props?.data?.randomLikeCount);
-const dataIndex = ref(props?.posts?._id);
+const postType = ref(props?.data?.[0].type || 0);
+const postDescription = ref(props?.data?.[0].description || "");
+const postImages = ref(props?.data?.[0].content || null);
+const likeCount = ref(props?.data?.[0].likeCount);
+const randomLikeCount = ref(props?.data?.[0].randomLikeCount);
+const dataIndex = ref(props?.posts?.news?.[0]?.newsId);
+const dataPostId = ref(props?.posts?._id);
 const stripHTMLTags = (input) => {
   return input.replace(/<\/?[^>]+(>|$)/g, "");
 };
 const goToDetailNews = (content, uuid) => {
   globalStore.setActiveDetailPage(false);
   const router = useRouter();
-  router.push(`/detail/${props?.posts?._id}?newsId=${uuid || "null"}`);
+  router.push(`/detail/${dataPostId.value}?newsId=${uuid || "null"}`);
 };
 const isWebView = computed(() => {
   const userAgent = navigator.userAgent || navigator.vendor || window.opera;
@@ -278,7 +279,8 @@ watchEffect(() => {
     //   (obj) => obj.type == 0 || obj.type == 2
     // );
     // getFirstImage = getFirstImage?.content?.[0]?.url;
-    let getFirstDescription = props?.posts?.news?.description;
+    //let getFirstDescription = props?.posts?.news?.description;
+    let getFirstDescription = props?.posts?.news?.[0]?.description;
     getFirstDescription = stripHTMLTags(getFirstDescription);
     useSeoMeta({
       title: props.posts.title.replace(/<\/?[^>]+>/gi, ""),
@@ -289,7 +291,7 @@ watchEffect(() => {
       twitterCard: "summary_large_image",
       ogType: "article", // veya uygun tür
       ogSiteName: "Bundle Lines",
-      ogUrl: window.location.href,
+      //ogUrl: window.location.href,
       ogLocale: "tr_TR",
       twitterTitle: props.posts.title.replace(/<\/?[^>]+>/gi, ""),
       twitterDescription: getFirstDescription,
@@ -482,7 +484,7 @@ const createSharedNewsletter = async (imageBase64, imageId) => {
       const route = useRoute();
       const formData = {
         imgSrc: imgSrc,
-        fullPostId: dataIndex.value,
+        fullPostId: dataPostId.value,
         imageId: imageId,
       };
 
@@ -578,27 +580,32 @@ const nextImg = () => {
 
 const isLiked = ref(false);
 const likeToggle = (newsId) => {
-  toggleNewsInPost(props?.posts?._id, newsId);
+  toggleNewsInPost(dataPostId.value, newsId);
   isLiked.value = !isLiked.value;
   if (isLiked.value) {
     sendItemClick(`caricature-${dataIndex.value + 1}`);
   }
   likeCount.value = isLiked.value ? likeCount.value + 1 : likeCount.value - 1;
-  updateLikeCount(props?.posts?._id, newsId, likeCount.value);
+  updateLikeCount(dataPostId.value, newsId, likeCount.value);
 };
 
 const checkPostIsLiked = (postId, newsId) => {
-  let likedPosts = JSON.parse(localStorage.getItem("likedBundlePosts")) || [{}];
-  let posts = likedPosts[0];
-  if (posts[postId] && posts[postId].includes(newsId)) {
-    isLiked.value = true;
-    return true;
+  let likedPosts = [];
+
+  if (typeof window !== "undefined") {
+    likedPosts = JSON.parse(localStorage.getItem("likedBundlePosts")) || [];
+
+    let posts = likedPosts[0];
+    if (posts[postId] && posts[postId].includes(newsId)) {
+      isLiked.value = true;
+      return true;
+    }
+    isLiked.value = false;
+    return false;
   }
-  isLiked.value = false;
-  return false;
 };
 const toggleNewsInPost = (postId, newsId) => {
-  let likedPosts = JSON.parse(localStorage.getItem("likedBundlePosts")) || [{}];
+  let likedPosts = JSON.parse(localStorage?.getItem("likedBundlePosts")) || [];
   let posts = likedPosts[0];
   if (posts[postId]) {
     let newsIndex = posts[postId].indexOf(newsId);
