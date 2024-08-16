@@ -55,6 +55,7 @@
                   @click="
                     goToDetailNews(props?.data, postImages?.[index]?.uuid)
                   "
+                  class="cursor-pointer"
                 >
                   <v-img :src="image.url" :value="index" />
                 </v-carousel-item>
@@ -479,10 +480,9 @@ const createSharedNewsletter = async (imageBase64, imageId) => {
 
     if (imgSrc) {
       const route = useRoute();
-      const id = route.params.id;
       const formData = {
         imgSrc: imgSrc,
-        fullPostId: id,
+        fullPostId: dataIndex.value,
         imageId: imageId,
       };
 
