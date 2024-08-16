@@ -249,6 +249,7 @@ const showReview = () => {
     campaignName: formCaricatures.value.campaignName,
     creator: data?.value?.user.email,
     caricaturist: formCaricatures.value.caricaturist,
+    createdAt: new Date()
   }));
 
   reviewData.value = newObjectsArray;
