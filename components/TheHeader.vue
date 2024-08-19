@@ -3,7 +3,7 @@
     <template v-if="!isLoading">
       <v-container fluid class="pa-0" >
         <div
-          class="mb-0 mb-md-4 mb-lg-8 bg-white pa-0 mt-0 mx-0 align-center d-flex" style="height:72px"
+          class="mb-8 bg-white pa-0 mt-0 mx-0 align-center d-flex" style="height:72px"
         >
           <div class="bg-grey-darken-4 py-6 px-8" v-if="!isSmallScreen">
             <v-img :width="28" src="/logo/logo-icon.png" />

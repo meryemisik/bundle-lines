@@ -1,9 +1,9 @@
 <template>
   <div>
     <v-row class="mb-0 mb-md-4 mb-lg-8 page-container mx-auto">
-      <v-col cols="12" class="pb-0 mx-n2">
+      <v-col cols="12" class="mx-auto">
         <template v-if="!isLoading">
-          <div class="header-title mt-4 text-black">
+          <div class="header-title text-black">
             <span class="font-playfair" v-html="title"></span>
           </div>
           <div class="header-subtitle mt-3 text-black">
@@ -27,6 +27,9 @@
     </v-row>
     <div v-for="(caricature, index) in allCaricaturesData" :key="index">
       <the-news-container :posts="caricature" />
+      <div v-if="(index + 1) % 3 === 0">
+        <the-adds/>
+      </div>
     </div>
     <div
       class="page-container d-flex justify-center mb-8"

@@ -78,10 +78,10 @@
           </template>
         </v-col>
       </v-row>
-      <v-row v-if="postCaricaturist">
+      <v-row v-if="data[0]?.caricaturist">
         <v-col class="px-0 px-sm-3 px-md-6 mt-4 mb-n4">
           <div class="font-playfair post-caricaturist text-black">
-            Çizer: {{ postCaricaturist }}
+            Çizer: {{ data[0]?.caricaturist }}
           </div>
         </v-col>
       </v-row>
@@ -135,13 +135,16 @@
                     v-for="icon in socialIcons"
                     :key="icon.name"
                     rel="noopener noreferrer"
+                    
                   >
                     <v-img
                       :width="24"
                       :src="`/icons/${icon.name}.svg`"
                       :alt="icon.name"
                       class="cursor-pointer"
-                      @click="createImage(icon.name)"
+                      @click="
+                        createImage(icon.name, postImages[currentSlide].uuid, posts._id)
+                      "
                     />
                   </div>
                 </div>
@@ -161,10 +164,19 @@
         v-model="isSnackbarVisible"
         timeout="3000"
         location="top right"
-        color="success"
+        :color="snackbarColor"
       >
         {{ snackbarMsg }}
       </v-snackbar>
+
+      <!-- <v-snackbar
+        v-model="isSnackbarVisible"
+        timeout="3000"
+        location="top right"
+        color="success"
+      >
+        {{ snackbarMsg }}
+      </v-snackbar> -->
     </v-container>
   </div>
 </template>
@@ -189,6 +201,7 @@ const likeCount = ref(props?.data?.[0].likeCount);
 const randomLikeCount = ref(props?.data?.[0].randomLikeCount);
 const dataIndex = ref(props?.posts?.news?.[0]?.newsId);
 const dataPostId = ref(props?.posts?._id);
+const snackbarColor = ref("");
 const stripHTMLTags = (input) => {
   return input.replace(/<\/?[^>]+(>|$)/g, "");
 };
@@ -351,82 +364,81 @@ onUnmounted(() => {
 });
 
 const canvas = ref(null);
-const createImage = async (socialIconName) => {
-  const sourceImage = ref(
-    document.querySelector(`#imagecover-${dataIndex.value}`)
-  );
-  const postDescriptionElement = ref(
-    document.querySelector(`#description-${dataIndex.value}`)
-  );
-
-  // if (postType.value == 0) {
-  //   sourceImage.value = document.querySelector(`#image-${dataIndex.value} img`);
-  // } else if (postType.value == 1) {
-  //   var captureDivElement = document.querySelector(`#video-${dataIndex.value}`);
-  //   var createCanvas = await html2canvas(captureDivElement, { useCORS: true });
-  //   var createImgFromCanvas = createCanvas.toDataURL("image/png");
-  //   sourceImage.value = document.createElement("img");
-  //   sourceImage.value.src = createImgFromCanvas;
-  // } else if (postType.value == 2) {
-  //   sourceImage.value = document.querySelector(
-  //     `#slider-${dataIndex.value} #slider-item-${currentSlide.value} img`
-  //   );
-  //   console.log("sourceImage.value : ", sourceImage.value)
-  // }
-
-  const frameImg = new Image();
-
-  frameImg.src = "/canvas-frame.png";
-  sourceImage.value.crossOrigin = "anonymous";
-  frameImg.crossOrigin = "anonymous";
-  //img.crossOrigin = "anonymous";
-  frameImg.onload = () => {
-    const ctx = canvas.value.getContext("2d");
-    ctx.clearRect(0, 0, 1080, 1350);
-    ctx.fillStyle = "white";
-    ctx.fillRect(0, 0, canvas.value.width, canvas.value.height);
-
-    const canvasContentWidth = (canvas.value.width / 38) * 30;
-    var imgWidth = 0;
-    var imgHeight = 0;
-    var imgX = (canvas.value.width / 38) * 4;
-    var imgY = (canvas.value.width / 38) * 2.5;
-    if (sourceImage.value.offsetHeight > sourceImage.value.offsetWidth) {
-      imgWidth =
-        (sourceImage.value.offsetWidth / sourceImage.value.offsetHeight) *
-        canvasContentWidth;
-      imgHeight = canvasContentWidth;
-      imgX = imgX + (canvasContentWidth - imgWidth) / 2;
-    } else {
-      imgWidth = canvasContentWidth;
-      imgHeight =
-        (sourceImage.value.offsetHeight / sourceImage.value.offsetWidth) *
-        canvasContentWidth;
-      imgY = imgY + (canvasContentWidth - imgHeight) / 2;
-    }
-
-    ctx.drawImage(frameImg, 0, 0, canvas.value.width, canvas.value.width);
-
-    html2canvas(sourceImage.value, { useCORS: true }).then((imageElement) => {
-      ctx.drawImage(imageElement, imgX, imgY, imgWidth, imgHeight);
-
-      html2canvas(postDescriptionElement.value, { useCORS: true }).then(
-        (descriptionElement) => {
-          const textY = canvas.value.width;
-          ctx.drawImage(
-            descriptionElement,
-            0,
-            textY,
-            canvas.value.width,
-            (canvas.value.width / postDescriptionElement.value.offsetWidth) *
-              postDescriptionElement.value.offsetHeight
-          );
-
-          sharePost(socialIconName, canvas.value.toDataURL("image/png"));
-        }
+const createImage = async (socialIconName, postUuid, postId) => {
+  await $fetch(`/api/aws/getById?newsUuid=${postUuid}`)
+    .then((res) => {
+      checkSocialIcon(socialIconName, res?.imageId)
+    })
+    .catch((error) => {
+      const sourceImage = ref(
+        document.querySelector(`#imagecover-${dataIndex.value}`)
       );
+      const postDescriptionElement = ref(
+        document.querySelector(`#description-${dataIndex.value}`)
+      );
+
+      const frameImg = new Image();
+
+      frameImg.src = "/canvas-frame.png";
+      sourceImage.value.crossOrigin = "anonymous";
+      frameImg.crossOrigin = "anonymous";
+      //img.crossOrigin = "anonymous";
+      frameImg.onload = () => {
+        const ctx = canvas.value.getContext("2d");
+        ctx.clearRect(0, 0, 1080, 1350);
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, 0, canvas.value.width, canvas.value.height);
+
+        const canvasContentWidth = (canvas.value.width / 38) * 30;
+        var imgWidth = 0;
+        var imgHeight = 0;
+        var imgX = (canvas.value.width / 38) * 4;
+        var imgY = (canvas.value.width / 38) * 2.5;
+        if (sourceImage.value.offsetHeight > sourceImage.value.offsetWidth) {
+          imgWidth =
+            (sourceImage.value.offsetWidth / sourceImage.value.offsetHeight) *
+            canvasContentWidth;
+          imgHeight = canvasContentWidth;
+          imgX = imgX + (canvasContentWidth - imgWidth) / 2;
+        } else {
+          imgWidth = canvasContentWidth;
+          imgHeight =
+            (sourceImage.value.offsetHeight / sourceImage.value.offsetWidth) *
+            canvasContentWidth;
+          imgY = imgY + (canvasContentWidth - imgHeight) / 2;
+        }
+
+        ctx.drawImage(frameImg, 0, 0, canvas.value.width, canvas.value.width);
+
+        html2canvas(sourceImage.value, { useCORS: true }).then(
+          (imageElement) => {
+            ctx.drawImage(imageElement, imgX, imgY, imgWidth, imgHeight);
+
+            html2canvas(postDescriptionElement.value, { useCORS: true }).then(
+              (descriptionElement) => {
+                const textY = canvas.value.width;
+                ctx.drawImage(
+                  descriptionElement,
+                  0,
+                  textY,
+                  canvas.value.width,
+                  (canvas.value.width /
+                    postDescriptionElement.value.offsetWidth) *
+                    postDescriptionElement.value.offsetHeight
+                );
+
+                sharePost(
+                  socialIconName,
+                  canvas.value.toDataURL("image/png"),
+                  postUuid,
+                  postId
+                );
+              }
+            );
+          }
+        );
+      };
     });
-  };
 };
 
 const getRandomChar = () => {
@@ -476,12 +488,26 @@ const sendFilesS3 = async (base64Data) => {
   }
 };
 
-const createSharedNewsletter = async (imageBase64, imageId) => {
+const createSharedNewsletter = async (
+  imageBase64,
+  imageId,
+  postUuid,
+  postId
+) => {
   try {
     const imgSrc = await sendFilesS3(imageBase64);
 
     if (imgSrc) {
       const route = useRoute();
+      const formUploadAws = {
+        newsUuid: postUuid,
+        postId: postId,
+        imageId: imageId,
+      };
+      await $fetch("/api/aws/create", {
+        method: "POST",
+        body: formUploadAws,
+      });
       const formData = {
         imgSrc: imgSrc,
         fullPostId: dataPostId.value,
@@ -500,12 +526,16 @@ const createSharedNewsletter = async (imageBase64, imageId) => {
   }
 };
 
-const sharePost = async (socialIconName, image) => {
+const sharePost = async (socialIconName, image, postUuid, postId) => {
   let imageId = generateUniqueId();
+
+  await createSharedNewsletter(image, imageId, postUuid, postId);
+  checkSocialIcon(socialIconName, imageId);
+};
+
+const checkSocialIcon = (socialIconName, imageId) => {
   let postTitle = props.posts.title.replace(/<\/?[^>]+>/gi, "");
   let postUrl = `${location.origin}/c/${imageId}`;
-
-  await createSharedNewsletter(image, imageId);
   var socialUrl = null;
   if (socialIconName == "x") {
     socialUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(
@@ -540,16 +570,22 @@ const sharePost = async (socialIconName, image) => {
     sendItemClick(`linkedin`);
   } else if (socialIconName == "link") {
     socialUrl = `${location.origin}/c/${imageId}`;
-    isSnackbarVisible.value = "true";
-    snackbarMsg.value = "Kopyalandı!";
-    const textArea = document.createElement("textarea");
-    textArea.value = socialUrl;
-    document.body.appendChild(textArea);
-    textArea.select();
-    document.execCommand("copy");
-    document.body.removeChild(textArea);
+    if (!navigator.clipboard) {
+      fallbackCopyTextToClipboard(socialUrl);
+    } else {
+      navigator.clipboard
+        .writeText(socialUrl)
+        .then(() => {
+          isSnackbarVisible.value = true;
+          snackbarColor.value = "success";
+          snackbarMsg.value = "URL kopyalandı!";
+        })
+        .catch((err) => {
+          console.error("Async: Could not copy text: ", err);
+          fallbackCopyTextToClipboard(socialUrl);
+        });
+    }
 
-    await navigator.clipboard.writeText(socialUrl);
     sendItemClick(`link`);
   } else if (socialIconName == "download") {
     socialUrl = `${location.origin}/c/${imageId}`;
@@ -560,6 +596,30 @@ const sharePost = async (socialIconName, image) => {
       sendItemClick(`download`);
     });
   }
+};
+
+const fallbackCopyTextToClipboard = (text) => {
+  var textArea = document.createElement("textarea");
+  textArea.value = text;
+  textArea.style.position = "fixed";
+  textArea.style.left = "-999999px";
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+  try {
+    var successful = document.execCommand("copy");
+    if (successful) {
+      snackbarColor.value = "success";
+      snackbarMsg.value = "URL kopyalandı!";
+    } else {
+      snackbarColor.value = "error";
+      snackbarMsg.value = "Kopyalama başarısız!";
+    }
+    isSnackbarVisible.value = true;
+  } catch (err) {
+    console.error("Fallback: Oops, unable to copy", err);
+  }
+  document.body.removeChild(textArea);
 };
 
 const currentSlide = ref(0);
@@ -594,7 +654,6 @@ const checkPostIsLiked = (postId, newsId) => {
     typeof localStorage === "undefined" ||
     localStorage.getItem("likedBundlePosts") == null
   ) {
-    console.warn("localStorage is not available.");
     return false;
   }
   let likedPosts = JSON.parse(localStorage.getItem("likedBundlePosts")) || [];

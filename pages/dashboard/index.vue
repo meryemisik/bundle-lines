@@ -115,6 +115,15 @@
                   <v-card-item>
                     <v-card-subtitle>Görsel Yükle</v-card-subtitle>
                   </v-card-item>
+                  <v-card-item>
+                    <v-text-field
+                      variant="solo-filled"
+                      density="compact"
+                      label="Çizer İsmi Ekle"
+                      v-model="comp.caricaturist"
+                      :rules="caricaturistRules"
+                    ></v-text-field>
+                  </v-card-item>
                   <v-card-text class="form-input-text">
                     <tiptap-editor
                       :editor="editor"
@@ -131,6 +140,15 @@
                   <v-card-item>
                     <v-card-subtitle>Video Yükle</v-card-subtitle>
                   </v-card-item>
+                  <v-card-item>
+                    <v-text-field
+                      variant="solo-filled"
+                      density="compact"
+                      label="Çizer İsmi Ekle"
+                      v-model="comp.caricaturist"
+                      :rules="caricaturistRules"
+                    ></v-text-field>
+                  </v-card-item>
                   <v-card-text class="form-input-text">
                     <tiptap-editor
                       :editor="editor"
@@ -146,6 +164,15 @@
                 <div v-else-if="comp.type === '2'" class="multi-file-component">
                   <v-card-item>
                     <v-card-subtitle>Slider Yükle</v-card-subtitle>
+                  </v-card-item>
+                  <v-card-item>
+                    <v-text-field
+                      variant="solo-filled"
+                      density="compact"
+                      label="Çizer İsmi Ekle"
+                      v-model="comp.caricaturist"
+                      :rules="caricaturistRules"
+                    ></v-text-field>
                   </v-card-item>
                   <v-card-text class="form-input-text">
                     <tiptap-editor
@@ -249,7 +276,7 @@ const showReview = () => {
     campaignName: formCaricatures.value.campaignName,
     creator: data?.value?.user.email,
     caricaturist: formCaricatures.value.caricaturist,
-    createdAt: new Date()
+    createdAt: new Date(),
   }));
 
   reviewData.value = newObjectsArray;
@@ -314,10 +341,12 @@ const components = ref([
     likeCount: null,
     randomLikeCount: Math.floor(Math.random() * 51) + 50,
     newsId: generateUniqueId(),
+    caricaturist: formCaricatures.value.caricaturist || null,
   },
 ]);
 
 const addComponents = (type) => {
+  const defaultCaricaturist = formCaricatures.value.caricaturist;
   if (type === 0) {
     components.value.push({
       type: "0",
@@ -326,6 +355,7 @@ const addComponents = (type) => {
       likeCount: null,
       randomLikeCount: Math.floor(Math.random() * 51) + 50,
       newsId: generateUniqueId(),
+      caricaturist: defaultCaricaturist,
     });
   } else if (type === 1) {
     components.value.push({
@@ -335,6 +365,7 @@ const addComponents = (type) => {
       likeCount: null,
       randomLikeCount: Math.floor(Math.random() * 51) + 50,
       newsId: generateUniqueId(),
+      caricaturist: defaultCaricaturist,
     });
   } else if (type === 2) {
     components.value.push({
@@ -344,6 +375,7 @@ const addComponents = (type) => {
       likeCount: null,
       randomLikeCount: Math.floor(Math.random() * 51) + 50,
       newsId: generateUniqueId(),
+      caricaturist: defaultCaricaturist,
     });
   }
 };
@@ -517,6 +549,15 @@ const createCaricatures = async (event) => {
     snackbarMsg.value = "Zorunlu alanlar boş geçilemez!";
   }
 };
+
+watch(
+  () => formCaricatures.value.caricaturist,
+  (newCaricaturist) => {
+    components.value.forEach((comp) => {
+      comp.caricaturist = newCaricaturist;
+    });
+  }
+);
 </script>
 
 <style lang="scss">

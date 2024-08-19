@@ -76,6 +76,7 @@ export default defineEventHandler(async (event) => {
             custom_elements: [
               { 'content:encoded': descriptionContent },
               content.url ? { 'enclosure': { _attr: { url: content.url, type: getMimeType(content.url) } } } : null,
+              { 'firstLink':  `${webDomain}newsletter/${caricatur._id}` },
             ].filter(Boolean),
           });
         });

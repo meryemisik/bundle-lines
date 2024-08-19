@@ -11,7 +11,7 @@
           >
             <p class="font-playfair">Bundle Lines’ı</p>
             <v-img
-              src="/icons/instagram-1.png"
+              src="/icons/instagram.png"
               alt="Instagram Logo"
               class="instagram-icon"
             ></v-img>

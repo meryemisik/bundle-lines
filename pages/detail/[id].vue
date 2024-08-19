@@ -21,10 +21,12 @@ const posts = ref({
 });
 const pageTitle = ref("Loading Bundle Lines");
 
+const newsUuid = route.query.newsId || "";
+
 const fetchPosts = async () => {
   try {
     const response = await $fetch(
-      `/api/caricatures/getById?id=${route.params.id}`
+      `/api/caricatures/getByNewsId?newsUuid=${newsUuid}`
     );
     if (response && response.news) {
       globalStore.setLoading(true);
@@ -40,6 +42,7 @@ const fetchPosts = async () => {
   }
 };
 
+// Sayfa yüklendiğinde verileri çekiyoruz
 await fetchPosts();
 
 useHead({
