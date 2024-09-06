@@ -1,20 +1,22 @@
 <template>
   <div class="post-item" :id="`post-item-${dataIndex}`">
     <v-container
-      class="page-container my-0 my-md-6"
+      class="page-container my-0 my-md-6 my-sm-4"
       v-if="postImages?.length > 0 || postImages?.[0]?.url"
     >
-      <v-row class="bg-white rounded-xl">
-        <v-col :id="`imagecover-${dataIndex}`">
+      <v-row>
+        <v-col class="pa-0" :id="`imagecover-${dataIndex}`">
           <template v-if="postType == 0">
             <v-img
               :src="postImages?.[0]?.url"
               v-if="postImages?.[0]?.url"
-              :id="`image-${dataIndex}`"
+              style="border-radius: 18px"
+              @click="goToDetailNews(props?.data, postImages?.[0]?.uuid)"
+              class="cursor-pointer"
             />
           </template>
           <template v-else-if="postType == 1">
-            <v-col v-if="postImages?.[0]?.url">
+            <v-col v-if="postImages?.[0]?.url" class="pa-0">
               <v-responsive>
                 <div :id="`video-${dataIndex}`">
                   <video
@@ -22,7 +24,9 @@
                     :controls="isPlaying"
                     @play="isPlaying = true"
                     controlsList="nodownload"
-                    class="post-video"
+                    class="post-video cursor-pointer"
+                    style="border-radius: 18px"
+                    :poster="data[0].posterUrl"
                   >
                     <source :src="postImages?.[0]?.url" type="video/mp4" />
                     Tarayıcınız bu videoyu desteklemiyor.
@@ -37,6 +41,7 @@
               </v-responsive>
             </v-col>
           </template>
+
           <template v-else-if="postType == 2">
             <div class="position-relative" v-if="postImages?.length > 0">
               <v-carousel
@@ -44,17 +49,14 @@
                 v-model="currentSlide"
                 hide-delimiter-background
                 :show-arrows="false"
-                :id="`slider-${dataIndex}`"
+                @click="goToDetailNews(props?.data, postImages?.[currentSlide]?.uuid)"
+                style="border-radius: 18px"
               >
                 <v-carousel-item
                   v-for="(image, index) in postImages"
                   :key="index"
                 >
-                  <v-img
-                    :src="image.url"
-                    :id="`slider-item-${index}`"
-                    :value="index"
-                  />
+                  <v-img :src="image.url" :value="index" class="cursor-pointer"/>
                 </v-carousel-item>
               </v-carousel>
               <div class="position-absolute slider-control">
@@ -75,75 +77,118 @@
           </template>
         </v-col>
       </v-row>
-      <v-row>
-        <v-col class="px-0 px-sm-3 px-md-6">
+
+      <v-row
+        v-if="
+          data[0]?.caricaturist &&
+          (sourcePage == 'web' || sourcePage == 'detail')
+        "
+        class="mt-0 mt-8"
+      >
+        <v-col class="pa-0 px-sm-3 px-md-5 mb-n4">
+          <div class="font-playfair post-caricaturist text-black">
+            Çizer: {{ data[0]?.caricaturist }}
+          </div>
+        </v-col>
+      </v-row>
+      <v-row class="mt-0">
+        <v-col
+          class="px-0 px-sm-3 px-md-5 mt-6 cursor-pointer"
+          @click="goToDetailNews(props?.data, postImages?.[0]?.uuid)"
+        >
           <div
-            class="text-subtitle-2 text-md-subtitle-1 font-weight-medium text-center post-description"
+            class="font-weight-medium post-description font-playfair"
             :id="`description-${dataIndex}`"
             v-html="postDescription"
           ></div>
         </v-col>
       </v-row>
-      <v-row>
+      <v-row class="mt-0 pt-2">
         <v-col
-          class="d-flex justify-center text-caption font-weight-medium mb-5"
+          class="d-flex justify-center align-center text-caption font-weight-medium px-0 px-sm-3 px-md-5"
           v-if="postDescription || postImages?.[0]?.url"
         >
           <div
-            class="cursor-pointer mx-1 mx-sm-2 mx-md-4 d-flex align-center"
-            @click="likeToggle(data?.newsId)"
+            class="post-date font-roboto"
+            v-if="sourcePage == 'web' || sourcePage == 'detail'"
           >
-            <v-img
-              :width="24"
-              :src="
-                checkPostIsLiked(props?.posts?._id, data?.newsId)
-                  ? '/icons/favorite.svg'
-                  : '/icons/favorite-outline.svg'
-              "
-              :class="`mr-2 like-button ${
-                checkPostIsLiked(props?.posts?._id, data?.newsId) && 'liked'
-              } `"
-            />
-            <span
-              v-if="likeCount < 50"
-              style="
-                font-family: CCWildWordsTR;
-                font-size: 12px;
-                font-weight: 400;
-                line-height: 15.72px;
-                letter-spacing: 0.01em;
-                text-align: center;
-              "
-            >
-              {{ likeCount + randomLikeCount }}
-            </span>
-            <span v-else>
-              {{ likeCount }}
-            </span>
+            {{ postCreatedAt }}
           </div>
           <div
-            class="cursor-pointer position-relative mx-1 mx-md-2 mx-lg-4 d-flex align-center"
-            @click="shareFunction(props?.posts)"
+            class="font-playfair post-caricaturist text-black"
+            v-if="
+              data[0]?.caricaturist &&
+              data[0]?.caricaturist &&
+              sourcePage == 'newsletter'
+            "
           >
-            <v-img :width="24" src="/icons/share.svg" class="mr-2" />
-            <span>Paylaş</span>
+            Çizer: {{ data[0]?.caricaturist }}
+          </div>
+          <div class="d-flex justify-end align-center flex-fill">
             <div
-              v-show="shareTooltip"
-              class="position-absolute share-tooltip py-3 cursor-default"
+              class="cursor-pointer mx-1 mx-sm-2 mx-md-4 d-flex align-center"
+              @click="likeToggle(data?.[0].newsId)"
             >
-              <div class="d-flex justify-space-between">
+              <span
+                class="mr-2 font-roboto like-count text-black"
+                v-if="likeCount > 0"
+              >
+                {{ likeCount }}
+              </span>
+              <v-img
+                :width="18"
+                :src="
+                  checkPostIsLiked(dataPostId, data?.[0].newsId)
+                    ? '/icons/favorite.svg'
+                    : '/icons/favorite-outline.svg'
+                "
+                :class="`mr-2 like-button ${
+                  checkPostIsLiked(dataPostId, data?.[0].newsId) && 'liked'
+                } `"
+              />
+            </div>
+
+            <div
+              class="cursor-pointer position-relative d-flex align-center ml-3"
+              @click="shareFunction(props?.posts, dataIndex)"
+            >
+              <!-- <span class="mr-2 font-roboto share-text text-black">Paylaş</span> -->
+              <v-img :width="24" src="/icons/share.svg" />
+              <div
+                v-show="shareTooltip"
+                class="position-absolute share-tooltip cursor-default"
+              >
                 <div
-                  v-for="icon in socialIcons"
-                  :key="icon.name"
-                  rel="noopener noreferrer"
+                  class="d-flex justify-space-between flex-column align-center mx-4 my-4 share-tooltip-icons"
                 >
-                  <v-img
-                    :width="24"
-                    :src="`/icons/${icon.name}.svg`"
-                    :alt="icon.name"
-                    class="cursor-pointer"
-                    @click="createImage(icon.name)"
-                  />
+                  <div
+                    v-for="icon in socialIcons"
+                    :key="icon.name"
+                    rel="noopener noreferrer"
+                    class="d-flex align-center justify-space-between w-100 cursor-pointer"
+                    @click="
+                          createImage(
+                            icon.name,
+                            postImages[currentSlide].uuid,
+                            posts._id
+                          )
+                        "
+                  >
+                    <span
+                      class="text-white font-barlow"
+                      style="font-weight: 600 !important"
+                      >{{ icon.label }}</span
+                    >
+
+                    <div>
+                      <v-img
+                        :width="18"
+                        :src="`/icons/${icon.name}.png`"
+                        :alt="icon.name"
+                        class="cursor-pointer"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -161,7 +206,7 @@
         v-model="isSnackbarVisible"
         timeout="3000"
         location="top right"
-        color="success"
+        :color="snackbarColor"
       >
         {{ snackbarMsg }}
       </v-snackbar>
@@ -172,26 +217,49 @@
 <script setup>
 import { sendGA4Events } from "~/services/ga4";
 import html2canvas from "html2canvas";
+import { useGlobalStore } from "~/stores/globalStore";
+
+const globalStore = useGlobalStore();
 const runtimeConfig = useRuntimeConfig();
-const props = defineProps(["data", "dataIndex", "posts"]);
+const props = defineProps(["data", "posts", "sourcePage"]);
+const { $formatDate } = useNuxtApp();
+const postCaricaturist = ref(props?.posts?.caricaturist || "");
+const postCreatedAt = ref($formatDate(props?.posts?.createdAt) || "");
 const isSnackbarVisible = ref(false);
 const snackbarMsg = ref("");
-const postType = ref(props?.data?.type || 0);
-const postDescription = ref(props?.data?.description || "");
-const postImages = ref(props?.data?.content || null);
-const likeCount = ref(props?.data?.likeCount);
-const randomLikeCount = ref(props?.data?.randomLikeCount);
+const postType = ref(props?.data?.[0].type || 0);
+const postDescription = ref(props?.data?.[0].description || "");
+const postImages = ref(props?.data?.[0].content || null);
+const likeCount = ref(props?.data?.[0].likeCount);
+const randomLikeCount = ref(props?.data?.[0].randomLikeCount);
+const dataIndex = ref(props?.data[0].content[0].uuid);
+const dataPostId = ref(props?.posts?._id);
+const snackbarColor = ref("");
+const sourcePage = ref(props.sourcePage);
+const route = useRoute();
+const router = useRouter();
+
 const stripHTMLTags = (input) => {
   return input.replace(/<\/?[^>]+(>|$)/g, "");
 };
 
+const goToDetailNews = (content, uuid) => {
+  const router = useRouter();
+  router.push(`/detail/${dataPostId.value}?newsId=${uuid || "null"}`);
+  if (route.fullPath === "/") {
+    localStorage.setItem("locationType", "web");
+  } else if (route.fullPath.startsWith("/newsletter")) {
+    localStorage.setItem("locationType", "newsletter");
+  } else {
+    localStorage.removeItem("locationType")
+  }
+};
+
 const isWebView = computed(() => {
   const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-  // Android WebView detection
   if (/android/i.test(userAgent) && /wv/.test(userAgent)) {
     return true;
   }
-  // iOS WebView detection
   if (/iPhone|iPod|iPad/i.test(userAgent) && !window.MSStream) {
     if (
       (navigator.standalone && !window.navigator.standalone) ||
@@ -205,7 +273,6 @@ const isWebView = computed(() => {
 
 const isIOSWebView = computed(() => {
   const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-  // iOS WebView detection
   if (/iPhone|iPod|iPad/i.test(userAgent) && !window.MSStream) {
     if (
       (navigator.standalone && !window.navigator.standalone) ||
@@ -230,13 +297,12 @@ const isIOS = computed(() => {
     (navigator.userAgent.includes("Mac") && "ontouchend" in document)
   );
 });
-
-const shareFunction = async (data) => {
+const shareFunction = async (data, dataIndex) => {
   if (isIOS.value) {
     const shareData = {
-      title: data.title.replace(/<\/?[^>]+(>|$)/g, ""),
-      text: data.title.replace(/<\/?[^>]+(>|$)/g, ""),
-      url: `${window.location.origin}/newsletter/${data._id}`,
+      title: "Bundle Lines",
+      text: (postDescription.value || "Bundle Lines").replace(/<\/?[^>]+(>|$)/g, ""),
+      url: `${window.location.origin}/detail/${data._id}?newsId=${dataIndex}`,
     };
     try {
       if (navigator.share) {
@@ -250,39 +316,29 @@ const shareFunction = async (data) => {
   }
 };
 
-const scrollToContent = () => {
-  const route = useRoute();
-  const newsId = route.query.newsId;
-  if (parseInt(newsId) === props.dataIndex) {
-    const element = document.getElementById(`post-item-${props.dataIndex}`);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
-    }
-  }
-};
-
 watchEffect(() => {
   if (props?.posts) {
-    let getFirstImage = props?.posts.news.find(
-      (obj) => obj.type == 0 || obj.type == 2
-    );
-    getFirstImage = getFirstImage?.content?.[0]?.url;
-    let getFirstDescription = props?.posts.news[0].description;
+    // let getFirstImage = props?.posts.news.find(
+    //   (obj) => obj.type == 0 || obj.type == 2
+    // );
+    // getFirstImage = getFirstImage?.content?.[0]?.url;
+    //let getFirstDescription = props?.posts?.news?.description;
+    let getFirstDescription = props?.posts?.news?.[0]?.description;
     getFirstDescription = stripHTMLTags(getFirstDescription);
     useSeoMeta({
-      title: props.posts.title.replace(/<\/?[^>]+>/gi, ""),
-      ogTitle: props.posts.title.replace(/<\/?[^>]+>/gi, ""),
+      title: props?.posts?.title?.replace(/<\/?[^>]+>/gi, ""),
+      ogTitle: props?.posts?.title?.replace(/<\/?[^>]+>/gi, ""),
       description: getFirstDescription,
       ogDescription: getFirstDescription,
-      ogImage: getFirstImage,
+      //ogImage: getFirstImage,
       twitterCard: "summary_large_image",
       ogType: "article", // veya uygun tür
       ogSiteName: "Bundle Lines",
-      ogUrl: window.location.href,
+      //ogUrl: window.location.href,
       ogLocale: "tr_TR",
-      twitterTitle: props.posts.title.replace(/<\/?[^>]+>/gi, ""),
+      twitterTitle: props?.posts?.title?.replace(/<\/?[^>]+>/gi, ""),
       twitterDescription: getFirstDescription,
-      twitterImage: getFirstImage,
+      //twitterImage: getFirstImage,
     });
   }
 });
@@ -296,30 +352,31 @@ const { sendItemImpression, sendItemClick } = sendGA4Events({
   apiSecretKey: runtimeConfig.apiSecretKey,
 });
 
-const socialIconsForWebView = [
-  {
-    name: "link",
-  },
-];
 const socialIcons = [
   {
     name: "facebook",
+    label: "Facebook",
   },
   {
     name: "x",
+    label: "X",
   },
   {
     name: "linkedin",
+    label: "Linked In",
   },
   {
     name: "whatsapp",
+    label: "WhatsApp",
   },
   {
     name: "link",
+    label: "Bağlantı",
   },
-  {
-    name: "download",
-  },
+  // {
+  //   name: "download",
+  //   label:"Facebook"
+  // },
 ];
 const shareTooltip = ref(false);
 
@@ -330,7 +387,6 @@ const handleScroll = () => {
 onMounted(() => {
   window.addEventListener("scroll", handleScroll);
   sendItemImpression("homepage");
-  scrollToContent();
 });
 
 onUnmounted(() => {
@@ -338,82 +394,81 @@ onUnmounted(() => {
 });
 
 const canvas = ref(null);
-const createImage = async (socialIconName) => {
-  const sourceImage = ref(
-    document.querySelector(`#imagecover-${props.dataIndex}`)
-  );
-  const postDescriptionElement = ref(
-    document.querySelector(`#description-${props.dataIndex}`)
-  );
-
-  // if (postType.value == 0) {
-  //   sourceImage.value = document.querySelector(`#image-${props.dataIndex} img`);
-  // } else if (postType.value == 1) {
-  //   var captureDivElement = document.querySelector(`#video-${props.dataIndex}`);
-  //   var createCanvas = await html2canvas(captureDivElement, { useCORS: true });
-  //   var createImgFromCanvas = createCanvas.toDataURL("image/png");
-  //   sourceImage.value = document.createElement("img");
-  //   sourceImage.value.src = createImgFromCanvas;
-  // } else if (postType.value == 2) {
-  //   sourceImage.value = document.querySelector(
-  //     `#slider-${props.dataIndex} #slider-item-${currentSlide.value} img`
-  //   );
-  //   console.log("sourceImage.value : ", sourceImage.value)
-  // }
-
-  const frameImg = new Image();
-
-  frameImg.src = "/canvas-frame.png";
-  sourceImage.value.crossOrigin = "anonymous";
-  frameImg.crossOrigin = "anonymous";
-  //img.crossOrigin = "anonymous";
-  frameImg.onload = () => {
-    const ctx = canvas.value.getContext("2d");
-    ctx.clearRect(0, 0, 1080, 1350);
-    ctx.fillStyle = "white";
-    ctx.fillRect(0, 0, canvas.value.width, canvas.value.height);
-
-    const canvasContentWidth = (canvas.value.width / 38) * 30;
-    var imgWidth = 0;
-    var imgHeight = 0;
-    var imgX = (canvas.value.width / 38) * 4;
-    var imgY = (canvas.value.width / 38) * 2.5;
-    if (sourceImage.value.offsetHeight > sourceImage.value.offsetWidth) {
-      imgWidth =
-        (sourceImage.value.offsetWidth / sourceImage.value.offsetHeight) *
-        canvasContentWidth;
-      imgHeight = canvasContentWidth;
-      imgX = imgX + (canvasContentWidth - imgWidth) / 2;
-    } else {
-      imgWidth = canvasContentWidth;
-      imgHeight =
-        (sourceImage.value.offsetHeight / sourceImage.value.offsetWidth) *
-        canvasContentWidth;
-      imgY = imgY + (canvasContentWidth - imgHeight) / 2;
-    }
-
-    ctx.drawImage(frameImg, 0, 0, canvas.value.width, canvas.value.width);
-
-    html2canvas(sourceImage.value, { useCORS: true }).then((imageElement) => {
-      ctx.drawImage(imageElement, imgX, imgY, imgWidth, imgHeight);
-
-      html2canvas(postDescriptionElement.value, { useCORS: true }).then(
-        (descriptionElement) => {
-          const textY = canvas.value.width;
-          ctx.drawImage(
-            descriptionElement,
-            0,
-            textY,
-            canvas.value.width,
-            (canvas.value.width / postDescriptionElement.value.offsetWidth) *
-              postDescriptionElement.value.offsetHeight
-          );
-
-          sharePost(socialIconName, canvas.value.toDataURL("image/png"));
-        }
+const createImage = async (socialIconName, postUuid, postId) => {
+  await $fetch(`/api/aws/getById?newsUuid=${postUuid}`)
+    .then((res) => {
+      checkSocialIcon(socialIconName, res?.imageId);
+    })
+    .catch((error) => {
+      const sourceImage = ref(
+        document.querySelector(`#imagecover-${dataIndex.value}`)
       );
+      const postDescriptionElement = ref(
+        document.querySelector(`#description-${dataIndex.value}`)
+      );
+
+      const frameImg = new Image();
+
+      frameImg.src = "/canvas-frame.png";
+      sourceImage.value.crossOrigin = "anonymous";
+      frameImg.crossOrigin = "anonymous";
+      //img.crossOrigin = "anonymous";
+      frameImg.onload = () => {
+        const ctx = canvas.value.getContext("2d");
+        ctx.clearRect(0, 0, 1080, 1350);
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, 0, canvas.value.width, canvas.value.height);
+
+        const canvasContentWidth = (canvas.value.width / 38) * 30;
+        var imgWidth = 0;
+        var imgHeight = 0;
+        var imgX = (canvas.value.width / 38) * 4;
+        var imgY = (canvas.value.width / 38) * 2.5;
+        if (sourceImage.value.offsetHeight > sourceImage.value.offsetWidth) {
+          imgWidth =
+            (sourceImage.value.offsetWidth / sourceImage.value.offsetHeight) *
+            canvasContentWidth;
+          imgHeight = canvasContentWidth;
+          imgX = imgX + (canvasContentWidth - imgWidth) / 2;
+        } else {
+          imgWidth = canvasContentWidth;
+          imgHeight =
+            (sourceImage.value.offsetHeight / sourceImage.value.offsetWidth) *
+            canvasContentWidth;
+          imgY = imgY + (canvasContentWidth - imgHeight) / 2;
+        }
+
+        ctx.drawImage(frameImg, 0, 0, canvas.value.width, canvas.value.width);
+
+        html2canvas(sourceImage.value, { useCORS: true }).then(
+          (imageElement) => {
+            ctx.drawImage(imageElement, imgX, imgY, imgWidth, imgHeight);
+
+            html2canvas(postDescriptionElement.value, { useCORS: true }).then(
+              (descriptionElement) => {
+                const textY = canvas.value.width;
+                ctx.drawImage(
+                  descriptionElement,
+                  (canvas.value.width / 1300) * 25,
+                  textY,
+                  canvas.value.width,
+                  (canvas.value.width /
+                    postDescriptionElement.value.offsetWidth) *
+                    postDescriptionElement.value.offsetHeight
+                );
+
+                sharePost(
+                  socialIconName,
+                  canvas.value.toDataURL("image/png"),
+                  postUuid,
+                  postId
+                );
+              }
+            );
+          }
+        );
+      };
     });
-  };
 };
 
 const getRandomChar = () => {
@@ -463,16 +518,29 @@ const sendFilesS3 = async (base64Data) => {
   }
 };
 
-const createSharedNewsletter = async (imageBase64, imageId) => {
+const createSharedNewsletter = async (
+  imageBase64,
+  imageId,
+  postUuid,
+  postId
+) => {
   try {
     const imgSrc = await sendFilesS3(imageBase64);
 
     if (imgSrc) {
       const route = useRoute();
-      const id = route.params.id;
+      const formUploadAws = {
+        newsUuid: postUuid,
+        postId: postId,
+        imageId: imageId,
+      };
+      await $fetch("/api/aws/create", {
+        method: "POST",
+        body: formUploadAws,
+      });
       const formData = {
         imgSrc: imgSrc,
-        fullPostId: id,
+        fullPostId: dataPostId.value,
         imageId: imageId,
       };
 
@@ -488,12 +556,16 @@ const createSharedNewsletter = async (imageBase64, imageId) => {
   }
 };
 
-const sharePost = async (socialIconName, image) => {
+const sharePost = async (socialIconName, image, postUuid, postId) => {
   let imageId = generateUniqueId();
-  let postTitle = props.posts.title.replace(/<\/?[^>]+>/gi, "");
-  let postUrl = `${location.origin}/c/${imageId}`;
 
-  await createSharedNewsletter(image, imageId);
+  await createSharedNewsletter(image, imageId, postUuid, postId);
+  checkSocialIcon(socialIconName, imageId);
+};
+
+const checkSocialIcon = (socialIconName, imageId) => {
+  let postTitle = props?.posts?.title?.replace(/<\/?[^>]+>/gi, "");
+  let postUrl = `${location.origin}/c/${imageId}`;
   var socialUrl = null;
   if (socialIconName == "x") {
     socialUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(
@@ -528,16 +600,22 @@ const sharePost = async (socialIconName, image) => {
     sendItemClick(`linkedin`);
   } else if (socialIconName == "link") {
     socialUrl = `${location.origin}/c/${imageId}`;
-    isSnackbarVisible.value = "true";
-    snackbarMsg.value = "Kopyalandı!";
-    const textArea = document.createElement("textarea");
-    textArea.value = socialUrl;
-    document.body.appendChild(textArea);
-    textArea.select();
-    document.execCommand("copy");
-    document.body.removeChild(textArea);
+    if (!navigator.clipboard) {
+      fallbackCopyTextToClipboard(socialUrl);
+    } else {
+      navigator.clipboard
+        .writeText(socialUrl)
+        .then(() => {
+          isSnackbarVisible.value = true;
+          snackbarColor.value = "success";
+          snackbarMsg.value = "URL kopyalandı!";
+        })
+        .catch((err) => {
+          console.error("Async: Could not copy text: ", err);
+          fallbackCopyTextToClipboard(socialUrl);
+        });
+    }
 
-    await navigator.clipboard.writeText(socialUrl);
     sendItemClick(`link`);
   } else if (socialIconName == "download") {
     socialUrl = `${location.origin}/c/${imageId}`;
@@ -548,6 +626,30 @@ const sharePost = async (socialIconName, image) => {
       sendItemClick(`download`);
     });
   }
+};
+
+const fallbackCopyTextToClipboard = (text) => {
+  var textArea = document.createElement("textarea");
+  textArea.value = text;
+  textArea.style.position = "fixed";
+  textArea.style.left = "-999999px";
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+  try {
+    var successful = document.execCommand("copy");
+    if (successful) {
+      snackbarColor.value = "success";
+      snackbarMsg.value = "URL kopyalandı!";
+    } else {
+      snackbarColor.value = "error";
+      snackbarMsg.value = "Kopyalama başarısız!";
+    }
+    isSnackbarVisible.value = true;
+  } catch (err) {
+    console.error("Fallback: Oops, unable to copy", err);
+  }
+  document.body.removeChild(textArea);
 };
 
 const currentSlide = ref(0);
@@ -568,17 +670,23 @@ const nextImg = () => {
 
 const isLiked = ref(false);
 const likeToggle = (newsId) => {
-  toggleNewsInPost(props?.posts?._id, newsId);
+  toggleNewsInPost(dataPostId.value, newsId);
   isLiked.value = !isLiked.value;
   if (isLiked.value) {
-    sendItemClick(`caricature-${props.dataIndex + 1}`);
+    sendItemClick(`caricature-${dataIndex.value + 1}`);
   }
   likeCount.value = isLiked.value ? likeCount.value + 1 : likeCount.value - 1;
-  updateLikeCount(props?.posts?._id, newsId, likeCount.value);
+  updateLikeCount(dataPostId.value, newsId, likeCount.value);
 };
 
 const checkPostIsLiked = (postId, newsId) => {
-  let likedPosts = JSON.parse(localStorage.getItem("likedBundlePosts")) || [{}];
+  if (
+    typeof localStorage === "undefined" ||
+    localStorage.getItem("likedBundlePosts") == null
+  ) {
+    return false;
+  }
+  let likedPosts = JSON.parse(localStorage.getItem("likedBundlePosts")) || [];
   let posts = likedPosts[0];
   if (posts[postId] && posts[postId].includes(newsId)) {
     isLiked.value = true;
@@ -588,7 +696,15 @@ const checkPostIsLiked = (postId, newsId) => {
   return false;
 };
 const toggleNewsInPost = (postId, newsId) => {
-  let likedPosts = JSON.parse(localStorage.getItem("likedBundlePosts")) || [{}];
+  if (
+    typeof localStorage === "undefined" ||
+    localStorage.getItem("likedBundlePosts") == null
+  ) {
+    let initialPosts = {};
+    initialPosts[postId] = [];
+    localStorage.setItem("likedBundlePosts", JSON.stringify([initialPosts]));
+  }
+  let likedPosts = JSON.parse(localStorage?.getItem("likedBundlePosts")) || [];
   let posts = likedPosts[0];
   if (posts[postId]) {
     let newsIndex = posts[postId].indexOf(newsId);
@@ -605,10 +721,11 @@ const toggleNewsInPost = (postId, newsId) => {
   }
   localStorage.setItem("likedBundlePosts", JSON.stringify(likedPosts));
 };
+
 const isPlaying = ref(false);
 const playVideo = () => {
   const videoElement = document.querySelector(
-    `#video-${props.dataIndex} video`
+    `#video-${dataIndex.value} video`
   );
   if (videoElement && isPlaying) {
     videoElement.play();
@@ -617,7 +734,11 @@ const playVideo = () => {
 
 const updateLikeCount = async (id, likeCountIndex, likeCount) => {
   try {
-    const response = await $fetch(`/api/caricatures/updateLikeCount`, {
+    const locationType = localStorage.getItem('locationType');
+    const apiUrl = locationType === 'web'
+      ? `/api/web-content/updateLikeCount`
+      : `/api/caricatures/updateLikeCount`;
+    const response = await $fetch(apiUrl, {
       method: "PATCH",
       body: { newsId: likeCountIndex, likeCount: likeCount, id: id },
     });

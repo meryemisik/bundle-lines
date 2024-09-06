@@ -20,10 +20,11 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useAsyncData, useHead } from "#app";
-
+definePageMeta({
+  layout: 'c'
+})
 const route = useRoute();
 const router = useRouter();
 
@@ -31,10 +32,15 @@ const imgSrc = ref(null);
 const fullPostId = ref(null);
 const isLoading = ref(true);
 
-const { data, pending, error } = await useAsyncData("newsletterDetails", async () => {
-  const response = await $fetch(`/api/newsletter-detail/getById?imageId=${route.params.id}`);
-  return response;
-});
+const { data, pending, error } = await useAsyncData(
+  "newsletterDetails",
+  async () => {
+    const response = await $fetch(
+      `/api/newsletter-detail/getById?imageId=${route.params.id}`
+    );
+    return response;
+  }
+);
 
 if (!error.value) {
   imgSrc.value = data.value.imgSrc;
@@ -51,7 +57,10 @@ useHead(() => ({
     { property: "og:image", content: imgSrc.value },
     { property: "og:type", content: "article" },
     { property: "og:site_name", content: "Bundle Lines" },
-    { property: "og:url", content: `https://bundlelines.bundle.app${route.fullPath}` },
+    {
+      property: "og:url",
+      content: `https://bundlelines.bundle.app${route.fullPath}`,
+    },
     { property: "og:locale", content: "tr_TR" },
     { name: "twitter:card", content: "summary_large_image" },
     { name: "twitter:title", content: "Bundle Lines" },

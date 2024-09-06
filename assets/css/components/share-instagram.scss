@@ -1,0 +1,33 @@
+.instagram-component {
+  border-color: #eeeeee !important;
+
+  p {
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 20.96px;
+    letter-spacing: 0.01em;
+    text-align: left;
+    span {
+      font-size: 16px;
+      font-weight: 500;
+      line-height: 20.96px;
+      letter-spacing: 0.01em;
+      text-align: left;
+      color: rgba(230, 44, 51, 1);
+      text-decoration: underline;
+    }
+  }
+
+  .follow-instagram {
+    padding: 10px 20px;
+    border-radius: 40px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+  }
+
+  .instagram-icon {
+    width: 20px;
+  }
+}

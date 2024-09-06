@@ -1,12 +1,22 @@
 // https://v3.nuxtjs.org/api/configuration/nuxt.config
 export default defineNuxtConfig({
   css: ["~/assets/css/main.scss"],
-
+  app: {
+    head: {
+      script: [
+        {
+          src: 'https://securepubads.g.doubleclick.net/tag/js/gpt.js',
+          async: true,
+        }
+      ],
+    },
+  },
   modules: [
     "nuxt-icon",
     "@nuxt/content",
     "nuxt-tiptap-editor",
     "@sidebase/nuxt-auth",
+    "@nuxt/image",
   ],
 
   build: {
@@ -52,4 +62,8 @@ export default defineNuxtConfig({
       process.exit();
     },
   },
+
+  plugins: ["~/plugins/formatDate"],
+
+  compatibilityDate: "2024-08-13",
 });

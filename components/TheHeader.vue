@@ -1,70 +1,112 @@
 <template>
-  <v-container fluid class="pb-0">
-    <v-row class="mb-0 mb-md-4 mb-lg-8 bg-white pa-0">
-      <v-col cols="auto" class="pa-0">
-        <div class="bg-grey-darken-4 py-2 px-4">
-          <v-img :width="28" src="/logo/logo-icon.png" />
-        </div>
-      </v-col>
-      <v-col class="page-container">
-        <v-img :width="180" src="/logo/logo-dark.png" />
-      </v-col>
-      <v-col cols="auto"> paylaş </v-col>
-    </v-row>
-    <v-row class="mb-0 mb-md-4 mb-lg-8 page-container mx-auto">
-      <v-col cols="12" class="pb-0">
-        <template v-if="!isLoading">
-          <h1
-            style="
-              font-family: 'MetaSerifPro' !important;
-              font-weight: 350 !important;
-            "
-            class="font-weight-regular header-title"
+  <div :class="{ 'sticky-header': stickyHeader }">
+    <template v-if="!isLoading">
+      <v-container fluid class="pa-0 header">
+        <div
+          class="pa-0 mt-0 mx-0 align-center d-flex header-light-bg"
+          style="height: 72px; border-bottom: 0.5px solid #b3b3b3"
+        >
+          <div
+            class="py-6 px-4"
+            style="height: 100%; display: flex"
+            :class="{ 'header-dark-bg px-8': !isSmallScreen }"
+            v-if="globalStore.activeDetailPage != 'detail' || !isSmallScreen"
           >
-            <span v-html="title"></span>
-          </h1>
-        </template>
-        <template v-else>
-          <v-skeleton-loader class="mx-auto" type="heading"></v-skeleton-loader>
-        </template>
-      </v-col>
-      <v-col class="mt-n4" v-show="sponsorship" v-if="!isLoading">
-        <div class="d-inline-flex">
-          <v-img
-            :width="64"
-            :src="sponsorshipLogo[0].url"
-            class="mr-2"
-            v-if="sponsorshipLogo?.[0]?.url"
-          />
-          <span class="text-sponsorship font-weight-medium font-barlow">{{
-            sponsorship
-          }}</span>
+            <v-img :width="28" src="/logo/logo-icon.png" />
+          </div>
+          <div
+            class="ml-5 cursor-pointer"
+            v-if="globalStore.activeDetailPage == 'detail'"
+            @click="goToHome()"
+          >
+            <v-img :width="40" src="/icons/arrow-left.png" />
+          </div>
+          <div class="page-container">
+            <v-img
+              :width="isSmallScreen ? 110 : 180"
+              src="/logo/logo-dark.png"
+              :class="{ 'mx-auto ': isSmallScreen }"
+            />
+          </div>
+          <div>
+            <v-img
+              :width="40"
+              src="/icons/share-button.png"
+              class="cursor-pointer mr-4"
+              @click="shareWebSite()"
+            />
+          </div>
         </div>
-      </v-col>
-    </v-row>
-  </v-container>
+        <v-snackbar
+          v-model="isSnackbarVisible"
+          timeout="3000"
+          location="top right"
+          :color="snackbarColor"
+        >
+          {{ snackbarMsg }}
+        </v-snackbar>
+      </v-container>
+    </template>
+  </div>
 </template>
 
 <script setup>
 const props = defineProps({
   data: Object,
 });
+import { useGlobalStore } from "~/stores/globalStore";
+const isSmallScreen = ref(false);
+const globalStore = useGlobalStore();
+const isLoading = ref(!globalStore.isLoading);
+const isSnackbarVisible = ref(false);
+const snackbarMsg = ref("");
+const snackbarColor = ref("");
+const router = useRouter();
+const route = useRoute();
+const stickyHeader = ref(false);
+const shareWebSite = () => {
+  const currentUrl = window.location.href;
+  navigator.clipboard.writeText(currentUrl).then(() => {
+    isSnackbarVisible.value = true;
+    snackbarColor.value = "success";
+    snackbarMsg.value = "URL kopyalandı!";
+  });
+};
 
-const isLoading = ref(true);
-const title = ref(null);
-const sponsorship = ref(null);
-const sponsorshipLogo = ref(null);
+const goToHome = () => {
+  const match = route.fullPath.match(/\/detail\/([a-f0-9]+)/);
+  if (localStorage.getItem("locationType") == "web") {
+    router.push("/");
+  } else {
+    router.push(`/newsletter/${match[1]}`);
+  }
+};
+
+const checkScreenSize = () => {
+  isSmallScreen.value = window.innerWidth <= 768;
+};
+
+const checkRoute = () => {
+  if (route.fullPath == "/") {
+    stickyHeader.value = true;
+  }
+};
+onMounted(() => {
+  checkScreenSize();
+  window.addEventListener("resize", checkScreenSize);
+  checkRoute();
+});
+
+onUnmounted(() => {
+  window.removeEventListener("resize", checkScreenSize);
+});
 
 watch(
-  () => props.data,
-  (newData) => {
-    if (newData && newData.title) {
-      isLoading.value = false;
-      title.value = newData.title;
-      sponsorship.value = newData.sponsor;
-      sponsorshipLogo.value = newData.sponsorImage;
+  () => route.fullPath,
+  (newPath) => {
+    if (newPath != "/") {
+      stickyHeader.value = false;
     }
-  },
-  { immediate: true }
+  }
 );
 </script>

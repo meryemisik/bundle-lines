@@ -71,11 +71,12 @@ export default defineEventHandler(async (event) => {
           feed.item({
             title: item.description.replace(/<\/?[^>]+>/gi, ''),
             description: item.description.replace(/<\/?[^>]+>/gi, ''),
-            url: `${webDomain}newsletter/${caricatur._id}?newsId=${itemIndex}`,
+            url: `${webDomain}newsletter/${caricatur._id}?newsId=${content?.uuid || "null"}`,
             date: caricatur.createdAt || new Date().toISOString(),
             custom_elements: [
               { 'content:encoded': descriptionContent },
               content.url ? { 'enclosure': { _attr: { url: content.url, type: getMimeType(content.url) } } } : null,
+              { 'firstLink':  `${webDomain}newsletter/${caricatur._id}` },
             ].filter(Boolean),
           });
         });

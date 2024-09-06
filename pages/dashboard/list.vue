@@ -1,10 +1,10 @@
 <template>
-  <v-container class="page-container">
+  <v-container>
     <v-row>
-      <v-col>
+      <v-col class="px-0">
         <div class="ml-auto mb-4 d-flex align-center justify-end">
           <v-btn
-            class="ma-2"
+            class="my-2"
             size="large"
             color="primary"
             append-icon="mdi-plus"
@@ -12,20 +12,12 @@
           >
             <span class="font-barlow">Yeni Oluştur</span>
           </v-btn>
-          <v-icon
-            icon="mdi-logout"
-            color="light"
-            @click="logout"
-            class="mx-1 bg-error rounded pa-5"
-            elevation="1"
-          />
         </div>
 
         <v-card elevation="10" class="pa-3">
           <template v-if="isLoading">
             <v-skeleton-loader
               class="mx-auto border"
-              width="500"
               type="table"
             ></v-skeleton-loader>
           </template>
@@ -36,21 +28,47 @@
               :items-per-page="itemsPerPage"
               hide-default-footer
               v-model:sort-by="sortBy"
+              class="newsletter-list"
             >
               <template v-slot:[`item.title`]="{ item }">
-                <span v-html="item.title"></span>
+                <span v-html="truncateText(item.title, 90)"></span>
+              </template>
+
+              <template v-slot:[`item.sponsorImage`]="{ item }">
+                <v-img :width="100" :src="item.sponsorImage[0]" v-if="!item?.sponsorIsDeleted "/>
               </template>
 
               <template v-slot:[`item.createdAt`]="{ item }">
-                {{ formatISODate(item.createdAt) }}
+                {{ $formatDate(item.createdAt) }}
               </template>
               <template v-slot:[`item.btn`]="{ item }">
-                <v-icon small @click="goNews(item._id)">
-                  mdi-open-in-new
-                </v-icon>
-                <v-icon small class="ml-2" @click="goDetail(item._id)"
-                  >mdi-eye-outline</v-icon
-                >
+                <v-menu>
+                  <template v-slot:activator="{ props }">
+                    <v-icon
+                      small
+                      color="primary"
+                      class="cursor-pointer"
+                      v-bind="props"
+                    >
+                      mdi-dots-vertical
+                    </v-icon>
+                  </template>
+                  <v-list>
+                    <v-list-item @click="goNews(item._id)">
+                      Bültene git
+                    </v-list-item>
+                    <v-list-item @click="goDetail(item._id)">
+                      Bülten detayı
+                    </v-list-item>
+
+                    <v-list-item @click="removeNewsletter(item._id)">
+                      Bülteni sil
+                    </v-list-item>
+                    <v-list-item @click="removeSponsor(item._id)" v-if="!item?.sponsorIsDeleted && item.sponsorImage[0]">
+                      Sponsor sil
+                    </v-list-item>
+                  </v-list>
+                </v-menu>
               </template>
             </v-data-table>
 
@@ -75,6 +93,14 @@
       </v-col>
     </v-row>
   </v-container>
+  <v-snackbar
+    v-model="isSnackbarVisible"
+    timeout="3000"
+    location="top right"
+    :color="snackbarColor"
+  >
+    {{ snackbarMsg }}
+  </v-snackbar>
 
   <v-dialog
     v-model="newsletterDetailDialog"
@@ -96,54 +122,117 @@
             :src="item.content[0]?.url"
             class="newsletter-detail-dialog-table-image"
           ></v-img>
+          <video class="post-video" controls v-if="item.type == 1" style="width:100px">
+              <source :src="item.content[0]?.url" type="video/mp4" />
+              Tarayıcınız bu videoyu desteklemiyor.
+            </video>
         </template>
         <template v-slot:[`item.description`]="{ item }">
           <span v-html="item.description"></span>
+        </template>
+        <template v-slot:[`item.caricaturist`]="{ item }">
+          {{ item.caricaturist }}
         </template>
         <template v-slot:[`item.likeCount`]="{ item }">
           <span class="newsletter-detail-dialog-table-like-count">
             {{ item.likeCount }}</span
           >
         </template>
+
+        <template v-slot:[`item.btn`]="{ item }">
+          <v-icon
+            icon="mdi-trash-can-outline"
+            color="error"
+            @click="removeNewsletterItem(item.content[0].uuid)"
+          />
+        </template>
       </v-data-table>
+    </v-card>
+  </v-dialog>
+  <v-dialog v-model="dialog" max-width="400">
+    <v-card>
+      <v-card-title class="headline">Onay Gerekiyor</v-card-title>
+      <v-card-text>
+        Bu bülteni silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn color="darken-1 bg-error" text @click="dialog = false"
+          >Vazgeç</v-btn
+        >
+        <v-btn color="darken-1 bg-green" text @click="confirmDeleteNewsletter"
+          >Sil</v-btn
+        >
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+  <v-dialog v-model="deleteNewsletterItemDialog" max-width="400">
+    <v-card>
+      <v-card-title class="headline">Onay Gerekiyor</v-card-title>
+      <v-card-text>
+        Bu karikatürü silmek istediğinizden emin misiniz? Bu işlem geri
+        alınamaz.
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn
+          color="darken-1 bg-error"
+          text
+          @click="deleteNewsletterItemDialog = false"
+          >Vazgeç</v-btn
+        >
+        <v-btn
+          color="darken-1 bg-green"
+          text
+          @click="confirmRemoveNewsletterItem()"
+          >Sil</v-btn
+        >
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+  <v-dialog v-model="removeSponsorDialog" max-width="400">
+    <v-card>
+      <v-card-title class="headline">Onay Gerekiyor</v-card-title>
+      <v-card-text>
+       Bu bültene ait sponsoru silmek istediğinizden emin misiniz? Bu işlem geri alınamaz. 
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn color="darken-1 bg-error" text @click="removeSponsorDialog = false"
+          >Vazgeç</v-btn
+        >
+        <v-btn color="darken-1 bg-green" text @click="confirmDeleteSponsor"
+          >Sil</v-btn
+        >
+      </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 
 <script setup>
+import { useGlobalStore } from "~/stores/globalStore";
+const globalStore = useGlobalStore();
+definePageMeta({
+  layout: "dashboard",
+});
+const { $formatDate } = useNuxtApp();
 useHead({
   title: "Karikatürlerim",
 });
 const newsletterDetailDialog = ref(false);
+const deleteNewsletterItemDialog = ref(false);
+const deletedNewsId = ref(null);
 const newsletterDetailData = ref([]);
+const removeSponsorDialog = ref(false)
 const isLoading = ref(true);
-const { status, data, getSession, signIn, signOut } = useAuth();
-if (!data?.value?.user) {
-  signIn();
-}
+const dialog = ref(false);
+const deletedNewsletterId = ref(null);
+const isSnackbarVisible = ref(false);
+const snackbarMsg = ref("");
+const snackbarColor = ref("");
 
-const logout = () => {
-  signOut();
-};
 
 const router = useRouter();
-const goDashboard = () => {
-  router.push("/dashboard");
-};
-const goNews = (id) => {
-  window.open(`/newsletter/${id}`, "_blank");
-};
-const goDetail = async (id) => {
-  try {
-    const response = await $fetch(`/api/caricatures/getById?id=${id}`);
-    if (response && response.news) {
-      newsletterDetailDialog.value = true;
-      newsletterDetailData.value = response;
-    }
-  } catch (e) {
-    console.error("Error fetching posts:", e);
-  }
-};
 const page = ref(1);
 const itemsPerPage = ref(10);
 const headers = ref([
@@ -152,7 +241,12 @@ const headers = ref([
     align: "start",
     key: "title",
   },
-  { title: "Oluşturma Tarihi", align: "end", key: "createdAt" },
+  {
+    title: "Sponsor",
+    align: "start",
+    key: "sponsorImage",
+  },
+  { title: "Oluşturma Tarihi", align: "start", key: "createdAt" },
   { align: "end", key: "btn" },
 ]);
 
@@ -167,11 +261,14 @@ const detailHeaders = ref([
     align: "start",
     key: "description",
   },
+  { title: "Karikatürist", align: "start", key: "caricaturist" },
+
   {
     title: "Beğeni Sayısı",
     align: "start",
     key: "likeCount",
   },
+  { align: "end", key: "btn" },
 ]);
 const items = ref([]);
 
@@ -187,6 +284,27 @@ const pageCount = computed(() => {
   return Math.ceil(items.value.length / itemsPerPage.value);
 });
 
+const goDashboard = () => {
+  router.push("/dashboard");
+};
+
+const goNews = (id) => {
+  window.open(`/newsletter/${id}`, "_blank");
+};
+
+const goDetail = async (id) => {
+  try {
+    const response = await $fetch(`/api/caricatures/getById?id=${id}`);
+    if (response && response.news) {
+      globalStore.setLoading(true);
+      newsletterDetailDialog.value = true;
+      newsletterDetailData.value = response;
+    }
+  } catch (e) {
+    console.error("Error fetching posts:", e);
+  }
+};
+
 const prevPage = () => {
   if (page.value > 1) {
     page.value--;
@@ -199,13 +317,101 @@ const nextPage = () => {
   }
 };
 
-onMounted(async () => {
+const truncateText = (text, maxLength) => {
+  if (text.length > maxLength) {
+    return text.slice(0, maxLength) + "...";
+  }
+  return text;
+};
+
+const removeNewsletter = (item) => {
+  dialog.value = true;
+  deletedNewsletterId.value = item;
+};
+const removeSponsor = (item) => {
+  removeSponsorDialog.value = true;
+  deletedNewsletterId.value = item;
+}
+
+const confirmDeleteSponsor = async () =>{
+  try {
+    const response = await $fetch(
+      `/api/caricatures/deleteSponsor?id=${deletedNewsletterId.value}`
+    );
+    if (response) {
+      isSnackbarVisible.value = true;
+      snackbarColor.value = "success";
+      snackbarMsg.value = "Bülten başarılı bir şekilde silindi!";
+      dialog.value = false;
+      items.value = [];
+      await getAllNewsletter();
+    }
+  } catch (error) {
+    isSnackbarVisible.value = true;
+    snackbarColor.value = "error";
+    snackbarMsg.value = "Bülten silinemedi lütfen tekrar deneyin!";
+    dialog.value = false;
+  }
+}
+const confirmDeleteNewsletter = async () => {
+  try {
+    const response = await $fetch(
+      `/api/caricatures/delete?id=${deletedNewsletterId.value}`
+    );
+    if (response) {
+      isSnackbarVisible.value = true;
+      snackbarColor.value = "success";
+      snackbarMsg.value = "Bülten başarılı bir şekilde silindi!";
+      dialog.value = false;
+      items.value = [];
+      await getAllNewsletter();
+    }
+  } catch (error) {
+    isSnackbarVisible.value = true;
+    snackbarColor.value = "error";
+    snackbarMsg.value = "Bülten silinemedi lütfen tekrar deneyin!";
+    dialog.value = false;
+  }
+};
+
+const removeNewsletterItem = async (newsId) => {
+  deleteNewsletterItemDialog.value = true;
+  deletedNewsId.value = newsId;
+};
+
+const confirmRemoveNewsletterItem = async () => {
+  try {
+    const response = await $fetch(
+      `/api/caricatures/deleteByNewsUuid?uuid=${deletedNewsId.value}`
+    );
+    if (response) {
+      isSnackbarVisible.value = true;
+      snackbarColor.value = "success";
+      snackbarMsg.value = "Karikatür başarılı bir şekilde silindi";
+      deleteNewsletterItemDialog.value = false;
+      newsletterDetailDialog.value = false;
+      items.value = [];
+      await getAllNewsletter();
+    }
+  } catch (error) {
+    isSnackbarVisible.value = true;
+    snackbarColor.value = "error";
+    snackbarMsg.value = "Karikatür silinemedi lütfen tekrar deneyin!";
+    deleteNewsletterItemDialog.value = false;
+    newsletterDetailDialog.value = false;
+  }
+};
+
+const getAllNewsletter = async () => {
   try {
     let request = await $fetch(
-      `/api/caricatures/getByCreator?creator=${data?.value?.user.email}`
+      `/api/caricatures`
     ).then((res) => {
-      res?.caricatures?.forEach((e) => {
-        items.value.push({ ...e, btn: "" });
+      items.value = res
+      res?.forEach((e) => {
+        if (e.news[0].content.length == 0) {
+          $fetch(`/api/caricatures/delete?id=${e._id}`);
+        }
       });
       isLoading.value = false;
     });
@@ -213,39 +419,8 @@ onMounted(async () => {
   } catch (e) {
     console.error(e);
   }
-});
-
-const formatISODate = (isoDate) => {
-  const date = new Date(isoDate);
-
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  const hours = String(date.getHours()).padStart(2, "0");
-  const minutes = String(date.getMinutes()).padStart(2, "0");
-
-  return `${day}.${month}.${year} ${hours}:${minutes}`;
 };
+onMounted(async () => {
+  await getAllNewsletter();
+});
 </script>
-<style lang="scss">
-.newsletter-detail-dialog {
-  .v-card-title {
-    p {
-      padding: 10px;
-    }
-  }
-  table {
-    width: 90% !important;
-    border-spacing: 0;
-    margin: auto !important;
-  }
-  &-table {
-    &-image {
-      width: 150px;
-    }
-    &-like-count {
-      font-size: 20px !important;
-    }
-  }
-}
-</style>

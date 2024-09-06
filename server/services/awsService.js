@@ -34,14 +34,14 @@ export const uploadFileToS3 = async (file) => {
     const fileName = `${generateUUID()}${getFileExtension(file[0].originalFilename)}`;
     const uploadParams = {
         Bucket: runtimeConfig.awsBucketName,
-        Key: fileName,
+        Key: `bundlelines/files/${fileName}`,
         Body: fileStream,
         ContentType: file[0].mimetype,
     };
 
     try {
         const data = await s3.send(new PutObjectCommand(uploadParams));
-        return `https://${runtimeConfig.awsBucketName}.s3.${runtimeConfig.awsRegion}.amazonaws.com/${fileName}`;
+        return `https://static.bundle.app/bundlelines/files/${fileName}`;
     } catch (err) {
         console.error("S3 upload error:", err);
         throw err;

@@ -1,0 +1,30 @@
+.newsletter{
+    &-list{
+        .v-data-table__tr{
+            .v-data-table__td {padding:  25px 10px !important;}
+        }
+    }
+    &-detail-dialog {
+        .v-card-title {
+          p {
+            padding: 10px;
+          }
+        }
+        table {
+          width: 90% !important;
+          border-spacing: 0;
+          margin: auto !important;
+          .v-data-table__td {
+              padding: 10px !important;
+          }
+        }
+        &-table {
+          &-image {
+            width: 100px;
+          }
+          &-like-count {
+            font-size: 20px !important;
+          }
+        }
+      }
+}

@@ -93,12 +93,25 @@ export default {
       emit('update:updateModel', newFiles);
     });
 
+    const getRandomChar = () => {
+      const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+      return chars.charAt(Math.floor(Math.random() * chars.length));
+    };
+    const generateUniqueId = () => {
+      const timestamp = new Date().getTime();
+      let uniqueId = "";
+      for (let i = 0; i < 5; i++) {
+        uniqueId += getRandomChar();
+      }
+      return `${uniqueId}${timestamp}`;
+    };
+
     const onChange = (event) => {
       const selectedFiles = Array.from(event.target.files);
       selectedFiles.forEach((file) => {
         const reader = new FileReader();
         reader.onload = (e) => {
-          internalFiles.value.push({ url: e.target.result, file:file });
+          internalFiles.value.push({ url: e.target.result, file:file, uuid: generateUniqueId(), });
           emit("multiple-file", internalFiles.value, props.index, props.fileKey);
         };
         reader.readAsDataURL(file);
@@ -136,6 +149,8 @@ export default {
       dragleave,
       remove,
       drop,
+      getRandomChar,
+      generateUniqueId,
     };
   }
 };
