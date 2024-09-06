@@ -1,7 +1,16 @@
 // https://v3.nuxtjs.org/api/configuration/nuxt.config
 export default defineNuxtConfig({
   css: ["~/assets/css/main.scss"],
-
+  app: {
+    head: {
+      script: [
+        {
+          src: 'https://securepubads.g.doubleclick.net/tag/js/gpt.js',
+          async: true,
+        }
+      ],
+    },
+  },
   modules: [
     "nuxt-icon",
     "@nuxt/content",

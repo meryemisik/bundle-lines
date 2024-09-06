@@ -42,7 +42,7 @@
           class="preview-card"
           :title="file.name"
         >
-          <template v-if="props.fileKey == 'file'">
+          <template v-if="shouldShowImagePreview">
             <img :src="file.url" alt="Preview" class="preview-image" />
           </template>
           <template v-else>
@@ -101,6 +101,7 @@ export default {
             url: e.target.result,
             file: file,
             uuid: generateUniqueId(),
+            isDeleted: false
           });
           emit("single-file", internalFiles.value, props.index, props.fileKey);
         };
@@ -138,7 +139,13 @@ export default {
     };
 
     const acceptType = computed(() => {
-      return props.fileKey === "video" ? "video/*" : "image/*";
+      if (props.fileKey === "video") {
+        return "video/*";
+      } else if (props.fileKey === "addSponsorImage") {
+        return "image/*,video/*,.gif";
+      } else {
+        return "image/*";
+      }
     });
 
     const getRandomChar = () => {
@@ -153,6 +160,14 @@ export default {
       }
       return `${uniqueId}${timestamp}`;
     };
+    const shouldShowImagePreview = computed(() => {
+      return (
+        props.fileKey === "file" ||
+        props.fileKey === "sponsorImage" ||
+        props.fileKey === "video" ||
+        props.fileKey == "addSponsorImage"
+      );
+    });
 
     return {
       fileInput,
@@ -168,6 +183,7 @@ export default {
       props,
       getRandomChar,
       generateUniqueId,
+      shouldShowImagePreview,
     };
   },
 };

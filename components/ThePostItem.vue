@@ -1,24 +1,22 @@
 <template>
   <div class="post-item" :id="`post-item-${dataIndex}`">
     <v-container
-      class="page-container my-0 my-md-6"
+      class="page-container my-0 my-md-6 my-sm-4"
       v-if="postImages?.length > 0 || postImages?.[0]?.url"
     >
-      <v-row class="bg-white rounded-xl">
-        <v-col :id="`imagecover-${dataIndex}`">
+      <v-row>
+        <v-col class="pa-0" :id="`imagecover-${dataIndex}`">
           <template v-if="postType == 0">
             <v-img
-              @click="goToDetailNews(props?.data, postImages?.[0]?.uuid)"
               :src="postImages?.[0]?.url"
               v-if="postImages?.[0]?.url"
+              style="border-radius: 18px"
+              @click="goToDetailNews(props?.data, postImages?.[0]?.uuid)"
               class="cursor-pointer"
             />
           </template>
           <template v-else-if="postType == 1">
-            <v-col
-              v-if="postImages?.[0]?.url"
-              @click="goToDetailNews(props?.data, postImages?.[0]?.uuid)"
-            >
+            <v-col v-if="postImages?.[0]?.url" class="pa-0">
               <v-responsive>
                 <div :id="`video-${dataIndex}`">
                   <video
@@ -26,7 +24,9 @@
                     :controls="isPlaying"
                     @play="isPlaying = true"
                     controlsList="nodownload"
-                    class="post-video rounded-lg"
+                    class="post-video cursor-pointer"
+                    style="border-radius: 18px"
+                    :poster="data[0].posterUrl"
                   >
                     <source :src="postImages?.[0]?.url" type="video/mp4" />
                     Tarayıcınız bu videoyu desteklemiyor.
@@ -41,6 +41,7 @@
               </v-responsive>
             </v-col>
           </template>
+
           <template v-else-if="postType == 2">
             <div class="position-relative" v-if="postImages?.length > 0">
               <v-carousel
@@ -48,16 +49,14 @@
                 v-model="currentSlide"
                 hide-delimiter-background
                 :show-arrows="false"
+                @click="goToDetailNews(props?.data, postImages?.[currentSlide]?.uuid)"
+                style="border-radius: 18px"
               >
                 <v-carousel-item
                   v-for="(image, index) in postImages"
                   :key="index"
-                  @click="
-                    goToDetailNews(props?.data, postImages?.[index]?.uuid)
-                  "
-                  class="cursor-pointer"
                 >
-                  <v-img :src="image.url" :value="index" />
+                  <v-img :src="image.url" :value="index" class="cursor-pointer"/>
                 </v-carousel-item>
               </v-carousel>
               <div class="position-absolute slider-control">
@@ -78,15 +77,25 @@
           </template>
         </v-col>
       </v-row>
-      <v-row v-if="data[0]?.caricaturist">
-        <v-col class="px-0 px-sm-3 px-md-6 mt-4 mb-n4">
+
+      <v-row
+        v-if="
+          data[0]?.caricaturist &&
+          (sourcePage == 'web' || sourcePage == 'detail')
+        "
+        class="mt-0 mt-8"
+      >
+        <v-col class="pa-0 px-sm-3 px-md-5 mb-n4">
           <div class="font-playfair post-caricaturist text-black">
             Çizer: {{ data[0]?.caricaturist }}
           </div>
         </v-col>
       </v-row>
-      <v-row>
-        <v-col class="px-0 px-sm-3 px-md-6">
+      <v-row class="mt-0">
+        <v-col
+          class="px-0 px-sm-3 px-md-5 mt-6 cursor-pointer"
+          @click="goToDetailNews(props?.data, postImages?.[0]?.uuid)"
+        >
           <div
             class="font-weight-medium post-description font-playfair"
             :id="`description-${dataIndex}`"
@@ -94,22 +103,40 @@
           ></div>
         </v-col>
       </v-row>
-      <v-row>
+      <v-row class="mt-0 pt-2">
         <v-col
-          class="d-flex justify-center align-center text-caption font-weight-medium px-0 px-sm-3 px-md-6"
+          class="d-flex justify-center align-center text-caption font-weight-medium px-0 px-sm-3 px-md-5"
           v-if="postDescription || postImages?.[0]?.url"
         >
-          <div class="post-date font-roboto">{{ postCreatedAt }}</div>
-          <div class="d-flex justify-center align-center flex-fill">
+          <div
+            class="post-date font-roboto"
+            v-if="sourcePage == 'web' || sourcePage == 'detail'"
+          >
+            {{ postCreatedAt }}
+          </div>
+          <div
+            class="font-playfair post-caricaturist text-black"
+            v-if="
+              data[0]?.caricaturist &&
+              data[0]?.caricaturist &&
+              sourcePage == 'newsletter'
+            "
+          >
+            Çizer: {{ data[0]?.caricaturist }}
+          </div>
+          <div class="d-flex justify-end align-center flex-fill">
             <div
               class="cursor-pointer mx-1 mx-sm-2 mx-md-4 d-flex align-center"
               @click="likeToggle(data?.[0].newsId)"
             >
-              <span class="mr-2 font-roboto like-count text-black">
+              <span
+                class="mr-2 font-roboto like-count text-black"
+                v-if="likeCount > 0"
+              >
                 {{ likeCount }}
               </span>
               <v-img
-                :width="24"
+                :width="18"
                 :src="
                   checkPostIsLiked(dataPostId, data?.[0].newsId)
                     ? '/icons/favorite.svg'
@@ -120,32 +147,47 @@
                 } `"
               />
             </div>
+
             <div
-              class="cursor-pointer position-relative mx-1 mx-md-2 mx-lg-4 d-flex align-center"
-              @click="shareFunction(props?.posts)"
+              class="cursor-pointer position-relative d-flex align-center ml-3"
+              @click="shareFunction(props?.posts, dataIndex)"
             >
-              <span class="mr-2 font-roboto share-text text-black">Paylaş</span>
+              <!-- <span class="mr-2 font-roboto share-text text-black">Paylaş</span> -->
               <v-img :width="24" src="/icons/share.svg" />
               <div
                 v-show="shareTooltip"
-                class="position-absolute share-tooltip py-3 cursor-default"
+                class="position-absolute share-tooltip cursor-default"
               >
-                <div class="d-flex justify-space-between">
+                <div
+                  class="d-flex justify-space-between flex-column align-center mx-4 my-4 share-tooltip-icons"
+                >
                   <div
                     v-for="icon in socialIcons"
                     :key="icon.name"
                     rel="noopener noreferrer"
-                    
+                    class="d-flex align-center justify-space-between w-100 cursor-pointer"
+                    @click="
+                          createImage(
+                            icon.name,
+                            postImages[currentSlide].uuid,
+                            posts._id
+                          )
+                        "
                   >
-                    <v-img
-                      :width="24"
-                      :src="`/icons/${icon.name}.svg`"
-                      :alt="icon.name"
-                      class="cursor-pointer"
-                      @click="
-                        createImage(icon.name, postImages[currentSlide].uuid, posts._id)
-                      "
-                    />
+                    <span
+                      class="text-white font-barlow"
+                      style="font-weight: 600 !important"
+                      >{{ icon.label }}</span
+                    >
+
+                    <div>
+                      <v-img
+                        :width="18"
+                        :src="`/icons/${icon.name}.png`"
+                        :alt="icon.name"
+                        class="cursor-pointer"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -168,15 +210,6 @@
       >
         {{ snackbarMsg }}
       </v-snackbar>
-
-      <!-- <v-snackbar
-        v-model="isSnackbarVisible"
-        timeout="3000"
-        location="top right"
-        color="success"
-      >
-        {{ snackbarMsg }}
-      </v-snackbar> -->
     </v-container>
   </div>
 </template>
@@ -188,7 +221,7 @@ import { useGlobalStore } from "~/stores/globalStore";
 
 const globalStore = useGlobalStore();
 const runtimeConfig = useRuntimeConfig();
-const props = defineProps(["data", "posts"]);
+const props = defineProps(["data", "posts", "sourcePage"]);
 const { $formatDate } = useNuxtApp();
 const postCaricaturist = ref(props?.posts?.caricaturist || "");
 const postCreatedAt = ref($formatDate(props?.posts?.createdAt) || "");
@@ -199,24 +232,34 @@ const postDescription = ref(props?.data?.[0].description || "");
 const postImages = ref(props?.data?.[0].content || null);
 const likeCount = ref(props?.data?.[0].likeCount);
 const randomLikeCount = ref(props?.data?.[0].randomLikeCount);
-const dataIndex = ref(props?.posts?.news?.[0]?.newsId);
+const dataIndex = ref(props?.data[0].content[0].uuid);
 const dataPostId = ref(props?.posts?._id);
 const snackbarColor = ref("");
+const sourcePage = ref(props.sourcePage);
+const route = useRoute();
+const router = useRouter();
+
 const stripHTMLTags = (input) => {
   return input.replace(/<\/?[^>]+(>|$)/g, "");
 };
+
 const goToDetailNews = (content, uuid) => {
-  globalStore.setActiveDetailPage(false);
   const router = useRouter();
   router.push(`/detail/${dataPostId.value}?newsId=${uuid || "null"}`);
+  if (route.fullPath === "/") {
+    localStorage.setItem("locationType", "web");
+  } else if (route.fullPath.startsWith("/newsletter")) {
+    localStorage.setItem("locationType", "newsletter");
+  } else {
+    localStorage.removeItem("locationType")
+  }
 };
+
 const isWebView = computed(() => {
   const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-  // Android WebView detection
   if (/android/i.test(userAgent) && /wv/.test(userAgent)) {
     return true;
   }
-  // iOS WebView detection
   if (/iPhone|iPod|iPad/i.test(userAgent) && !window.MSStream) {
     if (
       (navigator.standalone && !window.navigator.standalone) ||
@@ -230,7 +273,6 @@ const isWebView = computed(() => {
 
 const isIOSWebView = computed(() => {
   const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-  // iOS WebView detection
   if (/iPhone|iPod|iPad/i.test(userAgent) && !window.MSStream) {
     if (
       (navigator.standalone && !window.navigator.standalone) ||
@@ -255,13 +297,12 @@ const isIOS = computed(() => {
     (navigator.userAgent.includes("Mac") && "ontouchend" in document)
   );
 });
-
-const shareFunction = async (data) => {
+const shareFunction = async (data, dataIndex) => {
   if (isIOS.value) {
     const shareData = {
-      title: data.title.replace(/<\/?[^>]+(>|$)/g, ""),
-      text: data.title.replace(/<\/?[^>]+(>|$)/g, ""),
-      url: `${window.location.origin}/newsletter/${data._id}`,
+      title: "Bundle Lines",
+      text: (postDescription.value || "Bundle Lines").replace(/<\/?[^>]+(>|$)/g, ""),
+      url: `${window.location.origin}/detail/${data._id}?newsId=${dataIndex}`,
     };
     try {
       if (navigator.share) {
@@ -275,17 +316,6 @@ const shareFunction = async (data) => {
   }
 };
 
-const scrollToContent = () => {
-  const route = useRoute();
-  const newsId = route.query.newsId;
-  if (parseInt(newsId) === dataIndex.value) {
-    const element = document.getElementById(`post-item-${dataIndex.value}`);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
-    }
-  }
-};
-
 watchEffect(() => {
   if (props?.posts) {
     // let getFirstImage = props?.posts.news.find(
@@ -296,8 +326,8 @@ watchEffect(() => {
     let getFirstDescription = props?.posts?.news?.[0]?.description;
     getFirstDescription = stripHTMLTags(getFirstDescription);
     useSeoMeta({
-      title: props.posts.title.replace(/<\/?[^>]+>/gi, ""),
-      ogTitle: props.posts.title.replace(/<\/?[^>]+>/gi, ""),
+      title: props?.posts?.title?.replace(/<\/?[^>]+>/gi, ""),
+      ogTitle: props?.posts?.title?.replace(/<\/?[^>]+>/gi, ""),
       description: getFirstDescription,
       ogDescription: getFirstDescription,
       //ogImage: getFirstImage,
@@ -306,7 +336,7 @@ watchEffect(() => {
       ogSiteName: "Bundle Lines",
       //ogUrl: window.location.href,
       ogLocale: "tr_TR",
-      twitterTitle: props.posts.title.replace(/<\/?[^>]+>/gi, ""),
+      twitterTitle: props?.posts?.title?.replace(/<\/?[^>]+>/gi, ""),
       twitterDescription: getFirstDescription,
       //twitterImage: getFirstImage,
     });
@@ -322,30 +352,31 @@ const { sendItemImpression, sendItemClick } = sendGA4Events({
   apiSecretKey: runtimeConfig.apiSecretKey,
 });
 
-const socialIconsForWebView = [
-  {
-    name: "link",
-  },
-];
 const socialIcons = [
   {
     name: "facebook",
+    label: "Facebook",
   },
   {
     name: "x",
+    label: "X",
   },
   {
     name: "linkedin",
+    label: "Linked In",
   },
   {
     name: "whatsapp",
+    label: "WhatsApp",
   },
   {
     name: "link",
+    label: "Bağlantı",
   },
-  {
-    name: "download",
-  },
+  // {
+  //   name: "download",
+  //   label:"Facebook"
+  // },
 ];
 const shareTooltip = ref(false);
 
@@ -356,7 +387,6 @@ const handleScroll = () => {
 onMounted(() => {
   window.addEventListener("scroll", handleScroll);
   sendItemImpression("homepage");
-  scrollToContent();
 });
 
 onUnmounted(() => {
@@ -367,7 +397,7 @@ const canvas = ref(null);
 const createImage = async (socialIconName, postUuid, postId) => {
   await $fetch(`/api/aws/getById?newsUuid=${postUuid}`)
     .then((res) => {
-      checkSocialIcon(socialIconName, res?.imageId)
+      checkSocialIcon(socialIconName, res?.imageId);
     })
     .catch((error) => {
       const sourceImage = ref(
@@ -419,7 +449,7 @@ const createImage = async (socialIconName, postUuid, postId) => {
                 const textY = canvas.value.width;
                 ctx.drawImage(
                   descriptionElement,
-                  0,
+                  (canvas.value.width / 1300) * 25,
                   textY,
                   canvas.value.width,
                   (canvas.value.width /
@@ -534,7 +564,7 @@ const sharePost = async (socialIconName, image, postUuid, postId) => {
 };
 
 const checkSocialIcon = (socialIconName, imageId) => {
-  let postTitle = props.posts.title.replace(/<\/?[^>]+>/gi, "");
+  let postTitle = props?.posts?.title?.replace(/<\/?[^>]+>/gi, "");
   let postUrl = `${location.origin}/c/${imageId}`;
   var socialUrl = null;
   if (socialIconName == "x") {
@@ -704,7 +734,11 @@ const playVideo = () => {
 
 const updateLikeCount = async (id, likeCountIndex, likeCount) => {
   try {
-    const response = await $fetch(`/api/caricatures/updateLikeCount`, {
+    const locationType = localStorage.getItem('locationType');
+    const apiUrl = locationType === 'web'
+      ? `/api/web-content/updateLikeCount`
+      : `/api/caricatures/updateLikeCount`;
+    const response = await $fetch(apiUrl, {
       method: "PATCH",
       body: { newsId: likeCountIndex, likeCount: likeCount, id: id },
     });

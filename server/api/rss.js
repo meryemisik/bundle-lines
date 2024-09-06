@@ -71,7 +71,7 @@ export default defineEventHandler(async (event) => {
           feed.item({
             title: item.description.replace(/<\/?[^>]+>/gi, ''),
             description: item.description.replace(/<\/?[^>]+>/gi, ''),
-            url: `${webDomain}detail/${caricatur._id}?newsId=${content?.uuid || "null"}`,
+            url: `${webDomain}newsletter/${caricatur._id}?newsId=${content?.uuid || "null"}`,
             date: caricatur.createdAt || new Date().toISOString(),
             custom_elements: [
               { 'content:encoded': descriptionContent },

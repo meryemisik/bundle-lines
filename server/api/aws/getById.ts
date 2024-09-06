@@ -3,7 +3,6 @@ import UploadAwsFile from "~/server/models/UploadAwsFile.model";
 export default defineEventHandler(async (event: any) => {
   const query = getQuery(event);
   const newsUuid = query.newsUuid;
-  console.log('newsUuid',newsUuid)
 
   if (!newsUuid) {
     throw createError({

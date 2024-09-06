@@ -23,7 +23,7 @@
 import { useRoute, useRouter } from "vue-router";
 import { useAsyncData, useHead } from "#app";
 definePageMeta({
-  layout: 'dashboard'
+  layout: 'c'
 })
 const route = useRoute();
 const router = useRouter();

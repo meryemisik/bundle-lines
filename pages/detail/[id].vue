@@ -25,9 +25,14 @@ const newsUuid = route.query.newsId || "";
 
 const fetchPosts = async () => {
   try {
-    const response = await $fetch(
-      `/api/caricatures/getByNewsId?newsUuid=${newsUuid}`
-    );
+    const locationType = localStorage.getItem('locationType');
+
+    const apiUrl = locationType === 'web'
+      ? `/api/web-content/getByNewsId?newsUuid=${newsUuid}`
+      : `/api/caricatures/getByNewsId?newsUuid=${newsUuid}`;
+
+    const response = await $fetch(apiUrl);
+
     if (response && response.news) {
       globalStore.setLoading(true);
       posts.value = response;
@@ -42,7 +47,7 @@ const fetchPosts = async () => {
   }
 };
 
-// Sayfa yüklendiğinde verileri çekiyoruz
+globalStore.setActiveDetailPage('detail');
 await fetchPosts();
 
 useHead({

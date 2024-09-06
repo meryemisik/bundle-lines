@@ -1,12 +1,12 @@
-import CaricaturesModel from "~/server/models/Caricatures.model";
+import WebCaricatures from "~/server/models/WebCaricatures.model";
 
 export default defineEventHandler(async (event) => {
   const query = getQuery(event);
   const pageNum = parseInt(query.pageNum, 10) || 1;
-  const pageSize = 10;
+  const pageSize = 10; 
   const skipCount = (pageNum - 1) * pageSize;
   try {
-    const caricatures = await CaricaturesModel.aggregate([
+    const caricatures = await WebCaricatures.aggregate([
       { $match: { isDeleted: false } },
       { $sort: { createdAt: -1 } }, 
       { $unwind: "$news" },

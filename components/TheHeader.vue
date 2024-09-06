@@ -1,28 +1,31 @@
 <template>
-  <div>
+  <div :class="{ 'sticky-header': stickyHeader }">
     <template v-if="!isLoading">
-      <v-container fluid class="pa-0" >
+      <v-container fluid class="pa-0 header">
         <div
-          class="mb-8 bg-white pa-0 mt-0 mx-0 align-center d-flex" style="height:72px"
+          class="pa-0 mt-0 mx-0 align-center d-flex header-light-bg"
+          style="height: 72px; border-bottom: 0.5px solid #b3b3b3"
         >
-          <div class="bg-grey-darken-4 py-6 px-8" v-if="!isSmallScreen">
+          <div
+            class="py-6 px-4"
+            style="height: 100%; display: flex"
+            :class="{ 'header-dark-bg px-8': !isSmallScreen }"
+            v-if="globalStore.activeDetailPage != 'detail' || !isSmallScreen"
+          >
             <v-img :width="28" src="/logo/logo-icon.png" />
           </div>
-          <div class="ml-4 cursor-pointer" v-if="globalStore.activeDetailPage && isSmallScreen" @click="redirectToBundle">
-            <v-img :width="40" src="/icons/arrow-left.png" />
-          </div>
           <div
-            class="ml-4 cursor-pointer"
-            v-if="!globalStore.activeDetailPage"
-            @click="goToHomePage()"
+            class="ml-5 cursor-pointer"
+            v-if="globalStore.activeDetailPage == 'detail'"
+            @click="goToHome()"
           >
             <v-img :width="40" src="/icons/arrow-left.png" />
           </div>
           <div class="page-container">
             <v-img
-              :width="180"
+              :width="isSmallScreen ? 110 : 180"
               src="/logo/logo-dark.png"
-              :class="{ 'mx-auto': isSmallScreen }"
+              :class="{ 'mx-auto ': isSmallScreen }"
             />
           </div>
           <div>
@@ -58,7 +61,9 @@ const isLoading = ref(!globalStore.isLoading);
 const isSnackbarVisible = ref(false);
 const snackbarMsg = ref("");
 const snackbarColor = ref("");
-
+const router = useRouter();
+const route = useRoute();
+const stickyHeader = ref(false);
 const shareWebSite = () => {
   const currentUrl = window.location.href;
   navigator.clipboard.writeText(currentUrl).then(() => {
@@ -67,25 +72,41 @@ const shareWebSite = () => {
     snackbarMsg.value = "URL kopyalandı!";
   });
 };
-const goToHomePage = () => {
-  const router = useRouter();
-  router.push("/");
-  globalStore.setActiveDetailPage(false);
+
+const goToHome = () => {
+  const match = route.fullPath.match(/\/detail\/([a-f0-9]+)/);
+  if (localStorage.getItem("locationType") == "web") {
+    router.push("/");
+  } else {
+    router.push(`/newsletter/${match[1]}`);
+  }
 };
-const redirectToBundle = () => {
-  window.location.href = "https://www.bundle.app/bundle-lines";
-};
+
 const checkScreenSize = () => {
   isSmallScreen.value = window.innerWidth <= 768;
 };
 
+const checkRoute = () => {
+  if (route.fullPath == "/") {
+    stickyHeader.value = true;
+  }
+};
 onMounted(() => {
   checkScreenSize();
   window.addEventListener("resize", checkScreenSize);
-  globalStore.setActiveDetailPage(false);
+  checkRoute();
 });
 
 onUnmounted(() => {
   window.removeEventListener("resize", checkScreenSize);
 });
+
+watch(
+  () => route.fullPath,
+  (newPath) => {
+    if (newPath != "/") {
+      stickyHeader.value = false;
+    }
+  }
+);
 </script>

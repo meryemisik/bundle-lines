@@ -3,7 +3,7 @@ import { defineStore } from "pinia";
 export const useGlobalStore = defineStore("counter", {
   state: () => ({
     isLoading: false,
-    activeDetailPage : true
+    activeDetailPage : 'web'
   }),
   actions: {
     setLoading(status: any) {

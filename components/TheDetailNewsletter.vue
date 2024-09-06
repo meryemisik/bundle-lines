@@ -1,6 +1,23 @@
 <template>
   <div v-if="isClientMounted">
-    <the-post-item :data="postsUpdated.news" :posts="postsUpdated" />
+    <v-row class="page-container mx-auto" >
+      <v-col
+       
+        class="pa-0 text-center "
+      >
+        <div class="d-inline-flex">
+          <v-img
+            :width="80"
+            :src="postsUpdated?.sponsorImage[0]"
+            class="mr-2"
+          />
+          <span class="text-sponsorship font-weight-medium font-roboto">{{
+            postsUpdated.sponsor
+          }}</span>
+        </div>
+      </v-col>
+    </v-row>
+    <the-post-item :data="postsUpdated.news" :posts="postsUpdated" :sourcePage = "'detail'" class="mt-4"/>
   </div>
   <div v-else>
     <v-skeleton-loader

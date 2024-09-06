@@ -1,41 +1,67 @@
 <template>
   <div>
-    <v-row class="mb-4 page-container mx-auto">
-      <v-col cols="12" class="px-4" v-if="posts[0].title">
+    <v-row class="page-container mx-auto px-4 header">
+      <v-col cols="12" v-if="posts[0].title" class="py-0">
         <template v-if="!isLoading">
-          <h1 class="font-weight-regular header-title">
+          <h1 class="font-weight-regular header-title header-title">
             <span v-html="posts[0].title"></span>
           </h1>
         </template>
       </v-col>
+      <v-col cols="12" class="py-0" v-if="posts[0]?.subTitle">
+        <template v-if="!isLoading">
+          <div class="header-subtitle text-black">
+            <span class="font-playfair">{{ posts[0]?.subTitle }}</span>
+          </div>
+        </template>
+      </v-col>
+
       <v-col
-        class="mt-n4"
-        v-if="posts[0].sponsor || posts[0]?.sponsorImage[0]?.url"
+        class="mt-n4 pb-0 header-sponsor-image"
+        v-if="!posts[0]?.sponsorIsDeleted && posts[0]?.sponsorImage[0]"
       >
-        <div class="d-inline-flex">
+        <div class="d-inline-flex align-center" v-if="!isLoading">
           <v-img
-            :width="64"
-            :src="posts[0]?.sponsorImage[0]?.url"
-            class="mr-2"
-            v-if="posts[0]?.sponsorImage[0]?.url"
+            :width="80"
+            :src="posts[0].sponsorImage[0]"
+            class="mr-4 sponsor-image"
           />
-          <span class="text-sponsorship font-weight-medium font-barlow">{{
+          <v-divider
+            vertical
+            class="ma-auto divider"
+            v-if="posts[0].sponsor && posts[0].sponsorImage[0]"
+          />
+          <span class="text-sponsorship font-weight-medium font-roboto ml-4">{{
             posts[0].sponsor
           }}</span>
         </div>
       </v-col>
     </v-row>
     <div v-for="(caricature, index) in posts" :key="index" v-if="!isLoading">
-      <the-news-container :posts="caricature" />
+      <the-news-container :posts="caricature" :sourcePage="'newsletter'" />
     </div>
+    <v-row
+      class="page-container mx-auto justify-center px-5 mb-20 newsletter-sponsor-adds cursor-pointer"
+    >
+      <template v-if="!isLoading">
+        <div>
+          <img
+            :src="posts[0].addSponsorImage[0]"
+            v-if="posts[0].addSponsorImage[0]"
+            style="border-radius: 20px"
+            @click="redirectToUrl(posts[0]?.addSponsorUrl)"
+          />
+        </div>
+      </template>
+    </v-row>
     <v-skeleton-loader
-        v-if="isLoading"
-        v-for="i in 3"
-        :key="i"
-        type="image,paragraph,actions"
-        class="my-3 mx-auto pa-3 bg-light rounded-xl"
-        max-width="600"
-      />
+      v-if="isLoading"
+      v-for="i in 3"
+      :key="i"
+      type="image,paragraph,actions"
+      class="my-3 mx-auto pa-3 bg-light rounded-xl"
+      max-width="600"
+    />
   </div>
 </template>
 
@@ -51,7 +77,10 @@ const posts = ref({
   news: [],
 });
 const pageTitle = ref("Loading Bundle Lines");
-
+globalStore.setActiveDetailPage("newsletter");
+onMounted(() =>{
+  localStorage.setItem("locationType", "newsletter");
+})
 const fetchPosts = async () => {
   try {
     const response = await $fetch(
@@ -64,12 +93,16 @@ const fetchPosts = async () => {
       const newObjectsArray = response.news.map((newsItem) => ({
         _id: response._id,
         title: response.title,
+        subTitle: response.subTitle,
         sponsor: response.sponsor,
         sponsorImage: response.sponsorImage,
+        addSponsorImage: response.addSponsorImage,
+        addSponsorUrl: response.addSponsorUrl,
+        sponsorIsDeleted: response.sponsorIsDeleted,
         news: [newsItem],
         analyticsId: response.analyticsId,
         campaignName: response.campaignName,
-        creator: response.creator,
+        // creator: response.creator,
         createdAt: response.createdAt,
         updatedAt: response.updatedAt,
         __v: response.__v,
@@ -91,6 +124,12 @@ const fetchPosts = async () => {
 };
 
 await fetchPosts();
+
+const redirectToUrl = (url) => {
+  if (url) {
+    window.open(url, "_blank");
+  }
+};
 
 useHead({
   title: pageTitle.value,
@@ -146,3 +185,20 @@ useHead({
   ],
 });
 </script>
+
+<style lang="scss">
+.newsletter-sponsor-adds {
+  margin-top: 8px;
+  img {
+    width: 600px !important;
+    margin-bottom: 84px;
+  }
+  @media screen and (max-width: 573px) {
+    img {
+      width: 325px !important;
+      margin: auto;
+      margin-bottom: 70px;
+    }
+  }
+}
+</style>
