@@ -387,6 +387,12 @@ const handleScroll = () => {
 onMounted(() => {
   window.addEventListener("scroll", handleScroll);
   sendItemImpression("homepage");
+
+if(route?.query?.newsId && postType.value == 2){
+  const postIndex = postImages.value.findIndex(image => image.uuid === route?.query?.newsId);
+  currentSlide.value = postIndex
+}
+
 });
 
 onUnmounted(() => {

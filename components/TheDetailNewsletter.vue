@@ -12,7 +12,7 @@
             class="mr-2"
           />
           <span class="text-sponsorship font-weight-medium font-roboto">{{
-            postsUpdated.sponsor
+            postsUpdated?.sponsor
           }}</span>
         </div>
       </v-col>
@@ -45,8 +45,36 @@ const props = defineProps({
 });
 const postsUpdated = ref(null);
 const isClientMounted = ref(false);
+const selectedNews = ref([]);
 
-onMounted(() => {
+const findContentByUuid = async(data, targetUuid) => {
+    for (const item of data) {
+        for (const content of item.content) {
+            if (content.uuid === targetUuid) {
+                return item.content; 
+            }
+        }
+    }
+    return null; 
+}
+
+const getSliderDetail = async (id) => {
+  try {
+    const response = await $fetch(`/api/caricatures/getById?id=${id}`);
+    if (response && response.news) {
+      selectedNews.value = [...(response?.news?.[0]?.content || [])]
+
+      if(response?.news.length > 1){
+        const contentList = await findContentByUuid(response?.news, route.query.newsId)
+        selectedNews.value = [...(contentList || [])]
+      }
+    }
+  } catch (e) {
+    console.error("Error fetching posts:", e);
+  }
+};
+
+onMounted( async() => {
   isClientMounted.value = true;
 
   const contentArray = props?.posts?.news?.[0]?.content?.map((item) => {
@@ -60,12 +88,12 @@ onMounted(() => {
     (item) => item.uuid === route.query.newsId
   );
 
-  const selectedNews = [];
-  selectedNews.push(targetObject);
+  selectedNews.value.push(targetObject);
 
   let typeNum = props?.posts?.news?.[0].type;
+
   if (props?.posts?.news?.[0].type == 2) {
-    typeNum = "0";
+     await getSliderDetail(route.params.id)
   }
 
   const updatedData = {
@@ -73,7 +101,7 @@ onMounted(() => {
     news: [
       {
         ...props?.posts?.news?.[0],
-        content: selectedNews,
+        content: selectedNews.value,
         type: typeNum,
       },
     ],
