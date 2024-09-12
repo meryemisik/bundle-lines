@@ -55,7 +55,11 @@
             ></v-text-field>
           </v-card-text>
         </v-card>
-        <v-card class="mx-auto my-4" elevation="1">
+        <v-card
+          class="mx-auto my-4"
+          elevation="1"
+          v-if="contentType == 'newsletter'"
+        >
           <v-card-item>
             <v-card-subtitle>Başlık</v-card-subtitle>
           </v-card-item>
@@ -67,7 +71,11 @@
             />
           </v-card-text>
         </v-card>
-        <v-card class="mx-auto my-4" elevation="1">
+        <v-card
+          class="mx-auto my-4"
+          elevation="1"
+          v-if="contentType == 'newsletter'"
+        >
           <v-card-item>
             <v-card-subtitle>Alt Başlık</v-card-subtitle>
           </v-card-item>
@@ -80,7 +88,11 @@
             ></v-text-field>
           </v-card-text>
         </v-card>
-        <v-card class="mx-auto my-4" elevation="1">
+        <v-card
+          class="mx-auto my-4"
+          elevation="1"
+          v-if="contentType == 'newsletter'"
+        >
           <v-card-item>
             <v-card-subtitle>Sponsor</v-card-subtitle>
           </v-card-item>
@@ -93,13 +105,23 @@
             ></v-text-field>
             <the-file-upload
               ref="fileUploadRef"
-              @single-file="fileUploadFunction($event, index, 'sponsorImage')"
-              :index="index"
+              @single-file="
+                fileUploadFunction(
+                  $event,
+                  `${contentType}-${index}`,
+                  'sponsorImage'
+                )
+              "
+              :index="`${contentType}-${index}`"
               fileKey="sponsorImage"
             />
           </v-card-text>
         </v-card>
-        <v-card class="mx-auto my-4" elevation="1">
+        <v-card
+          class="mx-auto my-4"
+          elevation="1"
+          v-if="contentType == 'newsletter'"
+        >
           <v-card-item>
             <v-card-subtitle>Sponsora Ait Reklam</v-card-subtitle>
           </v-card-item>
@@ -148,8 +170,14 @@
               <v-card-text class="form-input-text">
                 <tiptap-editor :editor="editor" v-model="comp.description" />
                 <the-file-upload
-                  @single-file="fileUploadFunction($event, index, 'file')"
-                  :index="index"
+                  @single-file="
+                    fileUploadFunction(
+                      $event,
+                      `${contentType}-${index}`,
+                      'file'
+                    )
+                  "
+                  :index="`${contentType}-${index}`"
                   fileKey="file"
                 />
               </v-card-text>
@@ -170,8 +198,14 @@
               <v-card-text class="form-input-text">
                 <tiptap-editor :editor="editor" v-model="comp.description" />
                 <the-file-upload
-                  @single-file="fileUploadFunction($event, index, 'video')"
-                  :index="index"
+                  @single-file="
+                    fileUploadFunction(
+                      $event,
+                      `${contentType}-${index}`,
+                      'video'
+                    )
+                  "
+                  :index="`${contentType}-${index}`"
                   fileKey="video"
                 />
               </v-card-text>
@@ -192,8 +226,10 @@
               <v-card-text class="form-input-text">
                 <tiptap-editor :editor="editor" v-model="comp.description" />
                 <the-multiple-upload
-                  @multiple-file="multifileUploadFunction($event, index)"
-                  :index="index"
+                  @multiple-file="
+                    multifileUploadFunction($event, `${contentType}-${index}`)
+                  "
+                  :index="`${contentType}-${index}`"
                   fileKey="multiple"
                 />
               </v-card-text>
@@ -279,6 +315,13 @@
 definePageMeta({
   layout: "dashboard",
 });
+const props = defineProps({
+  contentType: {
+    type: String,
+    required: true,
+  },
+});
+
 const analyticsIdRules = [(v) => !!v || "Analytics Id Zorunludur"];
 const campaignNameRules = [(v) => !!v || "Analytics Campaign Id Zorunludur"];
 const caricaturistRules = [(v) => !!v || "Karikatürist Bilgisi Zorunludur"];
@@ -292,6 +335,7 @@ const reviewDialog = ref(false);
 const router = useRouter();
 const measurementId = ref("G-7PNZ5E4JDZ");
 const form = ref(null);
+const contentType = ref(props.contentType);
 var tempNews = [];
 const formCaricatures = ref({
   sponsor: "",
@@ -336,7 +380,11 @@ const getRandomChar = () => {
 };
 
 const goListPage = () => {
-  router.push("/dashboard/list");
+  if (contentType.value == "newsletter") {
+    router.push("/dashboard/list");
+  } else {
+    router.push("/dashboard/web/newsletter-list");
+  }
 };
 const generateUniqueId = () => {
   const timestamp = new Date().getTime();
@@ -356,6 +404,7 @@ const components = ref([
     randomLikeCount: Math.floor(Math.random() * 51) + 50,
     newsId: generateUniqueId(),
     caricaturist: formCaricatures.value.caricaturist || null,
+    isDeleted: false
   },
 ]);
 
@@ -370,6 +419,7 @@ const addComponents = (type) => {
       randomLikeCount: Math.floor(Math.random() * 51) + 50,
       newsId: generateUniqueId(),
       caricaturist: defaultCaricaturist,
+      isDeleted: false
     });
   } else if (type === 1) {
     components.value.push({
@@ -381,6 +431,7 @@ const addComponents = (type) => {
       newsId: generateUniqueId(),
       caricaturist: defaultCaricaturist,
       posterUrl: "",
+      isDeleted: false
     });
   } else if (type === 2) {
     components.value.push({
@@ -391,6 +442,7 @@ const addComponents = (type) => {
       randomLikeCount: Math.floor(Math.random() * 51) + 50,
       newsId: generateUniqueId(),
       caricaturist: defaultCaricaturist,
+      isDeleted: false
     });
   }
 };
@@ -400,20 +452,21 @@ const removeComponents = (index) => {
 };
 
 const fileUploadFunction = async (event, index, fileKey) => {
+  const indexNumber = index.substring(index.indexOf('-') + 1); 
   if (event) {
-    if (fileKey == "sponsorImage") {
+    if (fileKey === "sponsorImage") {
       formCaricatures.value.sponsorImage = event;
-    } else if (fileKey == "addSponsorImage") {
+    } else if (fileKey === "addSponsorImage") {
       formCaricatures.value.addSponsorImage = event;
     } else {
-      components.value[index].content = event;
+      components.value[Number(indexNumber)].content = event;
     }
   }
 
   const posterCanvas = document.getElementById("posterCanvas");
   components.value.map(async (comp) => {
     if (comp.type == 1) {
-      await createPosterFromVideo(comp.content[0].url, posterCanvas)
+      await createPosterFromVideo(comp?.content[0]?.url, posterCanvas)
         .then(async (res) => {
           let posterUrls = await sendSingleFileS3(res);
           comp.posterUrl = posterUrls;
@@ -425,16 +478,10 @@ const fileUploadFunction = async (event, index, fileKey) => {
   });
 };
 const multifileUploadFunction = async (event, index) => {
-  components.value[index].content = event;
+  const indexNumber = index.substring(index.indexOf('-') + 1);
+  components.value[Number(indexNumber)].content = event;
 };
-const getAll = async () => {
-  try {
-    let data = await $fetch("/api/caricatures");
-    return data;
-  } catch (e) {
-    console.error(e);
-  }
-};
+
 
 const updateUrls = (newUrls, oldUrls) => {
   const updatedData = tempNews.map((item) => ({
@@ -527,18 +574,20 @@ const createCaricatures = async (event) => {
     (item) => !item.content || item.content.length < 2
   );
 
-  if (formCaricatures.value.title.replace(/<\/?[^>]+>/gi, "").length == 0) {
-    isSnackbarVisible.value = true;
-    snackbarColor.value = "error";
-    snackbarMsg.value = "Başlık zorunludur!";
-    return false;
-  }
+  if (contentType.value == "newsletter") {
+    if (formCaricatures.value.title.replace(/<\/?[^>]+>/gi, "").length == 0) {
+      isSnackbarVisible.value = true;
+      snackbarColor.value = "error";
+      snackbarMsg.value = "Başlık zorunludur!";
+      return false;
+    }
 
-  if (checkResult.length > 0) {
-    isSnackbarVisible.value = true;
-    snackbarColor.value = "error";
-    snackbarMsg.value = "Slider için minimum 2 görsel seçilmelidir!";
-    return false;
+    if (checkResult.length > 0) {
+      isSnackbarVisible.value = true;
+      snackbarColor.value = "error";
+      snackbarMsg.value = "Slider için minimum 2 görsel seçilmelidir!";
+      return false;
+    }
   }
 
   const newsAreAllFieldsFilled = components.value.every(
@@ -577,54 +626,61 @@ const createCaricatures = async (event) => {
 
     const results = await Promise.all(allRequests);
 
-    const formData = {
+    const formNewsletterData = {
       sponsor: formCaricatures.value.sponsor,
       title: formCaricatures.value.title,
       news: tempNews,
       analyticsId: formCaricatures.value.analyticsId,
       campaignName: formCaricatures.value.campaignName,
       sponsorImage: sponsorImage,
-      // creator: data?.value?.user.email,
       caricaturist: formCaricatures.value.caricaturist,
       addSponsorImage: addSponsorImage,
       addSponsorUrl: formCaricatures.value.addSponsorUrl,
       subTitle: formCaricatures.value.subTitle,
     };
 
+    const formWebData = {
+      news: tempNews,
+      analyticsId: formCaricatures.value.analyticsId,
+      campaignName: formCaricatures.value.campaignName,
+      caricaturist: formCaricatures.value.caricaturist,
+      subTitle: formCaricatures.value.subTitle,
+    };
+
     try {
-      const response = await $fetch("/api/caricatures/create", {
+      let apiUrl;
+      let dataToSend;
+
+      if (contentType.value === "newsletter") {
+        apiUrl = "/api/caricatures/create";
+        dataToSend = formNewsletterData;
+      } else if (contentType.value === "web") {
+        apiUrl = "/api/web-content/createCaricatures";
+        dataToSend = formWebData;
+      } else {
+        throw new Error("Invalid apiType");
+      }
+
+      await $fetch(apiUrl, {
         method: "POST",
-        body: formData,
+        body: dataToSend,
       });
+
       isSnackbarVisible.value = true;
       snackbarColor.value = "success";
-      snackbarMsg.value = "Karikatür başarıyla paylaşıldı!";
+      snackbarMsg.value = "İçerik başarılı bir şekilde oluşturuldu"
 
       setTimeout(() => {
-        router.push("/dashboard/list");
+        if (contentType.value == "newsletter") {
+          router.push("/dashboard/list");
+        } else {
+          router.push("/dashboard/web/newsletter-list");
+        }
       }, 1500);
-
-      if (response) {
-        formCaricatures.value = {
-          sponsor: "",
-          title: "",
-          news: [],
-          analyticsId: "",
-          campaignName: "",
-          sponsorImage: "",
-          addSponsorImage: "",
-          addSponsorUrl: "",
-        };
-
-        components.value = [];
-        fileUploadRef.value.reset();
-        formCaricatures.value.analyticsId = measurementId.value;
-      }
-      await getAll();
     } catch (e) {
       isSnackbarVisible.value = true;
       snackbarColor.value = "error";
-      snackbarMsg.value = "Karikatür eklerken bir hata oluştu. Tekrar deneyin!";
+      snackbarMsg.value = "Bir hata oluştu. Tekrar deneyin!";
     }
   } else {
     isSnackbarVisible.value = true;

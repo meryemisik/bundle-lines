@@ -4,6 +4,7 @@
       <the-detail-newsletter
         :posts="posts"
         :isLoading="globalStore.isLoading"
+        :referrer="'web-content'"
       />
     </v-main>
   </v-app>
@@ -23,15 +24,11 @@ const pageTitle = ref("Loading Bundle Lines");
 
 const newsUuid = route.query.newsId || "";
 
-const fetchPosts = async () => {
+const getAllData = async () => {
   try {
-    const locationType = localStorage.getItem('locationType');
-
-    const apiUrl = locationType === 'web'
-      ? `/api/web-content/getByNewsId?newsUuid=${newsUuid}`
-      : `/api/caricatures/getByNewsId?newsUuid=${newsUuid}`;
-
-    const response = await $fetch(apiUrl);
+    const response = await $fetch(
+      `/api/web-content/getByNewsId?newsUuid=${newsUuid}`
+    );
 
     if (response && response.news) {
       globalStore.setLoading(true);
@@ -47,8 +44,8 @@ const fetchPosts = async () => {
   }
 };
 
-globalStore.setActiveDetailPage('detail');
-await fetchPosts();
+globalStore.setActiveDetailPage("detail");
+await getAllData();
 
 useHead({
   title: pageTitle.value,

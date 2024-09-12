@@ -38,7 +38,7 @@
       </v-col>
     </v-row>
     <div v-for="(caricature, index) in posts" :key="index" v-if="!isLoading">
-      <the-news-container :posts="caricature" :sourcePage="'newsletter'" />
+      <the-news-container :posts="caricature" :sourcePage="'newsletter'" :referrer="'caricatures'"/>
     </div>
     <v-row
       class="page-container mx-auto justify-center px-5 mb-20 newsletter-sponsor-adds cursor-pointer"
@@ -78,9 +78,6 @@ const posts = ref({
 });
 const pageTitle = ref("Loading Bundle Lines");
 globalStore.setActiveDetailPage("newsletter");
-onMounted(() =>{
-  localStorage.setItem("locationType", "newsletter");
-})
 const fetchPosts = async () => {
   try {
     const response = await $fetch(
@@ -190,15 +187,16 @@ useHead({
 .newsletter-sponsor-adds {
   margin-top: 8px;
   img {
+    max-width: 100%;
     width: 600px !important;
     margin-bottom: 84px;
   }
-  @media screen and (max-width: 573px) {
-    img {
-      width: 325px !important;
-      margin: auto;
-      margin-bottom: 70px;
-    }
-  }
+  // @media screen and (max-width: 573px) {
+  //   img {
+  //     width: 325px !important;
+  //     margin: auto;
+  //     margin-bottom: 70px;
+  //   }
+  // }
 }
 </style>

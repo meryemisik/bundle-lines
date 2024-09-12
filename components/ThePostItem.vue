@@ -10,9 +10,8 @@
             <v-img
               :src="postImages?.[0]?.url"
               v-if="postImages?.[0]?.url"
-              style="border-radius: 18px"
               @click="goToDetailNews(props?.data, postImages?.[0]?.uuid)"
-              class="cursor-pointer"
+              class="cursor-pointer post-image"
             />
           </template>
           <template v-else-if="postType == 1">
@@ -24,8 +23,7 @@
                     :controls="isPlaying"
                     @play="isPlaying = true"
                     controlsList="nodownload"
-                    class="post-video cursor-pointer"
-                    style="border-radius: 18px"
+                    class="post-video cursor-pointer post-image"
                     :poster="data[0].posterUrl"
                   >
                     <source :src="postImages?.[0]?.url" type="video/mp4" />
@@ -46,32 +44,41 @@
             <div class="position-relative" v-if="postImages?.length > 0">
               <v-carousel
                 height="auto"
+                width="100%"
                 v-model="currentSlide"
                 hide-delimiter-background
                 :show-arrows="false"
-                @click="goToDetailNews(props?.data, postImages?.[currentSlide]?.uuid)"
-                style="border-radius: 18px"
+                @click="
+                  goToDetailNews(props?.data, postImages?.[currentSlide]?.uuid)
+                "
               >
                 <v-carousel-item
                   v-for="(image, index) in postImages"
                   :key="index"
                 >
-                  <v-img :src="image.url" :value="index" class="cursor-pointer"/>
+                  <v-img
+                    :src="image.url"
+                    :value="index"
+                    class="cursor-pointer post-image"
+                  />
                 </v-carousel-item>
               </v-carousel>
               <div class="position-absolute slider-control">
-                <v-btn @click="prevImg" variant="plain" rounded="xl">
+                <div @click="prevImg">
                   <v-img
                     src="/icons/arrow-left.svg"
-                    class="carousel-icon"
-                  ></v-img
-                ></v-btn>
-                <v-btn @click="nextImg" variant="plain" rounded="xl">
+                    class="carousel-icon cursor-pointer"
+                    :class="{ 'carousel-btn-size': prevBtnSize }"
+                  >
+                  </v-img>
+                </div>
+                <div @click="nextImg">
                   <v-img
                     src="/icons/arrow-right.svg"
-                    class="carousel-icon"
-                  ></v-img
-                ></v-btn>
+                    class="carousel-icon cursor-pointer"
+                    :class="{ 'carousel-btn-size': nextBtnSize }"
+                  ></v-img>
+                </div>
               </div>
             </div>
           </template>
@@ -167,12 +174,12 @@
                     rel="noopener noreferrer"
                     class="d-flex align-center justify-space-between w-100 cursor-pointer"
                     @click="
-                          createImage(
-                            icon.name,
-                            postImages[currentSlide].uuid,
-                            posts._id
-                          )
-                        "
+                      createImage(
+                        icon.name,
+                        postImages[currentSlide].uuid,
+                        posts._id
+                      )
+                    "
                   >
                     <span
                       class="text-white font-barlow"
@@ -207,8 +214,12 @@
         timeout="3000"
         location="top right"
         :color="snackbarColor"
+        class="custom-snackbar"
       >
-        {{ snackbarMsg }}
+        <span :class="snackbarTextColor">{{ snackbarMsg }}</span>
+        <div class="custom-snackbar-image">
+          <!-- <v-img :src="snackbarIconSrc" /> -->
+        </div>
       </v-snackbar>
     </v-container>
   </div>
@@ -221,7 +232,7 @@ import { useGlobalStore } from "~/stores/globalStore";
 
 const globalStore = useGlobalStore();
 const runtimeConfig = useRuntimeConfig();
-const props = defineProps(["data", "posts", "sourcePage"]);
+const props = defineProps(["data", "posts", "sourcePage", "referrer"]);
 const { $formatDate } = useNuxtApp();
 const postCaricaturist = ref(props?.posts?.caricaturist || "");
 const postCreatedAt = ref($formatDate(props?.posts?.createdAt) || "");
@@ -232,27 +243,31 @@ const postDescription = ref(props?.data?.[0].description || "");
 const postImages = ref(props?.data?.[0].content || null);
 const likeCount = ref(props?.data?.[0].likeCount);
 const randomLikeCount = ref(props?.data?.[0].randomLikeCount);
-const dataIndex = ref(props?.data[0].content[0].uuid);
+const dataIndex = ref(props?.data[0]?.content[0].uuid);
 const dataPostId = ref(props?.posts?._id);
 const snackbarColor = ref("");
+const snackbarTextColor = ref("");
+// const snackbarIconSrc = computed(() => {
+//   return snackbarType.value === 'error'
+//     ? '/icons/snackbar/error.png'
+//     : '/icons/snackbar/success.png';
+// });
 const sourcePage = ref(props.sourcePage);
 const route = useRoute();
 const router = useRouter();
-
+const referrer = ref(props?.referrer);
 const stripHTMLTags = (input) => {
   return input.replace(/<\/?[^>]+(>|$)/g, "");
 };
 
 const goToDetailNews = (content, uuid) => {
-  const router = useRouter();
-  router.push(`/detail/${dataPostId.value}?newsId=${uuid || "null"}`);
+  let url;
   if (route.fullPath === "/") {
-    localStorage.setItem("locationType", "web");
+    url = `/detail/web/${dataPostId.value}?newsId=${uuid || "null"}`;
   } else if (route.fullPath.startsWith("/newsletter")) {
-    localStorage.setItem("locationType", "newsletter");
-  } else {
-    localStorage.removeItem("locationType")
+    url = `/detail/newsletter/${dataPostId.value}?newsId=${uuid || "null"}`;
   }
+  window.open(url, "_blank");
 };
 
 const isWebView = computed(() => {
@@ -301,8 +316,11 @@ const shareFunction = async (data, dataIndex) => {
   if (isIOS.value) {
     const shareData = {
       title: "Bundle Lines",
-      text: (postDescription.value || "Bundle Lines").replace(/<\/?[^>]+(>|$)/g, ""),
-      url: `${window.location.origin}/detail/${data._id}?newsId=${dataIndex}`,
+      text: (postDescription.value || "Bundle Lines").replace(
+        /<\/?[^>]+(>|$)/g,
+        ""
+      ),
+      url: `${window.location.origin}/detail/${referrer.value === 'web-content' ? 'web' : 'newsletter'}/${data._id}?newsId=${dataIndex}`,
     };
     try {
       if (navigator.share) {
@@ -353,10 +371,10 @@ const { sendItemImpression, sendItemClick } = sendGA4Events({
 });
 
 const socialIcons = [
-  {
-    name: "facebook",
-    label: "Facebook",
-  },
+  // {
+  //   name: "facebook",
+  //   label: "Facebook",
+  // },
   {
     name: "x",
     label: "X",
@@ -387,12 +405,12 @@ const handleScroll = () => {
 onMounted(() => {
   window.addEventListener("scroll", handleScroll);
   sendItemImpression("homepage");
-
-if(route?.query?.newsId && postType.value == 2){
-  const postIndex = postImages.value.findIndex(image => image.uuid === route?.query?.newsId);
-  currentSlide.value = postIndex
-}
-
+  if (route?.query?.newsId && postType.value == 2) {
+    const postIndex = postImages.value.findIndex(
+      (image) => image.uuid === route?.query?.newsId
+    );
+    currentSlide.value = postIndex;
+  }
 });
 
 onUnmounted(() => {
@@ -578,34 +596,36 @@ const checkSocialIcon = (socialIconName, imageId) => {
       postTitle
     )}&url=${encodeURIComponent(postUrl)}`;
     setTimeout(() => {
-      window.open(socialUrl, "_top");
+      window.open(socialUrl, "_blank");
     });
     sendItemClick(`X`);
   } else if (socialIconName == "whatsapp") {
     const text = encodeURIComponent(`${postTitle}: ${postUrl}`);
     socialUrl = `https://wa.me/?text=${text}`;
     setTimeout(() => {
-      window.open(socialUrl, "_top");
+      window.open(socialUrl, "_blank");
     });
     sendItemClick(`whatsapp`);
-  } else if (socialIconName == "facebook") {
-    socialUrl = `https://www.facebook.com/dialog/share?app_id=584568938807562&display=popup&href=${encodeURIComponent(
-      postUrl
-    )}&redirect_uri=${encodeURIComponent(postUrl)}`;
-    setTimeout(() => {
-      window.open(socialUrl, "_top");
-    });
-    sendItemClick(`facebook`);
-  } else if (socialIconName == "linkedin") {
+  }
+  // else if (socialIconName == "facebook") {
+  //   socialUrl = `https://www.facebook.com/dialog/share?app_id=584568938807562&display=popup&href=${encodeURIComponent(
+  //     postUrl
+  //   )}&redirect_uri=${encodeURIComponent(postUrl)}`;
+  //   setTimeout(() => {
+  //     window.open(socialUrl, "_top");
+  //   });
+  //   sendItemClick(`facebook`);
+  // }
+  else if (socialIconName == "linkedin") {
     socialUrl = `https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(
       postUrl
     )}`;
     setTimeout(() => {
-      window.open(socialUrl, "_top");
+      window.open(socialUrl, "_blank");
     });
     sendItemClick(`linkedin`);
   } else if (socialIconName == "link") {
-    socialUrl = `${location.origin}/c/${imageId}`;
+    socialUrl = `${location.origin}/detail/${referrer.value === 'web-content' ? 'web' : 'newsletter'}/${imageId}?newsId=${dataIndex.value}`;
     if (!navigator.clipboard) {
       fallbackCopyTextToClipboard(socialUrl);
     } else {
@@ -613,11 +633,11 @@ const checkSocialIcon = (socialIconName, imageId) => {
         .writeText(socialUrl)
         .then(() => {
           isSnackbarVisible.value = true;
-          snackbarColor.value = "success";
-          snackbarMsg.value = "URL kopyalandı!";
+          snackbarColor.value = "#181E25";
+          snackbarMsg.value = "URL Kopyalandı";
+          snackbarTextColor.value = "snackbar-success-color";
         })
         .catch((err) => {
-          console.error("Async: Could not copy text: ", err);
           fallbackCopyTextToClipboard(socialUrl);
         });
     }
@@ -645,11 +665,14 @@ const fallbackCopyTextToClipboard = (text) => {
   try {
     var successful = document.execCommand("copy");
     if (successful) {
-      snackbarColor.value = "success";
-      snackbarMsg.value = "URL kopyalandı!";
+      snackbarColor.value = "#181E25";
+      snackbarMsg.value = "URL Kopyalandı";
+      snackbarTextColor.value = "snackbar-success-color";
     } else {
-      snackbarColor.value = "error";
-      snackbarMsg.value = "Kopyalama başarısız!";
+      //#FE3B36
+      snackbarColor.value = "#181E25";
+      snackbarMsg.value = "URL Kopyalanamadı";
+      snackbarTextColor.value = "snackbar-error-color";
     }
     isSnackbarVisible.value = true;
   } catch (err) {
@@ -657,16 +680,25 @@ const fallbackCopyTextToClipboard = (text) => {
   }
   document.body.removeChild(textArea);
 };
-
+const prevBtnSize = ref(false);
 const currentSlide = ref(0);
-const prevImg = () => {
+const prevImg = (type) => {
+  prevBtnSize.value = true;
+  setTimeout(() => {
+    prevBtnSize.value = false;
+  }, 200);
   if (currentSlide.value != 0) {
     currentSlide.value--;
   } else {
     currentSlide.value = postImages.value.length - 1;
   }
 };
-const nextImg = () => {
+const nextBtnSize = ref(false);
+const nextImg = (type) => {
+  nextBtnSize.value = true;
+  setTimeout(() => {
+    nextBtnSize.value = false;
+  }, 200);
   if (postImages.value.length - 1 != currentSlide.value) {
     currentSlide.value++;
   } else {
@@ -740,11 +772,7 @@ const playVideo = () => {
 
 const updateLikeCount = async (id, likeCountIndex, likeCount) => {
   try {
-    const locationType = localStorage.getItem('locationType');
-    const apiUrl = locationType === 'web'
-      ? `/api/web-content/updateLikeCount`
-      : `/api/caricatures/updateLikeCount`;
-    const response = await $fetch(apiUrl, {
+    const response = await $fetch(`/api/${referrer.value}/updateLikeCount`, {
       method: "PATCH",
       body: { newsId: likeCountIndex, likeCount: likeCount, id: id },
     });

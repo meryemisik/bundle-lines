@@ -38,15 +38,13 @@
       >
         <div
           v-for="(file, idx) in internalFiles"
-          :key="file.name"
+          :key="file.uuid"
           class="preview-card"
           :title="file.name"
         >
           <template v-if="shouldShowImagePreview">
-            <img :src="file.url" alt="Preview" class="preview-image" />
-          </template>
-          <template v-else>
-            <video class="post-video" controls>
+            <img v-if="file.file.type.startsWith('image/')" :src="file.url" alt="Preview" class="preview-image" />
+            <video v-else class="post-video" controls>
               <source :src="file.url" type="video/mp4" />
               Tarayıcınız bu videoyu desteklemiyor.
             </video>
@@ -65,7 +63,6 @@
 </template>
 
 <script>
-import { ref, watch } from "vue";
 
 export default {
   props: {
@@ -101,7 +98,6 @@ export default {
             url: e.target.result,
             file: file,
             uuid: generateUniqueId(),
-            isDeleted: false
           });
           emit("single-file", internalFiles.value, props.index, props.fileKey);
         };

@@ -3,29 +3,30 @@ import { createError, defineEventHandler, getQuery } from "h3";
 
 export default defineEventHandler(async (event) => {
   const query = getQuery(event);
-  const uuid = query.uuid;
+  const newsId = query.newsId;
 
-  if (!uuid) {
+  if (!newsId) {
     throw createError({
       statusCode: 400,
-      statusMessage: 'UUID is required',
+      statusMessage: 'newsId is required',
     });
   }
 
   try {
     const result = await CaricaturesModel.updateOne(
-      { 'news.content.uuid': uuid }, 
-      { $pull: { 'news.$.content': { uuid } } } 
+      { 'news.newsId': newsId }, 
+      { $set: { 'news.$[elem].isDeleted': true } },
+      { arrayFilters: [{ 'elem.newsId': newsId }] }
     );
 
     if (result.modifiedCount === 0) {
       throw createError({
         statusCode: 404,
-        statusMessage: 'News item with this UUID not found',
+        statusMessage: 'News item with this newsId not found',
       });
     }
 
-    return { message: 'News item removed successfully' };
+    return { message: 'News item updated successfully' };
   } catch (error) {
     throw createError({
       statusCode: 500,

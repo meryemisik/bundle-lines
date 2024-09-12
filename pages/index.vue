@@ -42,7 +42,7 @@
       </v-col>
     </v-row>
     <div v-for="(caricature, index) in allCaricaturesData" :key="index">
-      <the-news-container :posts="caricature" :sourcePage="'web'" />
+      <the-news-container :posts="caricature" :sourcePage="'web'" :referrer="'web-content'" />
       <div v-if="(index + 1) % 3 === 0">
         <the-adds />
       </div>
@@ -82,12 +82,11 @@ onMounted(async () => {
   await getWebContent();
   await getAllCaricatureWithPagination(pageNum.value);
   globalStore.setActiveDetailPage("web");
-  localStorage.setItem("locationType", "web");
 });
 
 const getAllCaricatureWithPagination = async (num) => {
   try {
-    const data = await $fetch(`/api/web-content/getByPageNum?pageNum=${num}`);
+    const data = await $fetch(`/api/web-content/getByPageNum?pageNum=${num}`);  
     if(data.length == 0){
       isVisibleMoreLoadBtn.value = false
     }

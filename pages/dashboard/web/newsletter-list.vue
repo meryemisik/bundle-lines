@@ -24,19 +24,33 @@
           <template v-else>
             <v-data-table
               :headers="headers"
-              :items="paginatedItems"
+              :items="items"
               :items-per-page="itemsPerPage"
               hide-default-footer
               v-model:sort-by="sortBy"
               class="newsletter-list"
             >
               <template v-slot:[`item.img`]="{ item }">
-                <v-img :src="item.news[0].content[0].url" :width="100" />
+                <v-img :src="item?.news.content[0].url" :width="100" />
+                <video
+                  v-if="item?.news.type == 1"
+                  ref="video"
+                  :controls="isPlaying"
+                  @play="isPlaying = true"
+                  controlsList="nodownload"
+                  class="post-video cursor-pointer post-image"
+                >
+                  <source :src="item?.news.content[0].url" type="video/mp4" />
+                  Tarayıcınız bu videoyu desteklemiyor.
+                </video>
               </template>
+
               <template v-slot:[`item.desc`]="{ item }">
-                <span
-                  v-html="truncateText(item.news[0].description, 90)"
-                ></span>
+                <span v-html="truncateText(item?.news?.description, 90)"></span>
+              </template>
+
+              <template v-slot:[`item.type`]="{ item }">
+                <span v-html="imageType(item?.news?.type)"></span>
               </template>
 
               <template v-slot:[`item.createdAt`]="{ item }">
@@ -47,7 +61,7 @@
                 <div class="trash-icon">
                   <v-icon
                     icon="mdi-trash-can-outline"
-                    @click="removeCaricature(item._id)"
+                    @click="removeCaricature(item.news.newsId)"
                     color="error"
                   />
                 </div>
@@ -79,8 +93,7 @@
     <v-card>
       <v-card-title class="headline">Onay Gerekiyor</v-card-title>
       <v-card-text>
-        Karikatürü silmek istediğinizden emin misiniz? Bu işlem
-        geri alınamaz.
+        Karikatürü silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
@@ -96,13 +109,23 @@
       </v-card-actions>
     </v-card>
   </v-dialog>
+  <v-snackbar
+    v-model="isSnackbarVisible"
+    timeout="3000"
+    location="top right"
+    :color="snackbarColor"
+  >
+    {{ snackbarMsg }}
+  </v-snackbar>
 </template>
 
 <script setup>
 const removeCaricatureDialog = ref(false);
 const deletedNewsletterId = ref(null);
 const { $formatDate } = useNuxtApp();
-
+const isSnackbarVisible = ref(false);
+const snackbarMsg = ref("");
+const snackbarColor = ref("");
 definePageMeta({
   layout: "dashboard",
 });
@@ -120,9 +143,21 @@ const headers = ref([
     title: "Görsel",
     align: "start",
     key: "img",
+    width: "150px",
   },
   { title: "Description", align: "start", key: "desc" },
-  { title: "Oluşturma Tarihi", align: "start", key: "createdAt" },
+  {
+    title: "Tip",
+    align: "start",
+    key: "type",
+    width: "200px",
+  },
+  {
+    title: "Oluşturma Tarihi",
+    align: "start",
+    key: "createdAt",
+    width: "200px",
+  },
   { title: "", align: "end", key: "btn" },
 ]);
 
@@ -144,26 +179,33 @@ const goDashboard = () => {
   router.push("/dashboard");
 };
 
-const prevPage = () => {
-  if (page.value > 1) {
-    page.value--;
-  }
+const prevPage = async () => {
+  page.value -= 1;
+  await getAllNewsletter(page.value);
 };
 
-const nextPage = () => {
-  if (page.value < pageCount.value) {
-    page.value++;
-  }
+const nextPage = async () => {
+  page.value += 1;
+  await getAllNewsletter(page.value);
 };
 
-const getAllWebCaricatures = async () => {
+const imageType = (type) => {
+  if (type == 0) {
+    return "Tekli Görsel";
+  } else if (type == 1) {
+    return "Video";
+  } else if (type == 2) {
+    return "Çoklu Görsel";
+  }
+};
+const getAllWebCaricatures = async (num) => {
   try {
-    let request = await $fetch(`/api/web-content/getAllWebCaricatures`).then(
-      (res) => {
-        items.value = res;
-        isLoading.value = false;
-      }
-    );
+    let request = await $fetch(
+      `/api/web-content/getByPageNum?pageNum=${num}`
+    ).then((res) => {
+      items.value = res;
+      isLoading.value = false;
+    });
     return request;
   } catch (e) {
     console.error(e);
@@ -171,11 +213,9 @@ const getAllWebCaricatures = async () => {
 };
 
 const removeCaricature = (item) => {
-    console.log('itemss', item)
   removeCaricatureDialog.value = true;
   deletedNewsletterId.value = item;
 };
-
 
 const truncateText = (text, maxLength) => {
   if (text.length > maxLength) {
@@ -184,26 +224,26 @@ const truncateText = (text, maxLength) => {
   return text;
 };
 
-const confirmRemoveCaricature = async () =>{
-    try {
+const confirmRemoveCaricature = async () => {
+  try {
     const response = await $fetch(
-      `/api/web-content/deleteWebCaricature?id=${deletedNewsletterId.value}`
+      `/api/web-content/deleteWebCaricature?newsId=${deletedNewsletterId.value}`
     );
     if (response) {
       isSnackbarVisible.value = true;
       snackbarColor.value = "success";
-      snackbarMsg.value = "Karikatür başarılı bir şekilde silindi!";
+      snackbarMsg.value = "İçerik başarılı bir şekilde silindi!";
       removeCaricatureDialog.value = false;
-      getAllWebCaricatures()
+      getAllWebCaricatures(page.value);
     }
   } catch (error) {
     isSnackbarVisible.value = true;
     snackbarColor.value = "error";
-    snackbarMsg.value = "Karikatür silinemedi lütfen tekrar deneyin!";
+    snackbarMsg.value = "İçerik silinemedi lütfen tekrar deneyin!";
   }
-}
+};
 
 onMounted(async () => {
-  await getAllWebCaricatures();
+  await getAllWebCaricatures(page.value);
 });
 </script>

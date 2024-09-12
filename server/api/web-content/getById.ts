@@ -1,4 +1,4 @@
-import CaricaturesModel from "~/server/models/Caricatures.model";
+import WebCaricatures from "~/server/models/WebCaricatures.model";
 
 export default defineEventHandler(async (event: any) => {
   const query = getQuery(event);
@@ -12,22 +12,14 @@ export default defineEventHandler(async (event: any) => {
   }
 
   try {
-    const caricature = await CaricaturesModel.findById(id);
+    const caricature = await WebCaricatures.findById(id);
     if (!caricature) {
       throw createError({
         statusCode: 404,
         statusMessage: 'Caricature not found'
       });
     }
-
-    const filteredNews = caricature.news.filter((item: any) => item.isDeleted === false);
-
-    const response = {
-      ...caricature._doc, 
-      news: filteredNews   
-    };
-
-    return response;
+    return caricature;
   } catch (error) {
     throw createError({
       statusCode: 500,

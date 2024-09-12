@@ -31,7 +31,7 @@ if (!data?.value?.user) {
 <style lang="scss">
 .v-window__container {
   max-height: 100% !important;
-  background: white;
-  padding: 10px;
+  // background: white;
+  // padding: 10px;
 }
 </style>

@@ -6,7 +6,7 @@
     </v-tabs>
     <v-tabs-window v-model="tab">
       <v-tabs-window-item value="one">
-        <the-dashoard-index />
+        <the-dashoard-index  contentType = "newsletter"/>
       </v-tabs-window-item>
 
       <v-tabs-window-item value="two"> <the-web-content /> </v-tabs-window-item>
@@ -24,7 +24,7 @@ const tab = ref(null);
 <style lang="scss">
 .v-window__container {
   max-height: 100% !important;
-  background: white;
-  padding: 10px;
+  // background: white;
+  // padding: 10px;
 }
 </style>

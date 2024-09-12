@@ -24,7 +24,7 @@
           <template v-else>
             <v-data-table
               :headers="headers"
-              :items="paginatedItems"
+              :items="items"
               :items-per-page="itemsPerPage"
               hide-default-footer
               v-model:sort-by="sortBy"
@@ -35,7 +35,11 @@
               </template>
 
               <template v-slot:[`item.sponsorImage`]="{ item }">
-                <v-img :width="100" :src="item.sponsorImage[0]" v-if="!item?.sponsorIsDeleted "/>
+                <v-img
+                  :width="100"
+                  :src="item.sponsorImage[0]"
+                  v-if="!item?.sponsorIsDeleted"
+                />
               </template>
 
               <template v-slot:[`item.createdAt`]="{ item }">
@@ -64,7 +68,10 @@
                     <v-list-item @click="removeNewsletter(item._id)">
                       Bülteni sil
                     </v-list-item>
-                    <v-list-item @click="removeSponsor(item._id)" v-if="!item?.sponsorIsDeleted && item.sponsorImage[0]">
+                    <v-list-item
+                      @click="removeSponsor(item._id)"
+                      v-if="!item?.sponsorIsDeleted && item.sponsorImage[0]"
+                    >
                       Sponsor sil
                     </v-list-item>
                   </v-list>
@@ -72,7 +79,7 @@
               </template>
             </v-data-table>
 
-            <div v-if="items.length > 10">
+            <div>
               <v-btn
                 size="x-small"
                 @click="prevPage"
@@ -80,11 +87,7 @@
                 class="mr-1"
                 ><span class="font-barlow">Önceki</span></v-btn
               >
-              <v-btn
-                size="x-small"
-                @click="nextPage"
-                :disabled="page === pageCount"
-                class="ml-1"
+              <v-btn size="x-small" @click="nextPage" class="ml-1" :disabled="disabledNewxtBtn"
                 ><span class="font-barlow">Sonraki</span></v-btn
               >
             </div>
@@ -122,10 +125,15 @@
             :src="item.content[0]?.url"
             class="newsletter-detail-dialog-table-image"
           ></v-img>
-          <video class="post-video" controls v-if="item.type == 1" style="width:100px">
-              <source :src="item.content[0]?.url" type="video/mp4" />
-              Tarayıcınız bu videoyu desteklemiyor.
-            </video>
+          <video
+            class="post-video"
+            controls
+            v-if="item.type == 1"
+            style="width: 100px"
+          >
+            <source :src="item.content[0]?.url" type="video/mp4" />
+            Tarayıcınız bu videoyu desteklemiyor.
+          </video>
         </template>
         <template v-slot:[`item.description`]="{ item }">
           <span v-html="item.description"></span>
@@ -143,7 +151,7 @@
           <v-icon
             icon="mdi-trash-can-outline"
             color="error"
-            @click="removeNewsletterItem(item.content[0].uuid)"
+            @click="removeNewsletterItem(item.newsId)"
           />
         </template>
       </v-data-table>
@@ -194,11 +202,15 @@
     <v-card>
       <v-card-title class="headline">Onay Gerekiyor</v-card-title>
       <v-card-text>
-       Bu bültene ait sponsoru silmek istediğinizden emin misiniz? Bu işlem geri alınamaz. 
+        Bu bültene ait sponsoru silmek istediğinizden emin misiniz? Bu işlem
+        geri alınamaz.
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn color="darken-1 bg-error" text @click="removeSponsorDialog = false"
+        <v-btn
+          color="darken-1 bg-error"
+          text
+          @click="removeSponsorDialog = false"
           >Vazgeç</v-btn
         >
         <v-btn color="darken-1 bg-green" text @click="confirmDeleteSponsor"
@@ -230,8 +242,7 @@ const deletedNewsletterId = ref(null);
 const isSnackbarVisible = ref(false);
 const snackbarMsg = ref("");
 const snackbarColor = ref("");
-
-
+const disabledNewxtBtn = ref(false)
 const router = useRouter();
 const page = ref(1);
 const itemsPerPage = ref(10);
@@ -305,16 +316,15 @@ const goDetail = async (id) => {
   }
 };
 
-const prevPage = () => {
-  if (page.value > 1) {
-    page.value--;
-  }
+const prevPage = async () => {
+  
+  page.value -= 1
+   await getAllNewsletter(page.value);
 };
 
-const nextPage = () => {
-  if (page.value < pageCount.value) {
-    page.value++;
-  }
+const nextPage = async () => {
+  page.value += 1
+   await getAllNewsletter(page.value);
 };
 
 const truncateText = (text, maxLength) => {
@@ -344,7 +354,7 @@ const confirmDeleteSponsor = async () =>{
       snackbarMsg.value = "Bülten başarılı bir şekilde silindi!";
       dialog.value = false;
       items.value = [];
-      await getAllNewsletter();
+      await getAllNewsletter(page.value);
     }
   } catch (error) {
     isSnackbarVisible.value = true;
@@ -382,7 +392,7 @@ const removeNewsletterItem = async (newsId) => {
 const confirmRemoveNewsletterItem = async () => {
   try {
     const response = await $fetch(
-      `/api/caricatures/deleteByNewsUuid?uuid=${deletedNewsId.value}`
+      `/api/caricatures/deleteByNewsUuid?newsId=${deletedNewsId.value}`
     );
     if (response) {
       isSnackbarVisible.value = true;
@@ -391,7 +401,7 @@ const confirmRemoveNewsletterItem = async () => {
       deleteNewsletterItemDialog.value = false;
       newsletterDetailDialog.value = false;
       items.value = [];
-      await getAllNewsletter();
+      await getAllNewsletter(page.value);
     }
   } catch (error) {
     isSnackbarVisible.value = true;
@@ -402,18 +412,23 @@ const confirmRemoveNewsletterItem = async () => {
   }
 };
 
-const getAllNewsletter = async () => {
+const getAllNewsletter = async (num) => {
   try {
     let request = await $fetch(
-      `/api/caricatures`
+      `/api/caricatures/getByPageNum?pageNum=${num}`
     ).then((res) => {
       items.value = res
       res?.forEach((e) => {
-        if (e.news[0].content.length == 0) {
+        if (e?.news[0]?.content?.length == 0) {
           $fetch(`/api/caricatures/delete?id=${e._id}`);
         }
       });
+      if(res.length == 0){
+        disabledNewxtBtn.value = true
+      }
+      globalStore.setLoading(true);
       isLoading.value = false;
+      return items;
     });
     return request;
   } catch (e) {
@@ -421,6 +436,6 @@ const getAllNewsletter = async () => {
   }
 };
 onMounted(async () => {
-  await getAllNewsletter();
+  await getAllNewsletter(page.value);
 });
 </script>

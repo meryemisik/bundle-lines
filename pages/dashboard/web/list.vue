@@ -33,8 +33,8 @@
               <template v-slot:[`item.title`]="{ item }">
                 <span v-html="item.title"></span>
               </template>
-              <template v-slot:[`item.sponsor`]="{ item }">
-                {{ item.sponsor }}
+              <template v-slot:[`item.sponsorImage`]="{ item }">
+               <v-img :width="80" :src="item.sponsorImage" style="max-height:30px"/>
               </template>
 
               <template v-slot:[`item.createdAt`]="{ item }">
@@ -42,23 +42,9 @@
               </template>
 
               <template v-slot:[`item.btn`]="{ item }" >
-                <v-menu>
-                  <template v-slot:activator="{ props }" v-if="!item.sponsorIsDeleted">
-                    <v-icon
-                      small
-                      color="primary"
-                      class="cursor-pointer"
-                      v-bind="props"
-                    >
-                      mdi-dots-vertical
-                    </v-icon>
-                  </template>
-                  <v-list>
-                    <v-list-item @click="removeSponsor(item._id)" >
-                      Sponsor sil
-                    </v-list-item>
-                  </v-list>
-                </v-menu>
+                <div  v-if="!item.sponsorIsDeleted">
+              <v-btn color="error" @click="removeSponsor(item._id)">Sponsor Sil</v-btn>
+            </div>
               </template>
 
             </v-data-table>
@@ -128,7 +114,7 @@ const headers = ref([
     align: "start",
     key: "title",
   },
-  { title: "Sponsor", align: "start", key: "sponsor" },
+  { title: "Sponsor", align: "start", key: "sponsorImage" },
   { title: "Oluşturma Tarihi", align: "start", key: "createdAt" },
   { title: "", align: "end", key: "btn" },
 ]);

@@ -1,0 +1,27 @@
+.custom-snackbar {
+    .v-snackbar__wrapper {
+        border-radius: 12px;
+    }
+
+    .v-snackbar__content {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .snackbar-success-color {
+        color: #00C48B;
+        font-family: "Barlow", sans-serif !important;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    .snackbar-error-color {
+        color: #FE3B36;
+        font-family: "Barlow", sans-serif !important;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    &-image {
+        width: 18px;
+    }
+}

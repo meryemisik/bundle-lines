@@ -25,8 +25,7 @@
 <script setup>
 const redirectToInstagram = () => {
   window.open(
-    "https://www.instagram.com/bundlelines?igsh=MXF5cHM2aWppYmVhNg==",
-    "_blank"
+    "https://www.instagram.com/bundlelines?igsh=MXF5cHM2aWppYmVhNg=="
   );
 };
 </script>

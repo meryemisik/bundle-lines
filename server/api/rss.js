@@ -2,7 +2,7 @@ import RSS from 'rss';
 
 const getAll = async () => {
   try {
-    let data = await $fetch("/api/caricatures");
+    let data = await $fetch("/api/web-content/getAllWebCaricatures");
     return data;
   } catch (e) {
     console.error(e);
@@ -71,7 +71,7 @@ export default defineEventHandler(async (event) => {
           feed.item({
             title: item.description.replace(/<\/?[^>]+>/gi, ''),
             description: item.description.replace(/<\/?[^>]+>/gi, ''),
-            url: `${webDomain}newsletter/${caricatur._id}?newsId=${content?.uuid || "null"}`,
+            url: `${webDomain}detail/web/${caricatur._id}?newsId=${content?.uuid || "null"}`,
             date: caricatur.createdAt || new Date().toISOString(),
             custom_elements: [
               { 'content:encoded': descriptionContent },

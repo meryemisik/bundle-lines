@@ -7,10 +7,11 @@
           style="height: 72px; border-bottom: 0.5px solid #b3b3b3"
         >
           <div
-            class="py-6 px-4"
+            class="py-6 px-4 cursor-pointer"
             style="height: 100%; display: flex"
             :class="{ 'header-dark-bg px-8': !isSmallScreen }"
             v-if="globalStore.activeDetailPage != 'detail' || !isSmallScreen"
+            @click="redirectToBundleApp"
           >
             <v-img :width="28" src="/logo/logo-icon.png" />
           </div>
@@ -42,8 +43,10 @@
           timeout="3000"
           location="top right"
           :color="snackbarColor"
+          class="custom-snackbar"
         >
-          {{ snackbarMsg }}
+          <span :class="snackbarTextColor">{{ snackbarMsg }}</span>
+          <div class="custom-snackbar-image"><v-img src="/icons/snackbar/success-link.png"/></div>
         </v-snackbar>
       </v-container>
     </template>
@@ -61,6 +64,7 @@ const isLoading = ref(!globalStore.isLoading);
 const isSnackbarVisible = ref(false);
 const snackbarMsg = ref("");
 const snackbarColor = ref("");
+const snackbarTextColor = ref("");
 const router = useRouter();
 const route = useRoute();
 const stickyHeader = ref(false);
@@ -68,17 +72,29 @@ const shareWebSite = () => {
   const currentUrl = window.location.href;
   navigator.clipboard.writeText(currentUrl).then(() => {
     isSnackbarVisible.value = true;
-    snackbarColor.value = "success";
-    snackbarMsg.value = "URL kopyalandı!";
+    snackbarColor.value = "#181E25";
+    snackbarMsg.value = "URL Kopyalandı";
+    snackbarTextColor.value = "snackbar-success-color";
   });
 };
 
+const redirectToBundleApp = () => {
+  window.open("https://www.bundle.app/");
+};
 const goToHome = () => {
-  const match = route.fullPath.match(/\/detail\/([a-f0-9]+)/);
-  if (localStorage.getItem("locationType") == "web") {
-    router.push("/");
+  const match = route.fullPath.match(/\/detail\/(web|newsletter)\/([a-f0-9]+)/);
+
+  if (match) {
+    const type = match[1];
+    const id = match[2];
+
+    if (type === "web") {
+      router.push(`/`);
+    } else if (type === "newsletter") {
+      router.push(`/newsletter/${id}`);
+    }
   } else {
-    router.push(`/newsletter/${match[1]}`);
+    router.push(`/`);
   }
 };
 

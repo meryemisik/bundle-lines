@@ -79,77 +79,7 @@
     </v-tabs-window-item>
 
     <v-tabs-window-item value="web2">
-      <div class="ml-auto mb-4 d-flex align-center justify-end">
-        <v-card
-          append-icon="mdi-open-in-new"
-          class="mx-1"
-          max-width="220"
-          subtitle="Liste"
-          title=""
-          @click="goWebNewsletterListPage"
-        >
-        </v-card>
-      </div>
-      <v-card class="mx-auto mb-4" elevation="1">
-        <v-card-item>
-          <v-card-subtitle>Analytics Id</v-card-subtitle>
-        </v-card-item>
-        <v-card-text class="form-input-text">
-          <v-text-field
-            variant="solo-filled"
-            density="compact"
-            v-model="webCaricatures.analyticsId"
-            disabled
-          ></v-text-field>
-        </v-card-text>
-      </v-card>
-      <v-card class="mx-auto my-4" elevation="1">
-        <v-card-item>
-          <v-card-subtitle>Analytics Campaign Id</v-card-subtitle>
-        </v-card-item>
-        <v-card-text class="form-input-text">
-          <v-text-field
-            variant="solo-filled"
-            density="compact"
-            label="Örn: studio-fairy-temmuz-2024"
-            v-model="webCaricatures.campaignName"
-          ></v-text-field>
-        </v-card-text>
-      </v-card>
-      <v-card class="mx-auto mb-4" elevation="1">
-        <v-card-item>
-          <v-card-subtitle>Karikatürist</v-card-subtitle>
-        </v-card-item>
-        <v-card-text class="form-input-text">
-          <v-text-field
-            variant="solo-filled"
-            density="compact"
-            v-model="webCaricatures.news[0].caricaturist"
-            label="Çizer İsmi Ekle"
-          ></v-text-field>
-        </v-card-text>
-      </v-card>
-
-      <v-card class="mx-auto my-4" elevation="1">
-        <v-card-item>
-          <v-card-subtitle>Görsel Yükle</v-card-subtitle>
-        </v-card-item>
-        <v-card-text class="form-input-text">
-          <tiptap-editor
-            :editor="editor"
-            v-model="webCaricatures.news[0].description"
-          />
-          <the-file-upload
-            ref="fileUploadRefx"
-            @single-file="fileUploadFunction($event, 'file', 'file')"
-            :index="'file'"
-            fileKey="file"
-          />
-        </v-card-text>
-      </v-card>
-      <v-btn @click="createWebCaricatures()" color="success" class="mt-5"
-        ><span class="font-barlow">Paylaş</span></v-btn
-      >
+      <the-dashoard-index contentType="web" />
     </v-tabs-window-item>
   </v-tabs-window>
 
