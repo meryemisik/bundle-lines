@@ -55,8 +55,10 @@
                 <v-carousel-item
                   v-for="(image, index) in postImages"
                   :key="index"
+                  eager
                 >
                   <v-img
+                  eager
                     :src="image.url"
                     :value="index"
                     class="cursor-pointer post-image"

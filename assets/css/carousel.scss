@@ -4,6 +4,11 @@
     transition: transform 0.2s; 
 }
 
+.v-carousel{
+  width: 100%;
+  aspect-ratio: 23/24;
+}
+
 .v-carousel-item{
     .v-responsive__content{
         .v-responsive{
